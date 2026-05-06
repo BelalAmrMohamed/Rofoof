@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>على رفوف المساجد — تصفح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal-50:  #E1F5EE; --teal-100: #9FE1CB; --teal-200: #5DCAA5;
+  --teal-400: #1D9E75; --teal-600: #0F6E56; --teal-800: #085041; --teal-900: #04342C;
+  --amber-50: #FAEEDA; --amber-200: #FAC775; --amber-400: #EF9F27;
+  --amber-600: #BA7517; --amber-800: #633806;
+  --gray-50: #F9F8F6; --gray-100: #F1EFE8; --gray-200: #D3D1C7;
+  --gray-400: #888780; --gray-600: #5F5E5A; --gray-800: #444441; --gray-900: #2C2C2A;
+  --blue-50: #E6F1FB; --blue-800: #0C447C;
+  --purple-50: #EEEDFE; --purple-800: #3C3489;
+  --coral-50: #FAECE7; --coral-800: #712B13;
+  --green-50: #EAF3DE; --green-800: #27500A;
+  --pink-50: #FBEAF0; --pink-800: #72243E;
+  --bg: var(--gray-50);
+  --surface: #FFFFFF;
+  --border: #E5DDD4;
+  --text: var(--gray-900);
+  --text-sec: var(--gray-600);
+  --text-muted: var(--gray-400);
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px;
+  --nav-h: 60px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ──────── NAV ──────── */
+.navbar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--teal-800);
+  height: var(--nav-h);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  height: 100%; display: flex; align-items: center; gap: 24px;
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.brand-mark {
+  width: 36px; height: 36px; border-radius: var(--r-md);
+  background: var(--teal-400); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+}
+.brand-name { color: #fff; font-size: 15px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+.brand-sub  { color: rgba(255,255,255,0.55); font-size: 11px; font-weight: 400; }
+.nav-links { display: flex; gap: 4px; flex: 1; }
+.nav-link {
+  color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500;
+  padding: 6px 14px; border-radius: var(--r-md); transition: all .18s;
+}
+.nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.nav-link.active { color: #fff; background: rgba(255,255,255,0.15); }
+.nav-actions { display: flex; gap: 8px; align-items: center; margin-right: auto; }
+.btn-nav-submit {
+  background: var(--amber-400); color: var(--amber-800); border: none;
+  padding: 7px 16px; border-radius: var(--r-md); font-family: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: .18s;
+  white-space: nowrap;
+}
+.btn-nav-submit:hover { background: var(--amber-200); }
+.btn-nav-login {
+  background: transparent; color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.3);
+  padding: 7px 16px; border-radius: var(--r-md); font-family: inherit;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: .18s; white-space: nowrap;
+}
+.btn-nav-login:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* ──────── LOCATION BAR ──────── */
+.loc-bar {
+  background: var(--teal-50);
+  border-bottom: 1px solid var(--teal-100);
+  padding: 0 24px;
+}
+.loc-inner {
+  max-width: 1200px; margin: 0 auto;
+  height: 40px; display: flex; align-items: center; gap: 8px;
+}
+.loc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal-400); flex-shrink: 0; }
+.loc-text { font-size: 13px; color: var(--teal-800); flex: 1; }
+.loc-city { font-weight: 700; }
+.btn-change-loc {
+  background: none; border: 1px solid var(--teal-200); color: var(--teal-600);
+  padding: 3px 12px; border-radius: 100px; font-family: inherit;
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: .18s;
+}
+.btn-change-loc:hover { background: var(--teal-100); border-color: var(--teal-400); }
+
+/* ──────── MAIN ──────── */
+main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+
+/* ──────── SEARCH ──────── */
+.search-row { display: flex; gap: 10px; margin-bottom: 20px; }
+.search-wrap {
+  flex: 1; position: relative;
+}
+.search-icon {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+.search-input {
+  width: 100%; height: 48px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); font-family: inherit; font-size: 15px;
+  color: var(--text); padding: 0 44px 0 16px; outline: none; transition: .18s;
+  direction: rtl;
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus { border-color: var(--teal-400); box-shadow: 0 0 0 3px rgba(29,158,117,0.12); }
+.search-btn {
+  height: 48px; padding: 0 22px;
+  background: var(--teal-600); color: #fff; border: none;
+  border-radius: var(--r-lg); font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: .18s; flex-shrink: 0;
+}
+.search-btn:hover { background: var(--teal-800); }
+
+/* ──────── FILTER TABS (categories) ──────── */
+.filter-tabs {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+}
+.filter-tabs::-webkit-scrollbar { height: 3px; }
+.filter-tabs::-webkit-scrollbar-track { background: transparent; }
+.filter-tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+.filter-tab {
+  flex-shrink: 0; padding: 5px 16px; border-radius: 100px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-sec);
+  cursor: pointer; transition: .18s;
+}
+.filter-tab:hover { border-color: var(--teal-200); color: var(--teal-600); }
+.filter-tab.active {
+  background: var(--teal-600); border-color: var(--teal-600);
+  color: #fff; font-weight: 700;
+}
+
+/* ──────── FILTER ROW ──────── */
+.filter-row { display: flex; gap: 10px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+.filter-select {
+  height: 38px; padding: 0 12px; background: var(--surface);
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  font-family: inherit; font-size: 13px; color: var(--text); outline: none;
+  cursor: pointer; transition: .18s; min-width: 140px;
+}
+.filter-select:focus { border-color: var(--teal-400); }
+.filter-label { font-size: 13px; color: var(--text-muted); }
+
+/* ──────── VIEW TOGGLE ──────── */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.view-toggle {
+  display: flex; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r-md); padding: 3px; gap: 2px;
+}
+.view-btn {
+  padding: 6px 18px; border-radius: 7px; border: none; background: none;
+  font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-sec);
+  cursor: pointer; transition: .18s;
+}
+.view-btn.active {
+  background: var(--teal-600); color: #fff; font-weight: 700;
+}
+.results-meta { font-size: 13px; color: var(--text-muted); }
+.results-meta span { color: var(--teal-600); font-weight: 700; }
+
+/* ──────── CARDS GRID ──────── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ──────── BOOK CARD ──────── */
+.book-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden;
+  cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s;
+  display: flex; flex-direction: column;
+}
+.book-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+  border-color: var(--teal-200);
+}
+.book-card-top {
+  padding: 16px 16px 12px;
+  display: flex; gap: 12px; align-items: flex-start; flex: 1;
+}
+.book-avatar {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; flex-shrink: 0;
+}
+.book-info { flex: 1; min-width: 0; }
+.book-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 3px; line-height: 1.3; }
+.book-author { font-size: 13px; color: var(--text-sec); }
+.cat-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 100px; white-space: nowrap; align-self: flex-start; margin-top: 2px;
+  flex-shrink: 0;
+}
+.book-card-bottom {
+  padding: 10px 16px 14px; border-top: 1px solid var(--gray-100);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mosque-info { font-size: 12.5px; color: var(--text-sec); }
+.mosque-name { font-weight: 600; color: var(--text); }
+.distance-pill {
+  font-size: 11px; font-weight: 600; padding: 2px 10px;
+  border-radius: 100px; white-space: nowrap;
+}
+.dist-same { background: var(--teal-50); color: var(--teal-600); }
+.dist-near { background: var(--amber-50); color: var(--amber-600); }
+.dist-far  { background: var(--gray-100); color: var(--gray-600); }
+
+/* ──────── MOSQUE CARD ──────── */
+.mosque-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); padding: 20px; cursor: pointer;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.mosque-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+  border-color: var(--teal-200);
+}
+.mosque-icon-wrap {
+  width: 48px; height: 48px; border-radius: var(--r-lg);
+  background: var(--teal-50); display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+.mosque-card-title { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.mosque-card-loc { font-size: 13px; color: var(--text-sec); }
+.mosque-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 12px; border-top: 1px solid var(--gray-100);
+}
+.book-count { font-size: 13px; font-weight: 600; color: var(--teal-600); }
+.book-count-label { font-weight: 400; color: var(--text-sec); }
+
+/* ──────── EMPTY STATE ──────── */
+.empty-state {
+  text-align: center; padding: 80px 24px;
+  display: none; flex-direction: column; align-items: center; gap: 16px;
+}
+.empty-state.visible { display: flex; }
+.empty-icon { font-size: 48px; opacity: .4; }
+.empty-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.empty-sub { font-size: 14px; color: var(--text-sec); }
+.btn-empty {
+  background: var(--teal-600); color: #fff; border: none; padding: 10px 24px;
+  border-radius: var(--r-md); font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: .18s; margin-top: 4px;
+}
+.btn-empty:hover { background: var(--teal-800); }
+
+/* ──────── MODAL OVERLAY ──────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(4,52,44,0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none; transition: opacity .22s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border-radius: var(--r-xl);
+  width: 100%; max-width: 440px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+  transform: translateY(12px); transition: transform .22s;
+  overflow: hidden;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 20px 24px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-close {
+  width: 32px; height: 32px; border-radius: var(--r-md);
+  background: var(--gray-100); border: none; cursor: pointer;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  color: var(--text-sec); transition: .18s;
+}
+.modal-close:hover { background: var(--gray-200); color: var(--text); }
+.modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+.field-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.field-select {
+  width: 100%; height: 44px; padding: 0 14px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--r-md); font-family: inherit; font-size: 14px;
+  color: var(--text); outline: none; cursor: pointer; transition: .18s;
+}
+.field-select:focus { border-color: var(--teal-400); background: var(--surface); }
+.modal-footer {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.btn-cancel {
+  padding: 9px 20px; border-radius: var(--r-md); border: 1.5px solid var(--border);
+  background: none; font-family: inherit; font-size: 14px; font-weight: 500;
+  color: var(--text-sec); cursor: pointer; transition: .18s;
+}
+.btn-cancel:hover { background: var(--gray-100); }
+.btn-save {
+  padding: 9px 24px; border-radius: var(--r-md); border: none;
+  background: var(--teal-600); color: #fff; font-family: inherit;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: .18s;
+}
+.btn-save:hover { background: var(--teal-800); }
+
+/* ──────── BOOK DETAIL MODAL ──────── */
+.detail-modal {
+  max-width: 520px;
+}
+.detail-hero {
+  padding: 28px 24px 20px;
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.detail-avatar {
+  width: 64px; height: 64px; border-radius: var(--r-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 800; flex-shrink: 0;
+}
+.detail-info { flex: 1; }
+.detail-cat { margin-bottom: 8px; display: inline-block; }
+.detail-title { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+.detail-author { font-size: 14px; color: var(--text-sec); }
+.detail-section {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+}
+.detail-section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.detail-mosque-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--gray-50); border-radius: var(--r-md);
+  border: 1px solid var(--border); gap: 12px;
+}
+.detail-mosque-name { font-size: 14px; font-weight: 600; }
+.detail-mosque-loc { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+.detail-notes { font-size: 14px; color: var(--text-sec); line-height: 1.7; }
+.detail-footer {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  display: flex; gap: 10px;
+}
+.btn-full { flex: 1; padding: 11px 0; border-radius: var(--r-md); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: .18s; text-align: center; }
+.btn-primary-full { background: var(--teal-600); color: #fff; border: none; }
+.btn-primary-full:hover { background: var(--teal-800); }
+.btn-ghost-full { background: none; color: var(--text-sec); border: 1.5px solid var(--border); }
+.btn-ghost-full:hover { background: var(--gray-100); }
+
+/* ──────── FOOTER ──────── */
+footer {
+  background: var(--teal-900); color: rgba(255,255,255,0.5);
+  text-align: center; padding: 24px; font-size: 13px;
+}
+footer strong { color: rgba(255,255,255,0.8); font-weight: 700; }
+
+/* ──────── UTILITIES ──────── */
+.hidden { display: none !important; }
+.fade-in { animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* category colors */
+.cat-فقه    { background: var(--teal-50);   color: var(--teal-800); }
+.cat-حديث   { background: var(--blue-50);   color: var(--blue-800); }
+.cat-تفسير  { background: var(--purple-50); color: var(--purple-800); }
+.cat-سيرة   { background: var(--coral-50);  color: var(--coral-800); }
+.cat-عقيدة  { background: var(--amber-50);  color: var(--amber-800); }
+.cat-تزكية  { background: var(--green-50);  color: var(--green-800); }
+.cat-أدب    { background: var(--pink-50);   color: var(--pink-800); }
+.cat-تاريخ  { background: var(--gray-100);  color: var(--gray-800); }
+.cat-أخرى   { background: var(--gray-100);  color: var(--gray-800); }
+/* avatar backgrounds */
+.av-فقه    { background: var(--teal-50);   color: var(--teal-800); }
+.av-حديث   { background: var(--blue-50);   color: var(--blue-800); }
+.av-تفسير  { background: var(--purple-50); color: var(--purple-800); }
+.av-سيرة   { background: var(--coral-50);  color: var(--coral-800); }
+.av-عقيدة  { background: var(--amber-50);  color: var(--amber-800); }
+.av-تزكية  { background: var(--green-50);  color: var(--green-800); }
+.av-أدب    { background: var(--pink-50);   color: var(--pink-800); }
+.av-تاريخ  { background: var(--gray-100);  color: var(--gray-800); }
+.av-أخرى   { background: var(--gray-100);  color: var(--gray-800); }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" role="navigation" aria-label="القائمة الرئيسية">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="brand-mark">ر</div>
+      <div>
+        <div class="brand-name">على رفوف المساجد</div>
+        <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#" class="nav-link active">تصفح</a>
+      <a href="#" class="nav-link">عن المنصة</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-nav-submit">+ تسجيل كتاب</button>
+      <button class="btn-nav-login">تسجيل الدخول</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCATION BAR ═══ -->
+<div class="loc-bar" role="status" aria-live="polite">
+  <div class="loc-inner">
+    <div class="loc-dot" aria-hidden="true"></div>
+    <p class="loc-text">الكتب المعروضة قريبة من: <span class="loc-city" id="loc-display">المنيا، المنيا</span></p>
+    <button class="btn-change-loc" id="btn-change-loc" aria-label="تغيير موقعك">تغيير الموقع</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main role="main">
+
+  <!-- Search -->
+  <div class="search-row">
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input
+        type="search" class="search-input" id="search-input"
+        placeholder="ابحث بعنوان الكتاب أو اسم المؤلف..."
+        aria-label="بحث عن كتاب"
+      >
+    </div>
+    <button class="search-btn">بحث</button>
+  </div>
+
+  <!-- Category filter tabs -->
+  <div class="filter-tabs" role="group" aria-label="تصفية بالتصنيف">
+    <button class="filter-tab active" data-cat="all">الكل</button>
+    <button class="filter-tab" data-cat="فقه">فقه</button>
+    <button class="filter-tab" data-cat="حديث">حديث</button>
+    <button class="filter-tab" data-cat="تفسير">تفسير</button>
+    <button class="filter-tab" data-cat="سيرة">سيرة</button>
+    <button class="filter-tab" data-cat="عقيدة">عقيدة</button>
+    <button class="filter-tab" data-cat="تزكية">تزكية</button>
+    <button class="filter-tab" data-cat="أدب">أدب</button>
+    <button class="filter-tab" data-cat="تاريخ">تاريخ</button>
+  </div>
+
+  <!-- Filter row -->
+  <div class="filter-row">
+    <span class="filter-label">تصفية:</span>
+    <select class="filter-select" id="gov-filter" aria-label="تصفية بالمحافظة">
+      <option value="all">كل المحافظات</option>
+      <option value="المنيا">المنيا</option>
+      <option value="القاهرة">القاهرة</option>
+      <option value="الإسكندرية">الإسكندرية</option>
+      <option value="أسيوط">أسيوط</option>
+      <option value="سوهاج">سوهاج</option>
+    </select>
+    <select class="filter-select" id="city-filter" aria-label="تصفية بالمدينة">
+      <option value="all">كل المدن</option>
+    </select>
+  </div>
+
+  <!-- Toolbar: view toggle + count -->
+  <div class="toolbar">
+    <div class="view-toggle" role="group" aria-label="طريقة العرض">
+      <button class="view-btn active" id="btn-books" data-view="books">
+        📚 كتب
+      </button>
+      <button class="view-btn" id="btn-mosques" data-view="mosques">
+        🕌 مساجد
+      </button>
+    </div>
+    <p class="results-meta" id="results-meta" aria-live="polite"></p>
+  </div>
+
+  <!-- Books grid -->
+  <div class="cards-grid" id="books-grid" role="list" aria-label="قائمة الكتب"></div>
+
+  <!-- Mosques grid -->
+  <div class="cards-grid hidden" id="mosques-grid" role="list" aria-label="قائمة المساجد"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="empty-state" role="status">
+    <div class="empty-icon">🔍</div>
+    <p class="empty-title">لم يُعثر على نتائج</p>
+    <p class="empty-sub">جرّب تغيير كلمات البحث أو إزالة بعض الفلاتر</p>
+    <button class="btn-empty" onclick="resetFilters()">إعادة ضبط الفلاتر</button>
+  </div>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <strong>على رفوف المساجد</strong> — مبادرة مجتمعية مفتوحة لرقمنة مكتبات المساجد في مصر
+</footer>
+
+<!-- ═══ LOCATION MODAL ═══ -->
+<div class="modal-overlay" id="location-modal" role="dialog" aria-modal="true" aria-labelledby="loc-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="loc-modal-title">تغيير موقعك</h2>
+      <button class="modal-close" id="loc-modal-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:var(--text-sec); line-height:1.6; background:var(--teal-50); padding:10px 14px; border-radius:var(--r-md); border-right:3px solid var(--teal-400);">
+        سيتم حفظ موقعك في ملفك الشخصي ولن تحتاج إلى إدخاله مجدداً في زياراتك القادمة.
+      </p>
+      <div>
+        <p class="field-label">المحافظة <span style="color:var(--teal-600)">*</span></p>
+        <select class="field-select" id="modal-gov" aria-label="اختر المحافظة">
+          <option value="">اختر المحافظة...</option>
+          <option value="المنيا">المنيا</option>
+          <option value="القاهرة">القاهرة</option>
+          <option value="الإسكندرية">الإسكندرية</option>
+          <option value="أسيوط">أسيوط</option>
+          <option value="سوهاج">سوهاج</option>
+          <option value="الجيزة">الجيزة</option>
+          <option value="الشرقية">الشرقية</option>
+          <option value="الدقهلية">الدقهلية</option>
+        </select>
+      </div>
+      <div>
+        <p class="field-label">المدينة / المركز <span style="color:var(--teal-600)">*</span></p>
+        <select class="field-select" id="modal-city" aria-label="اختر المدينة">
+          <option value="">اختر المحافظة أولاً...</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="loc-modal-cancel">إلغاء</button>
+      <button class="btn-save" id="loc-modal-save">حفظ الموقع</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BOOK DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+  <div class="modal detail-modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="detail-title">تفاصيل الكتاب</h2>
+      <button class="modal-close" id="detail-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+
+const CITIES = {
+  'المنيا':       ['مدينة المنيا','ملوي','سمالوط','مغاغة','بني مزار','المطاهرة','أبو قرقاص'],
+  'القاهرة':      ['مدينة نصر','المعادي','الزيتون','شبرا','حلوان','مصر الجديدة','العباسية'],
+  'الإسكندرية':   ['المنتزه','سيدي بشر','اللبان','كرموز','العجمي','برج العرب'],
+  'أسيوط':        ['مدينة أسيوط','ديروط','القوصية','البداري','أبو تيج','منفلوط'],
+  'سوهاج':        ['مدينة سوهاج','أخميم','طهطا','جرجا','دار السلام','المراغة'],
+  'الجيزة':       ['مدينة الجيزة','العياط','أطفيح','الصف','البدرشين','الحوامدية'],
+  'الشرقية':      ['الزقازيق','العاشر من رمضان','بلبيس','ميت غمر','منيا القمح'],
+  'الدقهلية':     ['المنصورة','طلخا','ميت غمر','بلقاس','أجا','السنبلاوين'],
+};
+
+const books = [
+  { id:1, title:'فقه السنة', author:'السيد سابق', category:'فقه', edition:'الطبعة الخامسة',
+    extra:'من أشهر كتب الفقه الإسلامي المقارن، يشمل أبواب الطهارة والصلاة والصيام والحج والمعاملات.',
+    mosque:{ name:'مسجد النور', city:'مدينة المنيا', governorate:'المنيا' } },
+  { id:2, title:'رياض الصالحين', author:'الإمام النووي', category:'حديث', edition:null,
+    extra:'جامع حديثي شامل يضم أحاديث النبي ﷺ في الآداب والأخلاق والأحكام.',
+    mosque:{ name:null, city:'مدينة المنيا', governorate:'المنيا' } },
+  { id:3, title:'تفسير ابن كثير', author:'ابن كثير الدمشقي', category:'تفسير', edition:'طبعة دار طيبة',
+    extra:'من أمهات كتب التفسير بالمأثور، يعتمد تفسير القرآن بالقرآن والسنة وأقوال الصحابة.',
+    mosque:{ name:'مسجد الرحمة', city:'ملوي', governorate:'المنيا' } },
+  { id:4, title:'السيرة النبوية', author:'ابن هشام', category:'سيرة', edition:null,
+    extra:'أشهر كتب السيرة، يُعدّ من أوثق المصادر التاريخية لسيرة النبي محمد ﷺ.',
+    mosque:{ name:'مسجد الأنصار', city:'مدينة أسيوط', governorate:'أسيوط' } },
+  { id:5, title:'العقيدة الطحاوية', author:'الإمام الطحاوي', category:'عقيدة', edition:'طبعة المكتب الإسلامي',
+    extra:'متن مختصر في بيان اعتقاد أهل السنة والجماعة، اعتُمد في المناهج الدينية في كثير من الدول.',
+    mosque:{ name:'مسجد التوحيد', city:'مدينة نصر', governorate:'القاهرة' } },
+  { id:6, title:'إحياء علوم الدين', author:'الإمام الغزالي', category:'تزكية', edition:null,
+    extra:'موسوعة في الفقه والتصوف وعلم الأخلاق، تُعدّ من أعظم المؤلفات في التراث الإسلامي.',
+    mosque:{ name:'مسجد السلام', city:'المعادي', governorate:'القاهرة' } },
+  { id:7, title:'ديوان المتنبي', author:'أبو الطيب المتنبي', category:'أدب', edition:'تحقيق عبد الوهاب عزام',
+    extra:'الديوان الشعري الأشهر في تاريخ الأدب العربي، يضم قصائد المتنبي في الحكمة والمدح والهجاء.',
+    mosque:{ name:'مسجد الفتح', city:'المنتزه', governorate:'الإسكندرية' } },
+  { id:8, title:'البداية والنهاية', author:'ابن كثير الدمشقي', category:'تاريخ', edition:null,
+    extra:'موسوعة تاريخية شاملة تبدأ من بدء الخلق وتنتهي بعصر المؤلف، مع التركيز على التاريخ الإسلامي.',
+    mosque:{ name:null, city:'مدينة سوهاج', governorate:'سوهاج' } },
+  { id:9, title:'الموطأ', author:'الإمام مالك بن أنس', category:'حديث', edition:'رواية يحيى الليثي',
+    extra:'أول كتاب في الحديث النبوي وُضع على وجه التبويب الفقهي، ويُعدّ أصح الكتب بعد القرآن الكريم.',
+    mosque:{ name:'مسجد الهداية', city:'سمالوط', governorate:'المنيا' } },
+  { id:10, title:'أسباب النزول', author:'الواحدي النيسابوري', category:'تفسير', edition:'تحقيق كمال بسيوني',
+    extra:'الكتاب الأشمل في أسباب نزول آيات القرآن الكريم، يُرجع إليه المفسرون والفقهاء.',
+    mosque:{ name:'مسجد الإيمان', city:'سيدي بشر', governorate:'الإسكندرية' } },
+  { id:11, title:'زاد المعاد', author:'ابن القيم الجوزية', category:'تزكية', edition:'طبعة مؤسسة الرسالة',
+    extra:'كتاب شامل في الطب النبوي والفقه والسلوك، يُعدّ من أهم مؤلفات ابن القيم وأكثرها نفعاً.',
+    mosque:{ name:'مسجد عمر', city:'الزيتون', governorate:'القاهرة' } },
+  { id:12, title:'مختصر القدوري', author:'أبو الحسين القدوري', category:'فقه', edition:null,
+    extra:'متن فقهي حنفي مختصر يُدرَّس على نطاق واسع في مدارس الفقه الإسلامي الحنفي.',
+    mosque:{ name:null, city:'مدينة أسيوط', governorate:'أسيوط' } },
+];
+
+const mosques = [
+  { id:1, name:'مسجد النور',      city:'مدينة المنيا', governorate:'المنيا',     count:8  },
+  { id:2, name:'مسجد الرحمة',    city:'ملوي',          governorate:'المنيا',     count:4  },
+  { id:3, name:'مسجد الأنصار',   city:'مدينة أسيوط',  governorate:'أسيوط',      count:12 },
+  { id:4, name:'مسجد التوحيد',   city:'مدينة نصر',    governorate:'القاهرة',    count:6  },
+  { id:5, name:'مسجد السلام',    city:'المعادي',       governorate:'القاهرة',    count:3  },
+  { id:6, name:'مسجد الهداية',   city:'سمالوط',        governorate:'المنيا',     count:15 },
+  { id:7, name:null,              city:'مدينة سوهاج',  governorate:'سوهاج',      count:5  },
+  { id:8, name:'مسجد الإيمان',   city:'سيدي بشر',     governorate:'الإسكندرية', count:7  },
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+
+let state = {
+  view: 'books',
+  query: '',
+  category: 'all',
+  governorate: 'all',
+  city: 'all',
+  location: { governorate: 'المنيا', city: 'مدينة المنيا' },
+};
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+
+function distanceClass(bookGov) {
+  if (bookGov === state.location.governorate) return 'dist-same';
+  const nearby = ['المنيا','أسيوط','سوهاج'];
+  if (nearby.includes(bookGov) && nearby.includes(state.location.governorate)) return 'dist-near';
+  return 'dist-far';
+}
+function distanceLabel(bookGov) {
+  if (bookGov === state.location.governorate) return 'نفس محافظتك ●';
+  return bookGov;
+}
+function mosqueDisplay(m) {
+  return m.name || `مسجد في ${m.city}`;
+}
+function firstChar(title) {
+  return title ? title[0] : '؟';
+}
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+
+function renderBooks() {
+  const q = state.query.trim().toLowerCase();
+  const filtered = books.filter(b => {
+    const matchQ = !q || b.title.includes(q) || (b.author && b.author.includes(q));
+    const matchCat = state.category === 'all' || b.category === state.category;
+    const matchGov = state.governorate === 'all' || b.mosque.governorate === state.governorate;
+    const matchCity = state.city === 'all' || b.mosque.city === state.city;
+    return matchQ && matchCat && matchGov && matchCity;
+  });
+
+  // Sort: same governorate first
+  filtered.sort((a, b) => {
+    const aHome = a.mosque.governorate === state.location.governorate ? 0 : 1;
+    const bHome = b.mosque.governorate === state.location.governorate ? 0 : 1;
+    return aHome - bHome;
+  });
+
+  const grid = document.getElementById('books-grid');
+  const empty = document.getElementById('empty-state');
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    empty.classList.add('visible');
+    updateMeta(0, 'كتاب');
+    return;
+  }
+  empty.classList.remove('visible');
+  updateMeta(filtered.length, 'كتاب');
+
+  grid.innerHTML = filtered.map(b => `
+    <article class="book-card fade-in" role="listitem" tabindex="0"
+      onclick="openDetail(${b.id})" onkeydown="if(event.key==='Enter')openDetail(${b.id})"
+      aria-label="${b.title} - ${b.author || 'مؤلف غير معروف'}">
+      <div class="book-card-top">
+        <div class="book-avatar av-${b.category}">${firstChar(b.title)}</div>
+        <div class="book-info">
+          <div style="margin-bottom:6px;">
+            <span class="cat-badge cat-${b.category}">${b.category}</span>
+          </div>
+          <h3 class="book-title">${b.title}</h3>
+          <p class="book-author">${b.author || 'مؤلف غير محدد'}</p>
+          ${b.edition ? `<p style="font-size:11.5px;color:var(--text-muted);margin-top:3px;">${b.edition}</p>` : ''}
+        </div>
+      </div>
+      <div class="book-card-bottom">
+        <div class="mosque-info">
+          <span class="mosque-name">${mosqueDisplay(b.mosque)}</span>
+          <br><span style="font-size:11.5px;">${b.mosque.city}، ${b.mosque.governorate}</span>
+        </div>
+        <span class="distance-pill ${distanceClass(b.mosque.governorate)}">${distanceLabel(b.mosque.governorate)}</span>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderMosques() {
+  const q = state.query.trim().toLowerCase();
+  const filtered = mosques.filter(m => {
+    const matchQ = !q || (m.name && m.name.includes(q)) || m.city.includes(q) || m.governorate.includes(q);
+    const matchGov = state.governorate === 'all' || m.governorate === state.governorate;
+    const matchCity = state.city === 'all' || m.city === state.city;
+    return matchQ && matchGov && matchCity;
+  });
+
+  filtered.sort((a, b) => {
+    const aHome = a.governorate === state.location.governorate ? 0 : 1;
+    const bHome = b.governorate === state.location.governorate ? 0 : 1;
+    return aHome - bHome;
+  });
+
+  const grid = document.getElementById('mosques-grid');
+  const empty = document.getElementById('empty-state');
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    empty.classList.add('visible');
+    updateMeta(0, 'مسجد');
+    return;
+  }
+  empty.classList.remove('visible');
+  updateMeta(filtered.length, 'مسجد');
+
+  grid.innerHTML = filtered.map(m => `
+    <article class="mosque-card fade-in" role="listitem" tabindex="0"
+      aria-label="${m.name || 'مسجد بدون اسم'} - ${m.city}">
+      <div class="mosque-icon-wrap" aria-hidden="true">🕌</div>
+      <div>
+        <h3 class="mosque-card-title">${m.name || '<span style="color:var(--text-muted);font-style:italic;">مسجد بدون اسم مسجّل</span>'}</h3>
+        <p class="mosque-card-loc">${m.city}، محافظة ${m.governorate}</p>
+      </div>
+      <div class="mosque-card-footer">
+        <p class="book-count">
+          ${m.count} <span class="book-count-label">كتاب مُسجَّل</span>
+        </p>
+        <span class="distance-pill ${distanceClass(m.governorate)}">${distanceLabel(m.governorate)}</span>
+      </div>
+    </article>
+  `).join('');
+}
+
+function render() {
+  if (state.view === 'books') renderBooks();
+  else renderMosques();
+}
+
+function updateMeta(count, unit) {
+  const meta = document.getElementById('results-meta');
+  meta.innerHTML = `عرض <span>${count} ${unit}</span>`;
+}
+
+// ═══════════════════════════════════════════
+//  BOOK DETAIL
+// ═══════════════════════════════════════════
+
+function openDetail(id) {
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  const content = document.getElementById('detail-content');
+  content.innerHTML = `
+    <div class="detail-hero">
+      <div class="detail-avatar av-${b.category}">${firstChar(b.title)}</div>
+      <div class="detail-info">
+        <span class="cat-badge cat-${b.category} detail-cat">${b.category}</span>
+        <h3 class="detail-title" id="detail-title">${b.title}</h3>
+        <p class="detail-author">${b.author || 'مؤلف غير محدد'}</p>
+        ${b.edition ? `<p style="font-size:12px;color:var(--text-muted);margin-top:4px;">${b.edition}</p>` : ''}
+      </div>
+    </div>
+    ${b.extra ? `
+    <div class="detail-section">
+      <p class="detail-section-title">عن الكتاب</p>
+      <p class="detail-notes">${b.extra}</p>
+    </div>` : ''}
+    <div class="detail-section">
+      <p class="detail-section-title">متاح في</p>
+      <div class="detail-mosque-row">
+        <div>
+          <p class="detail-mosque-name">🕌 ${mosqueDisplay(b.mosque)}</p>
+          <p class="detail-mosque-loc">${b.mosque.city}، محافظة ${b.mosque.governorate}</p>
+        </div>
+        <span class="distance-pill ${distanceClass(b.mosque.governorate)}">${distanceLabel(b.mosque.governorate)}</span>
+      </div>
+    </div>
+    <div class="detail-footer">
+      <button class="btn-full btn-ghost-full" onclick="closeDetail()">إغلاق</button>
+      <button class="btn-full btn-primary-full">عرض المسجد على الخريطة</button>
+    </div>
+  `;
+  openModal('detail-modal');
+}
+
+function closeDetail() { closeModal('detail-modal'); }
+
+// ═══════════════════════════════════════════
+//  MODAL HELPERS
+// ═══════════════════════════════════════════
+
+function openModal(id) {
+  const el = document.getElementById(id);
+  el.classList.add('open');
+  el.addEventListener('click', function handler(e) {
+    if (e.target === el) { closeModal(id); el.removeEventListener('click', handler); }
+  });
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ═══════════════════════════════════════════
+//  LOCATION MODAL
+// ═══════════════════════════════════════════
+
+function openLocationModal() {
+  const govSel = document.getElementById('modal-gov');
+  const citySel = document.getElementById('modal-city');
+  govSel.value = state.location.governorate;
+  updateModalCities(state.location.governorate);
+  setTimeout(() => { citySel.value = state.location.city; }, 10);
+  openModal('location-modal');
+}
+
+function updateModalCities(gov) {
+  const citySel = document.getElementById('modal-city');
+  const cities = CITIES[gov] || [];
+  citySel.innerHTML = cities.length
+    ? cities.map(c => `<option value="${c}">${c}</option>`).join('')
+    : '<option value="">لا توجد مدن</option>';
+}
+
+function saveLocation() {
+  const gov = document.getElementById('modal-gov').value;
+  const city = document.getElementById('modal-city').value;
+  if (!gov || !city) { alert('يرجى اختيار المحافظة والمدينة'); return; }
+  state.location = { governorate: gov, city };
+  document.getElementById('loc-display').textContent = `${city}، ${gov}`;
+  closeModal('location-modal');
+  render();
+}
+
+// ═══════════════════════════════════════════
+//  FILTERS
+// ═══════════════════════════════════════════
+
+function updateCityFilter(gov) {
+  const citySel = document.getElementById('city-filter');
+  const cities = gov !== 'all' ? CITIES[gov] || [] : [];
+  citySel.innerHTML = '<option value="all">كل المدن</option>' +
+    cities.map(c => `<option value="${c}">${c}</option>`).join('');
+  state.city = 'all';
+}
+
+function resetFilters() {
+  state.query = ''; state.category = 'all'; state.governorate = 'all'; state.city = 'all';
+  document.getElementById('search-input').value = '';
+  document.getElementById('gov-filter').value = 'all';
+  updateCityFilter('all');
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === 'all'));
+  render();
+}
+
+// ═══════════════════════════════════════════
+//  EVENT LISTENERS
+// ═══════════════════════════════════════════
+
+document.getElementById('btn-change-loc').addEventListener('click', openLocationModal);
+document.getElementById('loc-modal-close').addEventListener('click', () => closeModal('location-modal'));
+document.getElementById('loc-modal-cancel').addEventListener('click', () => closeModal('location-modal'));
+document.getElementById('loc-modal-save').addEventListener('click', saveLocation);
+document.getElementById('detail-close').addEventListener('click', closeDetail);
+
+document.getElementById('modal-gov').addEventListener('change', function() {
+  updateModalCities(this.value);
+});
+
+document.getElementById('search-input').addEventListener('input', function() {
+  state.query = this.value;
+  render();
+});
+
+document.getElementById('gov-filter').addEventListener('change', function() {
+  state.governorate = this.value;
+  updateCityFilter(this.value);
+  render();
+});
+document.getElementById('city-filter').addEventListener('change', function() {
+  state.city = this.value;
+  render();
+});
+
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    state.category = this.dataset.cat;
+    render();
+  });
+});
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const v = this.dataset.view;
+    state.view = v;
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('books-grid').classList.toggle('hidden', v !== 'books');
+    document.getElementById('mosques-grid').classList.toggle('hidden', v !== 'mosques');
+    document.getElementById('empty-state').classList.remove('visible');
+    state.category = 'all';
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === 'all'));
+    render();
+  });
+});
+
+// Escape key closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal('location-modal');
+    closeModal('detail-modal');
+  }
+});
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+render();
+</script>
+</body>
+</html>

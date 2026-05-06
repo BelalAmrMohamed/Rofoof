@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>على رفوف المساجد — الدخول</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0B1F14;
+            --ink-mid: #1C3D28;
+            --ink-soft: #2C5A3C;
+            --gold: #C49A3C;
+            --gold-mid: #D4B060;
+            --gold-pale: #EDD898;
+            --cream: #FDF8EE;
+            --cream-b: #F5EDD8;
+            --cream-bb: #EDE0C4;
+            --border: #D8CBAA;
+            --text: #2A1E0C;
+            --muted: #8A7A5C;
+            --r: 10px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Noto Naskh Arabic', serif;
+            direction: rtl;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ══════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════ */
+        .page {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ══════════════════════════════════════
+   FORM PANEL  (right side in RTL)
+══════════════════════════════════════ */
+        .form-panel {
+            flex: 1;
+            background: var(--cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+            overflow-y: auto;
+            order: 1;
+            /* RTL: first visually = right side */
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 400px;
+            animation: riseIn .45s ease both;
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── tabs ─── */
+        .tabs {
+            display: flex;
+            background: var(--cream-b);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            background: none;
+            border-radius: 9px;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .22s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--text);
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+        }
+
+        /* ─── heading ─── */
+        .form-heading {
+            font-family: 'Amiri', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .form-sub {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 26px;
+            line-height: 1.8;
+        }
+
+        /* ─── social buttons ─── */
+        .social-col {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            margin-bottom: 20px;
+        }
+
+        .btn-oauth {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 44px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: all .18s;
+            width: 100%;
+        }
+
+        .btn-oauth:hover {
+            border-color: #B0A080;
+            background: #FFFDF8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
+
+        .oauth-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* ─── divider ─── */
+        .or-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 12px;
+            margin: 18px 0;
+        }
+
+        .or-line::before,
+        .or-line::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ─── fields ─── */
+        .field {
+            margin-bottom: 15px;
+        }
+
+        .field-lbl {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .req {
+            color: var(--gold);
+            margin-inline-start: 1px;
+        }
+
+        .field-wrap {
+            position: relative;
+        }
+
+        .field-input {
+            width: 100%;
+            height: 46px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 0 14px;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .18s, box-shadow .18s;
+        }
+
+        .field-input::placeholder {
+            color: #B8A88A;
+            font-size: 14px;
+        }
+
+        .field-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(196, 154, 60, .14);
+        }
+
+        .field-input.has-toggle {
+            padding-left: 42px;
+        }
+
+        .toggle-vis {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 4px;
+            line-height: 1;
+            font-size: 16px;
+            transition: color .18s;
+        }
+
+        .toggle-vis:hover {
+            color: var(--text);
+        }
+
+        /* location row */
+        .loc-wrap {
+            margin-bottom: 15px;
+        }
+
+        .loc-label-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 18px 0 12px;
+        }
+
+        .loc-label-row::before,
+        .loc-label-row::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .loc-label-text {
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .loc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .field-select {
+            width: 100%;
+            height: 46px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 0 14px 0 32px;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7A5C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 12px center;
+            transition: border-color .18s;
+        }
+
+        .field-select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(196, 154, 60, .14);
+        }
+
+        .field-select:disabled {
+            color: var(--muted);
+            background-color: var(--cream-b);
+        }
+
+        /* ─── submit ─── */
+        .btn-submit {
+            width: 100%;
+            height: 50px;
+            background: var(--ink);
+            color: white;
+            border: none;
+            border-radius: var(--r);
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: background .2s, transform .1s;
+            letter-spacing: .01em;
+        }
+
+        .btn-submit:hover {
+            background: var(--ink-soft);
+        }
+
+        .btn-submit:active {
+            transform: scale(.99);
+        }
+
+        /* gold underline accent on submit */
+        .btn-submit-wrap {
+            position: relative;
+        }
+
+        .btn-submit-wrap::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 20px;
+            right: 20px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 0 0 4px 4px;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .btn-submit-wrap:hover::after {
+            opacity: .7;
+        }
+
+        /* ─── footer ─── */
+        .form-footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .form-footer a {
+            color: var(--ink-soft);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color .18s;
+        }
+
+        .form-footer a:hover {
+            border-color: var(--gold);
+            color: var(--text);
+        }
+
+        /* ─── form state switching ─── */
+        .form-state {
+            display: none;
+        }
+
+        .form-state.active {
+            display: block;
+            animation: riseIn .3s ease both;
+        }
+
+        /* ─── error shake ─── */
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-7px);
+            }
+
+            40% {
+                transform: translateX(7px);
+            }
+
+            60% {
+                transform: translateX(-4px);
+            }
+
+            80% {
+                transform: translateX(4px);
+            }
+        }
+
+        .field-input.error {
+            border-color: #C0392B;
+            box-shadow: 0 0 0 3px rgba(192, 57, 43, .1);
+        }
+
+        /* ══════════════════════════════════════
+   BRAND PANEL  (left side in RTL)
+══════════════════════════════════════ */
+        .brand-panel {
+            width: 44%;
+            flex-shrink: 0;
+            background: var(--ink);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 48px;
+            overflow: hidden;
+            order: 2;
+        }
+
+        /* ─ background pattern ─ */
+        .brand-panel .geo-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: .14;
+            pointer-events: none;
+        }
+
+        /* ─ vignette over pattern ─ */
+        .brand-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, rgba(11, 31, 20, .7));
+            pointer-events: none;
+        }
+
+        .brand-inner {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* ─ ornament ─ */
+        .brand-ornament {
+            width: 64px;
+            height: 64px;
+            border: 1.5px solid rgba(212, 176, 96, .5);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .brand-ornament::before {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px solid rgba(212, 176, 96, .25);
+            border-radius: 8px;
+            transform: rotate(45deg);
+        }
+
+        .brand-ornament-letter {
+            font-family: 'Amiri', serif;
+            font-size: 28px;
+            color: var(--gold-pale);
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─ gold rule ─ */
+        .gold-rule {
+            width: 48px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-mid), transparent);
+            margin: 20px 0;
+        }
+
+        /* ─ title ─ */
+        .brand-title {
+            font-family: 'Amiri', serif;
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1.55;
+            color: var(--gold-pale);
+            letter-spacing: .02em;
+            text-align: center;
+        }
+
+        /* ─ tagline ─ */
+        .brand-tagline {
+            font-family: 'Amiri', serif;
+            font-style: italic;
+            font-size: 14px;
+            color: rgba(255, 255, 255, .38);
+            line-height: 2;
+            max-width: 260px;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        /* ─ back link ─ */
+        .brand-back {
+            position: absolute;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, .3);
+            text-decoration: none;
+            transition: color .2s;
+            letter-spacing: .02em;
+        }
+
+        .brand-back:hover {
+            color: var(--gold-mid);
+        }
+
+        .brand-back svg {
+            vertical-align: -2px;
+            margin-inline-end: 5px;
+        }
+
+        /* ══════════════════════════════════════
+   MOBILE
+══════════════════════════════════════ */
+        @media (max-width: 700px) {
+            .page {
+                flex-direction: column;
+            }
+
+            .brand-panel {
+                width: 100%;
+                order: 1;
+                padding: 28px 24px;
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 14px;
+                min-height: unset;
+            }
+
+            .brand-panel::after {
+                display: none;
+            }
+
+            .brand-panel .geo-bg {
+                opacity: .08;
+            }
+
+            .brand-inner {
+                flex-direction: row;
+                gap: 14px;
+                align-items: center;
+                text-align: right;
+            }
+
+            .brand-ornament {
+                width: 48px;
+                height: 48px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .brand-ornament-letter {
+                font-size: 20px;
+            }
+
+            .brand-title {
+                font-size: 20px;
+                margin-bottom: 0;
+            }
+
+            .gold-rule,
+            .brand-tagline {
+                display: none;
+            }
+
+            .brand-back {
+                display: none;
+            }
+
+            .form-panel {
+                order: 2;
+                padding: 28px 20px 48px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- ██ FORM PANEL ██ (RTL: right side) -->
+        <main class="form-panel" role="main" aria-label="نموذج الدخول">
+            <div class="form-box">
+
+                <div class="tabs" role="tablist" aria-label="الدخول أو إنشاء حساب">
+                    <button class="tab-btn active" role="tab" aria-selected="true" id="tab-login"
+                        aria-controls="state-login" onclick="switchTab('login')">
+                        تسجيل الدخول
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" id="tab-register"
+                        aria-controls="state-register" onclick="switchTab('register')">
+                        إنشاء حساب
+                    </button>
+                </div>
+
+                <!-- ─────── LOGIN ─────── -->
+                <div class="form-state active" id="state-login" role="tabpanel" aria-labelledby="tab-login">
+                    <h1 class="form-heading">أهلاً بعودتك</h1>
+                    <p class="form-sub">سجّل دخولك للمساهمة في فهرسة كتب مساجد مصر</p>
+
+                    <div class="social-col">
+                        <button class="btn-oauth" type="button" aria-label="الدخول عبر Google">
+                            <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                    fill="#4285F4" />
+                                <path
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                    fill="#34A853" />
+                                <path
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                    fill="#FBBC05" />
+                                <path
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                    fill="#EA4335" />
+                            </svg>
+                            الدخول عبر Google
+                        </button>
+                        <button class="btn-oauth" type="button" aria-label="الدخول عبر Facebook">
+                            <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                                    fill="#1877F2" />
+                            </svg>
+                            الدخول عبر Facebook
+                        </button>
+                    </div>
+
+                    <div class="or-line">أو بالبريد الإلكتروني</div>
+
+                    <div class="field">
+                        <label class="field-lbl" for="l-email">البريد الإلكتروني<span class="req"> *</span></label>
+                        <input class="field-input" id="l-email" type="email" placeholder="name@example.com"
+                            autocomplete="email" dir="ltr">
+                    </div>
+
+                    <div class="field">
+                        <label class="field-lbl" for="l-pass">كلمة المرور<span class="req"> *</span></label>
+                        <div class="field-wrap">
+                            <input class="field-input has-toggle" id="l-pass" type="password" placeholder="••••••••"
+                                autocomplete="current-password">
+                            <button class="toggle-vis" type="button" onclick="toggleVis('l-pass', this)"
+                                aria-label="إظهار أو إخفاء كلمة المرور">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" aria-hidden="true">
+                                    <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="btn-submit-wrap">
+                        <button class="btn-submit" type="button" onclick="handleLogin()">
+                            تسجيل الدخول
+                        </button>
+                    </div>
+
+                    <p class="form-footer">
+                        ليس لديك حساب؟
+                        <a href="#" onclick="switchTab('register'); return false;">إنشاء حساب جديد</a>
+                    </p>
+                </div>
+
+                <!-- ─────── REGISTER ─────── -->
+                <div class="form-state" id="state-register" role="tabpanel" aria-labelledby="tab-register">
+                    <h1 class="form-heading">انضم إلينا</h1>
+                    <p class="form-sub">أنشئ حساباً للمساهمة في فهرسة كتب مساجد مصر</p>
+
+                    <div class="social-col">
+                        <button class="btn-oauth" type="button" aria-label="التسجيل عبر Google">
+                            <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                    fill="#4285F4" />
+                                <path
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                    fill="#34A853" />
+                                <path
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                    fill="#FBBC05" />
+                                <path
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                    fill="#EA4335" />
+                            </svg>
+                            التسجيل عبر Google
+                        </button>
+                        <button class="btn-oauth" type="button" aria-label="التسجيل عبر Facebook">
+                            <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                                    fill="#1877F2" />
+                            </svg>
+                            التسجيل عبر Facebook
+                        </button>
+                    </div>
+
+                    <div class="or-line">أو بالبريد الإلكتروني</div>
+
+                    <div class="field">
+                        <label class="field-lbl" for="r-name">الاسم الكامل<span class="req"> *</span></label>
+                        <input class="field-input" id="r-name" type="text" placeholder="مثال: محمد أحمد"
+                            autocomplete="name">
+                    </div>
+
+                    <div class="field">
+                        <label class="field-lbl" for="r-email">البريد الإلكتروني<span class="req"> *</span></label>
+                        <input class="field-input" id="r-email" type="email" placeholder="name@example.com"
+                            autocomplete="email" dir="ltr">
+                    </div>
+
+                    <div class="field">
+                        <label class="field-lbl" for="r-pass">كلمة المرور<span class="req"> *</span></label>
+                        <div class="field-wrap">
+                            <input class="field-input has-toggle" id="r-pass" type="password"
+                                placeholder="٨ أحرف على الأقل" autocomplete="new-password">
+                            <button class="toggle-vis" type="button" onclick="toggleVis('r-pass', this)"
+                                aria-label="إظهار أو إخفاء كلمة المرور">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" aria-hidden="true">
+                                    <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="loc-wrap">
+                        <div class="loc-label-row" aria-hidden="true">
+                            <span class="loc-label-text">موقعك الجغرافي</span>
+                        </div>
+                        <div class="loc-grid">
+                            <div class="field" style="margin-bottom:0">
+                                <label class="field-lbl" for="r-gov">المحافظة<span class="req"> *</span></label>
+                                <select class="field-select" id="r-gov" onchange="updateCities()"
+                                    aria-label="اختر المحافظة">
+                                    <option value="">اختر المحافظة</option>
+                                    <option>القاهرة</option>
+                                    <option>الجيزة</option>
+                                    <option>الإسكندرية</option>
+                                    <option>المنيا</option>
+                                    <option>أسيوط</option>
+                                    <option>سوهاج</option>
+                                    <option>قنا</option>
+                                    <option>الأقصر</option>
+                                    <option>أسوان</option>
+                                    <option>الفيوم</option>
+                                    <option>بني سويف</option>
+                                    <option>الشرقية</option>
+                                    <option>الدقهلية</option>
+                                    <option>البحيرة</option>
+                                    <option>الغربية</option>
+                                    <option>المنوفية</option>
+                                    <option>القليوبية</option>
+                                    <option>كفر الشيخ</option>
+                                    <option>دمياط</option>
+                                    <option>بورسعيد</option>
+                                    <option>الإسماعيلية</option>
+                                    <option>السويس</option>
+                                </select>
+                            </div>
+                            <div class="field" style="margin-bottom:0">
+                                <label class="field-lbl" for="r-city">المدينة<span class="req"> *</span></label>
+                                <select class="field-select" id="r-city" disabled aria-label="اختر المدينة">
+                                    <option value="">اختر المحافظة أولاً</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-submit-wrap" style="margin-top:4px">
+                        <button class="btn-submit" type="button" onclick="handleRegister()">
+                            إنشاء الحساب
+                        </button>
+                    </div>
+
+                    <p class="form-footer">
+                        لديك حساب بالفعل؟
+                        <a href="#" onclick="switchTab('login'); return false;">تسجيل الدخول</a>
+                    </p>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ██ BRAND PANEL ██ (RTL: left side) -->
+        <aside class="brand-panel" role="complementary" aria-label="هوية المنصة">
+
+            <!-- Islamic Geometric Pattern — 8-pointed star tile -->
+            <svg class="geo-bg" viewBox="0 0 280 560" xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                    <pattern id="islamicStar" x="0" y="0" width="70" height="70" patternUnits="userSpaceOnUse">
+                        <!-- Bounding square -->
+                        <rect x=".5" y=".5" width="69" height="69" fill="none" stroke="#C49A3C" stroke-width=".35" />
+                        <!-- 45° rotated inner square -->
+                        <rect x="11" y="11" width="48" height="48" transform="rotate(45 35 35)" fill="none"
+                            stroke="#C49A3C" stroke-width=".35" />
+                        <!-- 8-pointed star at center (35,35) outer r=16, inner r=7 -->
+                        <!-- outer pts @0°,45°,90°,135°,180°,225°,270°,315° -->
+                        <!-- inner pts @22.5°,67.5°,112.5°,157.5°,202.5°,247.5°,292.5°,337.5° -->
+                        <polygon
+                            points="35,19 37.68,27.82 46.31,22.69 41.18,31.32 51,35 41.18,38.68 46.31,47.31 37.68,42.18 35,51 32.32,42.18 23.69,47.31 28.82,38.68 19,35 28.82,31.32 23.69,22.69 32.32,27.82"
+                            fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
+                        <!-- Corner star at (0,0) — tiles across borders to form interlocking pattern -->
+                        <polygon
+                            points="0,-16 2.68,-7.18 11.31,-11.31 6.18,-3.68 16,0 6.18,3.68 11.31,11.31 2.68,7.18 0,16 -2.68,7.18 -11.31,11.31 -6.18,3.68 -16,0 -6.18,-3.68 -11.31,-11.31 -2.68,-7.18"
+                            fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
+                        <!-- Corner repeat at (70,0) -->
+                        <polygon
+                            points="70,-16 72.68,-7.18 81.31,-11.31 76.18,-3.68 86,0 76.18,3.68 81.31,11.31 72.68,7.18 70,16 67.32,7.18 58.69,11.31 63.82,3.68 54,0 63.82,-3.68 58.69,-11.31 67.32,-7.18"
+                            fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
+                        <!-- Corner repeat at (0,70) -->
+                        <polygon
+                            points="0,54 2.68,62.82 11.31,58.69 6.18,66.32 16,70 6.18,73.68 11.31,81.31 2.68,77.18 0,86 -2.68,77.18 -11.31,81.31 -6.18,73.68 -16,70 -6.18,66.32 -11.31,58.69 -2.68,62.82"
+                            fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
+                        <!-- Corner repeat at (70,70) -->
+                        <polygon
+                            points="70,54 72.68,62.82 81.31,58.69 76.18,66.32 86,70 76.18,73.68 81.31,81.31 72.68,77.18 70,86 67.32,77.18 58.69,81.31 63.82,73.68 54,70 63.82,66.32 58.69,58.69 67.32,62.82"
+                            fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
+                        <!-- Cross connectors -->
+                        <line x1="35" y1="0" x2="35" y2="19" stroke="#C49A3C" stroke-width=".25" />
+                        <line x1="35" y1="51" x2="35" y2="70" stroke="#C49A3C" stroke-width=".25" />
+                        <line x1="0" y1="35" x2="19" y2="35" stroke="#C49A3C" stroke-width=".25" />
+                        <line x1="51" y1="35" x2="70" y2="35" stroke="#C49A3C" stroke-width=".25" />
+                    </pattern>
+                </defs>
+                <rect width="280" height="560" fill="url(#islamicStar)" />
+            </svg>
+
+            <div class="brand-inner">
+                <div class="brand-ornament" aria-hidden="true">
+                    <span class="brand-ornament-letter">ر</span>
+                </div>
+
+                <div class="brand-title">على رفوف<br>المساجد</div>
+
+                <div class="gold-rule" aria-hidden="true"></div>
+
+                <p class="brand-tagline">
+                    معظم المساجد يكون بها مكتبة ثرية بالكتب —
+                    ولا يكاد يقرأها أحد
+                </p>
+            </div>
+
+            <a href="/browse" class="brand-back">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                تصفح بدون تسجيل
+            </a>
+        </aside>
+
+    </div>
+
+    <script>
+        const CITIES = {
+            'القاهرة': ['القاهرة', 'مدينة نصر', 'مصر الجديدة', 'شبرا', 'حلوان', 'المعادي', 'الزيتون', 'عين شمس'],
+            'الجيزة': ['الجيزة', '6 أكتوبر', 'الشيخ زايد', 'البدرشين', 'أوسيم', 'الحوامدية'],
+            'الإسكندرية': ['الإسكندرية', 'المنتزه', 'العامرية', 'برج العرب', 'الرمل'],
+            'المنيا': ['المنيا', 'ملوي', 'بني مزار', 'سمالوط', 'مغاغة', 'أبو قرقاص', 'العدوة'],
+            'أسيوط': ['أسيوط', 'ديروط', 'منفلوط', 'القوصية', 'أبنوب', 'الغنايم'],
+            'سوهاج': ['سوهاج', 'طهطا', 'جرجا', 'أخميم', 'المراغة', 'دار السلام'],
+            'قنا': ['قنا', 'نجع حمادي', 'دشنا', 'أبو تشت', 'فرشوط', 'قفط'],
+            'الأقصر': ['الأقصر', 'إسنا', 'الطود', 'البياضية'],
+            'أسوان': ['أسوان', 'كوم أمبو', 'إدفو', 'دراو', 'نصر النوبة'],
+            'الفيوم': ['الفيوم', 'سنورس', 'إطسا', 'يوسف الصديق', 'طامية'],
+            'بني سويف': ['بني سويف', 'الواسطى', 'ناصر', 'إهناسيا', 'الفشن', 'ببا'],
+            'الشرقية': ['الزقازيق', 'بلبيس', 'منيا القمح', 'فاقوس', '10 رمضان', 'أبو حماد'],
+            'الدقهلية': ['المنصورة', 'طلخا', 'ميت غمر', 'دكرنس', 'منية النصر', 'أجا'],
+            'البحيرة': ['دمنهور', 'كفر الدوار', 'رشيد', 'أبو حمص', 'إيتاي البارود'],
+            'الغربية': ['طنطا', 'المحلة الكبرى', 'زفتى', 'سمنود', 'بسيون', 'قطور'],
+            'المنوفية': ['شبين الكوم', 'منوف', 'قويسنا', 'تلا', 'الباجور', 'السادات'],
+            'القليوبية': ['بنها', 'قليوب', 'شبرا الخيمة', 'قها', 'خانكة', 'طوخ'],
+            'كفر الشيخ': ['كفر الشيخ', 'دسوق', 'فوه', 'سيدي سالم', 'بلطيم', 'مطوبس'],
+            'دمياط': ['دمياط', 'رأس البر', 'فارسكور', 'الزرقا', 'كفر سعد'],
+            'بورسعيد': ['بورسعيد', 'بور فؤاد'],
+            'الإسماعيلية': ['الإسماعيلية', 'القنطرة', 'أبو صوير', 'فايد'],
+            'السويس': ['السويس', 'عتاقة', 'الجناين'],
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.id === 'tab-' + tab);
+                b.setAttribute('aria-selected', b.id === 'tab-' + tab ? 'true' : 'false');
+            });
+            document.querySelectorAll('.form-state').forEach(s =>
+                s.classList.toggle('active', s.id === 'state-' + tab)
+            );
+        }
+
+        function updateCities() {
+            const gov = document.getElementById('r-gov').value;
+            const sel = document.getElementById('r-city');
+            const list = CITIES[gov] || [];
+            sel.disabled = !list.length;
+            sel.innerHTML = list.length
+                ? list.map(c => `<option value="${c}">${c}</option>`).join('')
+                : '<option value="">لا توجد مدن مسجلة</option>';
+        }
+
+        function toggleVis(fieldId, btn) {
+            const inp = document.getElementById(fieldId);
+            const showing = inp.type === 'text';
+            inp.type = showing ? 'password' : 'text';
+            btn.innerHTML = showing
+                ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>`
+                : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+        }
+
+        function markError(id) {
+            const el = document.getElementById(id);
+            el.classList.add('error');
+            el.addEventListener('input', () => el.classList.remove('error'), { once: true });
+        }
+
+        function shakeForm(stateId) {
+            const el = document.getElementById(stateId);
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = 'shake .4s ease';
+            setTimeout(() => el.style.animation = '', 500);
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('l-email');
+            const pass = document.getElementById('l-pass');
+            let ok = true;
+            if (!email.value.includes('@')) { markError('l-email'); ok = false; }
+            if (pass.value.length < 1) { markError('l-pass'); ok = false; }
+            if (!ok) { shakeForm('state-login'); return; }
+
+            const btn = document.querySelector('#state-login .btn-submit');
+            btn.textContent = '…جاري التحقق';
+            btn.disabled = true;
+            setTimeout(() => { btn.textContent = '✓ تم تسجيل الدخول'; }, 1200);
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('r-name');
+            const email = document.getElementById('r-email');
+            const pass = document.getElementById('r-pass');
+            const gov = document.getElementById('r-gov');
+            const city = document.getElementById('r-city');
+            let ok = true;
+            if (!name.value.trim()) { markError('r-name'); ok = false; }
+            if (!email.value.includes('@')) { markError('r-email'); ok = false; }
+            if (pass.value.length < 8) { markError('r-pass'); ok = false; }
+            if (!gov.value) { markError('r-gov'); ok = false; }
+            if (!city.value || city.disabled) { markError('r-city'); ok = false; }
+            if (!ok) { shakeForm('state-register'); return; }
+
+            const btn = document.querySelector('#state-register .btn-submit');
+            btn.textContent = '…جاري إنشاء الحساب';
+            btn.disabled = true;
+            setTimeout(() => { btn.textContent = '✓ تم إنشاء الحساب'; }, 1200);
+        }
+
+        // Add shake keyframe dynamically (can't put @keyframes inside conditionals)
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent =
+            '@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}';
+        document.head.appendChild(shakeStyle);
+    </script>
+</body>
+
+</html>

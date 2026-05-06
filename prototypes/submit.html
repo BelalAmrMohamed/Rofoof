@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>على رفوف المساجد — تسجيل كتاب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5;
+  --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+  --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27;
+  --amber-400:#BA7517; --amber-800:#633806;
+  --coral-50:#FAECE7; --coral-600:#993C1D; --coral-800:#712B13;
+  --gray-50:#F9F8F6; --gray-100:#F1EFE8; --gray-200:#D3D1C7;
+  --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  --blue-50:#E6F1FB; --blue-800:#0C447C;
+  --purple-50:#EEEDFE; --purple-800:#3C3489;
+  --green-50:#EAF3DE; --green-800:#27500A;
+  --pink-50:#FBEAF0; --pink-800:#72243E;
+  --bg:#F9F8F6; --surface:#FFFFFF; --border:#E5DDD4;
+  --text:var(--gray-900); --text-sec:var(--gray-600); --text-muted:var(--gray-400);
+  --danger:#C0392B; --danger-bg:#FDF2F1;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* ── NAV ── */
+.navbar{position:sticky;top:0;z-index:200;background:var(--teal-800);height:60px;border-bottom:1px solid rgba(255,255,255,.08);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:24px;}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.brand-mark{width:36px;height:36px;border-radius:var(--r-md);background:var(--teal-400);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;}
+.brand-name{color:#fff;font-size:15px;font-weight:700;line-height:1.2;white-space:nowrap;}
+.brand-sub{color:rgba(255,255,255,.5);font-size:11px;}
+.nav-links{display:flex;gap:4px;flex:1;}
+.nav-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;font-weight:500;padding:6px 14px;border-radius:var(--r-md);transition:.18s;}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.1);}
+.nav-link.active{color:#fff;background:rgba(255,255,255,.15);}
+.nav-actions{display:flex;gap:8px;align-items:center;margin-right:auto;}
+.btn-nav-submit{background:var(--amber-200);color:var(--amber-800);border:none;padding:7px 16px;border-radius:var(--r-md);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.18s;white-space:nowrap;}
+.btn-nav-login{background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.3);padding:7px 16px;border-radius:var(--r-md);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:.18s;white-space:nowrap;}
+
+/* ── PROTOTYPE ROLE SWITCHER ── */
+.role-bar{background:#2C2C2A;padding:8px 24px;display:flex;align-items:center;justify-content:center;gap:16px;}
+.role-bar-label{font-size:12px;color:var(--gray-400);}
+.role-tabs{display:flex;background:rgba(255,255,255,.07);border-radius:100px;padding:2px;gap:2px;}
+.role-tab{padding:4px 14px;border-radius:100px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;transition:.18s;}
+.role-tab.active{background:var(--amber-200);color:var(--amber-800);}
+.role-note{font-size:11px;color:var(--gray-600);}
+
+/* ── PAGE HEADER ── */
+.page-header{max-width:680px;margin:0 auto;padding:32px 24px 0;}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+.breadcrumb a{color:var(--teal-600);text-decoration:none;font-weight:500;}
+.breadcrumb a:hover{text-decoration:underline;}
+.breadcrumb-sep{color:var(--gray-200);}
+.page-title{font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.page-sub{font-size:14px;color:var(--text-sec);}
+
+/* ── ROLE BADGE ── */
+.role-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:700;margin-top:12px;}
+.role-badge.volunteer{background:var(--teal-50);color:var(--teal-600);}
+.role-badge.visitor{background:var(--amber-50);color:var(--amber-400);}
+.role-badge-dot{width:7px;height:7px;border-radius:50%;}
+.volunteer .role-badge-dot{background:var(--teal-400);}
+.visitor .role-badge-dot{background:var(--amber-200);}
+
+/* ── FORM LAYOUT ── */
+.form-wrap{max-width:680px;margin:0 auto;padding:24px 24px 80px;}
+.form-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);overflow:visible;margin-bottom:16px;}
+.form-card-header{padding:20px 24px 16px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:12px;}
+.section-num{width:28px;height:28px;border-radius:50%;background:var(--teal-600);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-size:16px;font-weight:700;color:var(--text);}
+.section-sub{font-size:12.5px;color:var(--text-muted);margin-top:1px;}
+.form-card-body{padding:20px 24px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ── FIELD ── */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+.field-label{font-size:13px;font-weight:600;color:var(--text);}
+.field-req{color:var(--teal-600);margin-right:2px;}
+.field-hint{font-size:11.5px;color:var(--text-muted);margin-top:1px;}
+.field-input{height:44px;padding:0 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;color:var(--text);outline:none;transition:.18s;direction:rtl;width:100%;}
+.field-input::placeholder{color:var(--text-muted);}
+.field-input:focus{border-color:var(--teal-400);background:var(--surface);box-shadow:0 0 0 3px rgba(29,158,117,.1);}
+.field-input.error{border-color:var(--danger);}
+.field-textarea{height:88px;padding:10px 14px;resize:vertical;line-height:1.6;}
+.field-select{height:44px;padding:0 14px;appearance:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat left 12px center;border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;color:var(--text);outline:none;cursor:pointer;transition:.18s;direction:rtl;width:100%;}
+.field-select:focus{border-color:var(--teal-400);background-color:var(--surface);box-shadow:0 0 0 3px rgba(29,158,117,.1);}
+.field-error{font-size:12px;color:var(--danger);display:none;}
+.field-error.show{display:block;}
+
+/* ── IMAGE UPLOAD ── */
+.upload-area{border:2px dashed var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:.18s;min-height:110px;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;}
+.upload-area:hover{border-color:var(--teal-400);background:var(--teal-50);}
+.upload-area.has-image{border-style:solid;border-color:var(--teal-200);}
+.upload-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px;pointer-events:none;}
+.upload-icon{font-size:28px;opacity:.45;}
+.upload-label{font-size:13px;font-weight:600;color:var(--text-sec);}
+.upload-sub{font-size:11.5px;color:var(--text-muted);}
+.upload-preview{width:100%;height:140px;position:relative;display:none;}
+.upload-preview.show{display:block;}
+.upload-preview img{width:100%;height:100%;object-fit:cover;}
+.upload-remove{position:absolute;top:8px;left:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+
+/* ── MOSQUE SEARCH ── */
+.mosque-search-wrap{position:relative;}
+.mosque-search-input{height:44px;padding:0 14px 0 44px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;color:var(--text);outline:none;transition:.18s;direction:rtl;width:100%;}
+.mosque-search-input::placeholder{color:var(--text-muted);}
+.mosque-search-input:focus{border-color:var(--teal-400);background:var(--surface);box-shadow:0 0 0 3px rgba(29,158,117,.1);}
+.mosque-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
+.mosque-dropdown{position:absolute;top:calc(100% + 6px);right:0;left:0;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;overflow:hidden;max-height:280px;overflow-y:auto;display:none;}
+.mosque-dropdown.open{display:block;animation:dropIn .18s ease;}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.mosque-dropdown::-webkit-scrollbar{width:4px;}
+.mosque-dropdown::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:100px;}
+.mosque-item{padding:12px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.mosque-item:hover{background:var(--teal-50);}
+.mosque-item:last-child{border-bottom:none;}
+.mosque-item-name{font-size:14px;font-weight:600;color:var(--text);}
+.mosque-item-loc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.mosque-item-gov{font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--gray-100);color:var(--gray-600);white-space:nowrap;}
+.mosque-add-new-row{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--teal-600);font-size:13px;font-weight:700;background:var(--teal-50);transition:.15s;}
+.mosque-add-new-row:hover{background:var(--teal-100);}
+.mosque-no-results{padding:20px 16px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+/* ── SELECTED MOSQUE ── */
+.selected-mosque{background:var(--teal-50);border:1.5px solid var(--teal-100);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:fadeIn .2s ease;}
+.selected-mosque-info{}
+.selected-mosque-name{font-size:15px;font-weight:700;color:var(--teal-800);}
+.selected-mosque-loc{font-size:12.5px;color:var(--teal-600);margin-top:2px;}
+.btn-deselect{background:rgba(15,110,86,.12);border:none;color:var(--teal-600);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.18s;flex-shrink:0;}
+.btn-deselect:hover{background:rgba(15,110,86,.22);}
+
+/* ── NEW MOSQUE FORM ── */
+.new-mosque-section{border:1.5px dashed var(--teal-100);border-radius:var(--r-lg);padding:20px;background:var(--teal-50);margin-top:16px;animation:expandIn .25s ease;}
+@keyframes expandIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.new-mosque-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.new-mosque-title{font-size:14px;font-weight:700;color:var(--teal-800);}
+.new-mosque-sub{font-size:12px;color:var(--teal-600);margin-top:2px;}
+.btn-cancel-new{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:2px;}
+
+/* ── DUPLICATE WARNING ── */
+.dup-warning{background:#FEF9EC;border:1.5px solid var(--amber-100);border-right:3px solid var(--amber-200);border-radius:var(--r-md);padding:12px 16px;display:none;gap:10px;align-items:flex-start;margin-top:12px;}
+.dup-warning.show{display:flex;animation:fadeIn .2s ease;}
+.dup-warning-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.dup-warning-text{}
+.dup-warning-title{font-size:13px;font-weight:700;color:var(--amber-400);}
+.dup-warning-sub{font-size:12px;color:var(--gray-600);margin-top:2px;line-height:1.5;}
+.btn-proceed{background:none;border:none;color:var(--teal-600);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0;margin-top:6px;text-decoration:underline;}
+
+/* ── SUBMIT AREA ── */
+.submit-area{margin-top:8px;}
+.visitor-notice{background:var(--amber-50);border:1.5px solid var(--amber-100);border-right:3px solid var(--amber-200);border-radius:var(--r-md);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-800);line-height:1.6;display:none;}
+.visitor-notice.show{display:block;}
+.btn-submit-main{width:100%;height:52px;background:var(--teal-600);color:#fff;border:none;border-radius:var(--r-lg);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-submit-main:hover{background:var(--teal-800);}
+.btn-submit-main:active{transform:scale(.99);}
+.submit-footnote{text-align:center;font-size:12px;color:var(--text-muted);margin-top:10px;}
+
+/* ── SUCCESS STATE ── */
+.success-state{max-width:680px;margin:0 auto;padding:40px 24px 80px;display:none;}
+.success-state.show{display:block;animation:fadeInUp .4s ease;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.success-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);overflow:hidden;}
+.success-header{padding:32px 32px 24px;text-align:center;}
+.success-icon-wrap{width:72px;height:72px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.success-icon-wrap.volunteer-mode{background:var(--teal-50);}
+.success-icon-wrap.visitor-mode{background:var(--amber-50);}
+.success-headline{font-size:22px;font-weight:800;margin-bottom:8px;}
+.success-headline.volunteer-mode{color:var(--teal-800);}
+.success-headline.visitor-mode{color:var(--amber-400);}
+.success-desc{font-size:14px;color:var(--text-sec);line-height:1.7;}
+.success-book-card{margin:0 24px;background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;display:flex;gap:14px;align-items:center;}
+.success-book-avatar{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0;}
+.success-book-title{font-size:16px;font-weight:700;}
+.success-book-meta{font-size:12.5px;color:var(--text-sec);margin-top:3px;}
+.success-steps{margin:20px 24px 0;display:flex;flex-direction:column;gap:10px;}
+.success-step{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);}
+.success-step-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.success-step-icon.done{background:var(--teal-50);}
+.success-step-icon.pending-icon{background:var(--amber-50);}
+.success-step-icon.next{background:var(--gray-100);}
+.success-step-text{font-size:13px;color:var(--text-sec);}
+.success-step-text strong{color:var(--text);font-weight:700;}
+.success-actions{padding:20px 24px 24px;display:flex;gap:10px;}
+.btn-success-primary{flex:1;height:46px;background:var(--teal-600);color:#fff;border:none;border-radius:var(--r-md);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.18s;}
+.btn-success-primary:hover{background:var(--teal-800);}
+.btn-success-ghost{flex:1;height:46px;background:none;color:var(--text-sec);border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:.18s;}
+.btn-success-ghost:hover{background:var(--gray-100);}
+
+/* ── UTILS ── */
+.hidden{display:none!important;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+/* category colors */
+.cat-فقه{background:var(--teal-50);color:var(--teal-800);}
+.cat-حديث{background:var(--blue-50);color:var(--blue-800);}
+.cat-تفسير{background:var(--purple-50);color:var(--purple-800);}
+.cat-سيرة{background:var(--coral-50);color:var(--coral-800);}
+.cat-عقيدة{background:var(--amber-50);color:var(--amber-800);}
+.cat-تزكية{background:var(--green-50);color:var(--green-800);}
+.cat-أدب{background:var(--pink-50);color:var(--pink-800);}
+.cat-تاريخ{background:var(--gray-100);color:var(--gray-800);}
+.cat-أخرى{background:var(--gray-100);color:var(--gray-800);}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="browse.html" class="nav-brand">
+      <div class="brand-mark">ر</div>
+      <div>
+        <div class="brand-name">على رفوف المساجد</div>
+        <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="browse.html" class="nav-link">تصفح</a>
+      <a href="#" class="nav-link active">تسجيل كتاب</a>
+      <a href="#" class="nav-link">عن المنصة</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-nav-login">أحمد محمود ▾</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ PROTOTYPE ROLE SWITCHER ═══ -->
+<div class="role-bar" role="note" aria-label="أداة النموذج الأولي">
+  <span class="role-note">🛠 أداة النموذج الأولي:</span>
+  <span class="role-bar-label">تسجيل الدخول كـ</span>
+  <div class="role-tabs">
+    <button class="role-tab" id="tab-visitor" onclick="setRole('visitor')">زائر مسجّل</button>
+    <button class="role-tab active" id="tab-volunteer" onclick="setRole('volunteer')">متطوع</button>
+  </div>
+  <span class="role-note" id="role-note-text">الإضافة فورية بدون مراجعة</span>
+</div>
+
+<!-- ═══ PAGE HEADER ═══ -->
+<div class="page-header">
+  <nav class="breadcrumb" aria-label="مسار التنقل">
+    <a href="browse.html">تصفح الكتب</a>
+    <span class="breadcrumb-sep">›</span>
+    <span>تسجيل كتاب</span>
+  </nav>
+  <h1 class="page-title">تسجيل كتاب جديد</h1>
+  <p class="page-sub" id="page-sub">أضف كتاباً وجدته في مسجد لتتمكن المجتمع من اكتشافه</p>
+  <div class="role-badge volunteer" id="role-badge">
+    <div class="role-badge-dot"></div>
+    <span id="role-badge-text">متطوع — الإضافة فورية</span>
+  </div>
+</div>
+
+<!-- ═══ FORM ═══ -->
+<form class="form-wrap" id="submit-form" novalidate onsubmit="handleSubmit(event)">
+
+  <!-- Section 1: Book Info -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="section-num" aria-hidden="true">١</div>
+      <div>
+        <div class="section-title">معلومات الكتاب</div>
+        <div class="section-sub">الحقول المطلوبة مشار إليها بـ *</div>
+      </div>
+    </div>
+    <div class="form-card-body">
+
+      <!-- Title -->
+      <div class="field">
+        <label class="field-label" for="f-title">عنوان الكتاب <span class="field-req">*</span></label>
+        <input class="field-input" id="f-title" type="text" placeholder="مثال: فقه السنة" autocomplete="off" oninput="checkDuplicate()">
+        <span class="field-error" id="err-title">يرجى إدخال عنوان الكتاب</span>
+      </div>
+
+      <!-- Author + Category -->
+      <div class="form-grid-2">
+        <div class="field">
+          <label class="field-label" for="f-author">اسم المؤلف</label>
+          <input class="field-input" id="f-author" type="text" placeholder="مثال: السيد سابق">
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-category">التصنيف</label>
+          <select class="field-input field-select" id="f-category">
+            <option value="">اختر تصنيفاً...</option>
+            <option value="فقه">فقه</option>
+            <option value="حديث">حديث</option>
+            <option value="تفسير">تفسير</option>
+            <option value="سيرة">سيرة</option>
+            <option value="عقيدة">عقيدة</option>
+            <option value="تزكية">تزكية</option>
+            <option value="أدب">أدب</option>
+            <option value="تاريخ">تاريخ</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Edition + Publisher -->
+      <div class="form-grid-2">
+        <div class="field">
+          <label class="field-label" for="f-edition">رقم الطبعة</label>
+          <input class="field-input" id="f-edition" type="text" placeholder="مثال: الطبعة الثالثة">
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-publisher">دار النشر</label>
+          <input class="field-input" id="f-publisher" type="text" placeholder="مثال: دار الفكر">
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="field">
+        <label class="field-label" for="f-notes">ملاحظات إضافية</label>
+        <textarea class="field-input field-textarea" id="f-notes" placeholder="وصف مختصر عن الكتاب، حالته، أو أي معلومات مفيدة للقراء..."></textarea>
+      </div>
+
+      <!-- Book image upload -->
+      <div class="field">
+        <label class="field-label">صورة الكتاب</label>
+        <p class="field-hint">اختياري · يُفضَّل صورة الغلاف لتسهيل التعرف عليه</p>
+        <div class="upload-area" id="book-upload-area" role="button" tabindex="0" aria-label="رفع صورة الكتاب" onclick="document.getElementById('book-img-input').click()">
+          <input type="file" id="book-img-input" accept="image/jpeg,image/png,image/webp" hidden onchange="previewImage(this,'book-preview','book-preview-img','book-upload-area')">
+          <div class="upload-placeholder" id="book-upload-ph">
+            <div class="upload-icon">📷</div>
+            <p class="upload-label">انقر لرفع صورة الغلاف</p>
+            <p class="upload-sub">JPEG · PNG · WebP · أقصى حجم 5MB</p>
+          </div>
+          <div class="upload-preview" id="book-preview">
+            <img src="" alt="صورة الكتاب" id="book-preview-img">
+            <button type="button" class="upload-remove" onclick="removeImage(event,'book-img-input','book-preview','book-upload-area','book-upload-ph')" aria-label="إزالة الصورة">✕</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /form-card -->
+
+  <!-- Section 2: Mosque -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="section-num" aria-hidden="true">٢</div>
+      <div>
+        <div class="section-title">المسجد الذي يحتوي على الكتاب</div>
+        <div class="section-sub">ابحث أولاً — إذا لم تجد المسجد يمكنك إضافته</div>
+      </div>
+    </div>
+    <div class="form-card-body">
+
+      <!-- Mosque search -->
+      <div class="field" id="mosque-search-field">
+        <label class="field-label" for="mosque-search">ابحث عن المسجد <span class="field-req">*</span></label>
+        <div class="mosque-search-wrap">
+          <span class="mosque-search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input type="text" class="mosque-search-input" id="mosque-search"
+            placeholder="ابحث بالاسم أو المدينة أو المحافظة..."
+            autocomplete="off" oninput="onMosqueSearch(this.value)" onfocus="onMosqueSearch(this.value)">
+          <div class="mosque-dropdown" id="mosque-dropdown" role="listbox" aria-label="نتائج البحث عن المساجد"></div>
+        </div>
+        <span class="field-error" id="err-mosque">يرجى اختيار مسجد أو إضافة مسجد جديد</span>
+      </div>
+
+      <!-- Selected mosque display -->
+      <div class="selected-mosque hidden" id="selected-mosque-card" role="status">
+        <div class="selected-mosque-info">
+          <div class="selected-mosque-name" id="sel-mosque-name">—</div>
+          <div class="selected-mosque-loc" id="sel-mosque-loc">—</div>
+        </div>
+        <button type="button" class="btn-deselect" onclick="deselectMosque()" aria-label="إلغاء اختيار المسجد">✕</button>
+      </div>
+
+      <!-- Duplicate warning -->
+      <div class="dup-warning" id="dup-warning" role="alert">
+        <span class="dup-warning-icon">⚠️</span>
+        <div class="dup-warning-text">
+          <p class="dup-warning-title">هذا الكتاب مسجّل بالفعل في هذا المسجد</p>
+          <p class="dup-warning-sub">يبدو أن هناك إدخالاً موجوداً بهذا العنوان في نفس المسجد. يمكنك المتابعة إذا كانت نسختك مختلفة (طبعة مختلفة مثلاً).</p>
+          <button type="button" class="btn-proceed">متابعة على أي حال</button>
+        </div>
+      </div>
+
+      <!-- New mosque form -->
+      <div class="new-mosque-section hidden" id="new-mosque-section">
+        <div class="new-mosque-header">
+          <div>
+            <p class="new-mosque-title">🕌 إضافة مسجد جديد</p>
+            <p class="new-mosque-sub">لم يُسجَّل هذا المسجد بعد في المنصة</p>
+          </div>
+          <button type="button" class="btn-cancel-new" onclick="cancelNewMosque()" aria-label="إلغاء إضافة مسجد جديد">✕</button>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label class="field-label" for="nm-gov">المحافظة <span class="field-req">*</span></label>
+            <select class="field-input field-select" id="nm-gov" onchange="updateNmCities(this.value)">
+              <option value="">اختر المحافظة...</option>
+              <option>المنيا</option><option>القاهرة</option><option>الإسكندرية</option>
+              <option>أسيوط</option><option>سوهاج</option><option>الجيزة</option>
+              <option>الشرقية</option><option>الدقهلية</option><option>المنوفية</option>
+              <option>الفيوم</option><option>بني سويف</option><option>قنا</option>
+              <option>الأقصر</option><option>أسوان</option>
+            </select>
+            <span class="field-error" id="err-nm-gov">يرجى اختيار المحافظة</span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="nm-city">المدينة / المركز <span class="field-req">*</span></label>
+            <select class="field-input field-select" id="nm-city">
+              <option value="">اختر المحافظة أولاً...</option>
+            </select>
+            <span class="field-error" id="err-nm-city">يرجى اختيار المدينة</span>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:16px;">
+          <label class="field-label" for="nm-name">اسم المسجد</label>
+          <p class="field-hint">اختياري — كثير من المساجد في مصر لا تحمل اسماً رسمياً</p>
+          <input class="field-input" id="nm-name" type="text" placeholder="مثال: مسجد النور">
+        </div>
+
+        <div class="field">
+          <label class="field-label">صورة المسجد</label>
+          <p class="field-hint">اختياري · تساعد القراء على التعرف عليه</p>
+          <div class="upload-area" id="mosque-upload-area" style="min-height:90px;" role="button" tabindex="0" aria-label="رفع صورة المسجد" onclick="document.getElementById('mosque-img-input').click()">
+            <input type="file" id="mosque-img-input" accept="image/jpeg,image/png,image/webp" hidden onchange="previewImage(this,'mosque-preview','mosque-preview-img','mosque-upload-area')">
+            <div class="upload-placeholder" id="mosque-upload-ph">
+              <div class="upload-icon" style="font-size:22px;">🕌</div>
+              <p class="upload-label" style="font-size:12.5px;">انقر لرفع صورة المسجد</p>
+              <p class="upload-sub">اختياري · أقصى حجم 5MB</p>
+            </div>
+            <div class="upload-preview" id="mosque-preview">
+              <img src="" alt="صورة المسجد" id="mosque-preview-img">
+              <button type="button" class="upload-remove" onclick="removeImage(event,'mosque-img-input','mosque-preview','mosque-upload-area','mosque-upload-ph')" aria-label="إزالة الصورة">✕</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /new-mosque-section -->
+
+    </div>
+  </div><!-- /form-card -->
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <div class="visitor-notice" id="visitor-notice">
+      <strong>ملاحظة:</strong> بما أنك مسجّل كزائر، سيُرسَل طلبك إلى فريق المراجعة قبل نشره للعموم. ستجد حالة طلبك في ملفك الشخصي.
+    </div>
+    <button type="submit" class="btn-submit-main">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      <span id="submit-label">تسجيل الكتاب</span>
+    </button>
+    <p class="submit-footnote">بالإرسال فأنت تقر بأن المعلومات صحيحة وأن الكتاب موجود فعلاً في المسجد المذكور</p>
+  </div>
+
+</form>
+
+<!-- ═══ SUCCESS STATE ═══ -->
+<div class="success-state" id="success-state">
+  <div class="success-card">
+    <div class="success-header">
+      <div class="success-icon-wrap" id="s-icon-wrap">
+        <span id="s-icon"></span>
+      </div>
+      <h2 class="success-headline" id="s-headline"></h2>
+      <p class="success-desc" id="s-desc"></p>
+    </div>
+
+    <!-- Submitted book summary -->
+    <div class="success-book-card" id="s-book-card">
+      <div class="success-book-avatar cat-فقه" id="s-avatar">ف</div>
+      <div>
+        <p class="success-book-title" id="s-book-title"></p>
+        <p class="success-book-meta" id="s-book-meta"></p>
+      </div>
+    </div>
+
+    <!-- Steps (different per role) -->
+    <div class="success-steps" id="s-steps"></div>
+
+    <div class="success-actions">
+      <button class="btn-success-ghost" onclick="resetForm()">تسجيل كتاب آخر</button>
+      <button class="btn-success-primary" onclick="window.location.href='browse.html'">تصفح الكتب</button>
+    </div>
+  </div>
+</div>
+
+<footer style="background:var(--teal-900);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:13px;">
+  <strong style="color:rgba(255,255,255,.8);">على رفوف المساجد</strong> — مبادرة مجتمعية مفتوحة
+</footer>
+
+<script>
+// ═══════════ DATA ═══════════
+
+const CITIES = {
+  'المنيا':['مدينة المنيا','ملوي','سمالوط','مغاغة','بني مزار','المطاهرة','أبو قرقاص'],
+  'القاهرة':['مدينة نصر','المعادي','الزيتون','شبرا','حلوان','مصر الجديدة','العباسية','الدراسة'],
+  'الإسكندرية':['المنتزه','سيدي بشر','اللبان','كرموز','العجمي','برج العرب','أبو قير'],
+  'أسيوط':['مدينة أسيوط','ديروط','القوصية','البداري','أبو تيج','منفلوط'],
+  'سوهاج':['مدينة سوهاج','أخميم','طهطا','جرجا','دار السلام','المراغة'],
+  'الجيزة':['مدينة الجيزة','العياط','أطفيح','الصف','البدرشين','الحوامدية'],
+  'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','ميت غمر','منيا القمح'],
+  'الدقهلية':['المنصورة','طلخا','بلقاس','أجا','السنبلاوين'],
+  'المنوفية':['شبين الكوم','منوف','السادات','قويسنا'],
+  'الفيوم':['مدينة الفيوم','سنورس','يوسف الصديق','إطسا'],
+  'بني سويف':['مدينة بني سويف','الواسطى','ناصر','إهناسيا'],
+  'قنا':['مدينة قنا','نجع حمادي','دشنا','قوص'],
+  'الأقصر':['مدينة الأقصر','أرمنت','إسنا','الزينية'],
+  'أسوان':['مدينة أسوان','كوم أمبو','إدفو','نصر النوبة'],
+};
+
+const MOSQUES = [
+  {id:1, name:'مسجد النور',     city:'مدينة المنيا', gov:'المنيا'},
+  {id:2, name:'مسجد الرحمة',   city:'ملوي',          gov:'المنيا'},
+  {id:3, name:'مسجد الأنصار',  city:'مدينة أسيوط',  gov:'أسيوط'},
+  {id:4, name:'مسجد التوحيد',  city:'مدينة نصر',    gov:'القاهرة'},
+  {id:5, name:'مسجد السلام',   city:'المعادي',       gov:'القاهرة'},
+  {id:6, name:'مسجد الهداية',  city:'سمالوط',        gov:'المنيا'},
+  {id:7, name:'مسجد الإيمان',  city:'سيدي بشر',     gov:'الإسكندرية'},
+  {id:8, name:'مسجد عمر',      city:'الزيتون',       gov:'القاهرة'},
+  {id:9, name:'مسجد الفتح',    city:'المنتزه',       gov:'الإسكندرية'},
+  {id:10,name:'مسجد الصحابة',  city:'مغاغة',         gov:'المنيا'},
+  {id:11,name:'مسجد الرسالة',  city:'مدينة سوهاج',  gov:'سوهاج'},
+];
+
+// Known duplicates for demo
+const KNOWN_DUPS = [
+  {title:'فقه السنة', mosqueId:1},
+  {title:'رياض الصالحين', mosqueId:2},
+  {title:'تفسير ابن كثير', mosqueId:6},
+];
+
+// ═══════════ STATE ═══════════
+
+let role = 'volunteer';
+let selectedMosque = null;
+let addingNewMosque = false;
+let dupOverridden = false;
+
+// ═══════════ ROLE ═══════════
+
+function setRole(r) {
+  role = r;
+  document.getElementById('tab-visitor').classList.toggle('active', r==='visitor');
+  document.getElementById('tab-volunteer').classList.toggle('active', r==='volunteer');
+  const badge = document.getElementById('role-badge');
+  const badgeText = document.getElementById('role-badge-text');
+  const note = document.getElementById('role-note-text');
+  const submitLabel = document.getElementById('submit-label');
+  const visitorNotice = document.getElementById('visitor-notice');
+  if (r==='volunteer') {
+    badge.className='role-badge volunteer';
+    badgeText.textContent='متطوع — الإضافة فورية';
+    note.textContent='الإضافة فورية بدون مراجعة';
+    submitLabel.textContent='تسجيل الكتاب';
+    visitorNotice.classList.remove('show');
+  } else {
+    badge.className='role-badge visitor';
+    badgeText.textContent='زائر مسجّل — يحتاج مراجعة';
+    note.textContent='الطلب سيُرسَل للمراجعة';
+    submitLabel.textContent='إرسال طلب التسجيل';
+    visitorNotice.classList.add('show');
+  }
+}
+setRole('volunteer');
+
+// ═══════════ IMAGE UPLOAD ═══════════
+
+function previewImage(input, previewId, imgId, areaId) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('حجم الصورة يتجاوز 5MB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById(imgId).src = e.target.result;
+    document.getElementById(previewId).classList.add('show');
+    const ph = document.getElementById(areaId).querySelector('.upload-placeholder');
+    if (ph) ph.style.display='none';
+    document.getElementById(areaId).classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(evt, inputId, previewId, areaId, phId) {
+  evt.stopPropagation();
+  document.getElementById(inputId).value='';
+  document.getElementById(previewId).classList.remove('show');
+  document.getElementById(areaId).classList.remove('has-image');
+  const ph = document.getElementById(phId || areaId.replace('-area','') + '-ph');
+  if (ph) ph.style.display='';
+  // Also find by looking in area
+  const area = document.getElementById(areaId);
+  const placeholder = area.querySelector('.upload-placeholder');
+  if (placeholder) placeholder.style.display='';
+}
+
+// ═══════════ MOSQUE SEARCH ═══════════
+
+function onMosqueSearch(query) {
+  if (selectedMosque) return;
+  const dropdown = document.getElementById('mosque-dropdown');
+  const q = query.trim();
+
+  const matches = q ? MOSQUES.filter(m =>
+    m.name.includes(q) || m.city.includes(q) || m.gov.includes(q)
+  ) : MOSQUES;
+
+  let html = '';
+  if (matches.length) {
+    html = matches.map(m => `
+      <div class="mosque-item" role="option" tabindex="0"
+        onclick="selectMosque(${m.id})"
+        onkeydown="if(event.key==='Enter')selectMosque(${m.id})">
+        <div>
+          <div class="mosque-item-name">${m.name}</div>
+          <div class="mosque-item-loc">${m.city}، محافظة ${m.gov}</div>
+        </div>
+        <span class="mosque-item-gov">${m.gov}</span>
+      </div>
+    `).join('');
+  } else {
+    html = `<div class="mosque-no-results">لا توجد نتائج لـ "${q}"</div>`;
+  }
+  html += `
+    <div class="mosque-add-new-row" onclick="showNewMosqueForm()" role="option" tabindex="0">
+      <span>＋</span> إضافة مسجد جديد غير موجود في القائمة
+    </div>
+  `;
+  dropdown.innerHTML = html;
+  dropdown.classList.add('open');
+}
+
+function selectMosque(id) {
+  const m = MOSQUES.find(x => x.id===id);
+  if (!m) return;
+  selectedMosque = m;
+  addingNewMosque = false;
+  document.getElementById('mosque-dropdown').classList.remove('open');
+  document.getElementById('mosque-search').value = '';
+
+  document.getElementById('mosque-search-field').classList.add('hidden');
+  document.getElementById('new-mosque-section').classList.add('hidden');
+
+  const card = document.getElementById('selected-mosque-card');
+  document.getElementById('sel-mosque-name').textContent = '🕌 ' + m.name;
+  document.getElementById('sel-mosque-loc').textContent = m.city + '، محافظة ' + m.gov;
+  card.classList.remove('hidden');
+
+  document.getElementById('err-mosque').classList.remove('show');
+  checkDuplicate();
+}
+
+function deselectMosque() {
+  selectedMosque = null;
+  document.getElementById('selected-mosque-card').classList.add('hidden');
+  document.getElementById('mosque-search-field').classList.remove('hidden');
+  document.getElementById('dup-warning').classList.remove('show');
+  document.getElementById('mosque-search').value = '';
+  document.getElementById('mosque-search').focus();
+}
+
+function showNewMosqueForm() {
+  addingNewMosque = true;
+  selectedMosque = null;
+  document.getElementById('mosque-dropdown').classList.remove('open');
+  document.getElementById('selected-mosque-card').classList.add('hidden');
+  document.getElementById('new-mosque-section').classList.remove('hidden');
+  document.getElementById('err-mosque').classList.remove('show');
+  document.getElementById('dup-warning').classList.remove('show');
+  document.getElementById('mosque-search').value = '';
+}
+
+function cancelNewMosque() {
+  addingNewMosque = false;
+  document.getElementById('new-mosque-section').classList.add('hidden');
+  document.getElementById('mosque-search-field').classList.remove('hidden');
+}
+
+function updateNmCities(gov) {
+  const sel = document.getElementById('nm-city');
+  const cities = CITIES[gov] || [];
+  sel.innerHTML = cities.length
+    ? cities.map(c=>`<option value="${c}">${c}</option>`).join('')
+    : '<option value="">لا توجد مدن</option>';
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.mosque-search-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('mosque-dropdown').classList.remove('open');
+  }
+});
+
+// ═══════════ DUPLICATE CHECK ═══════════
+
+function checkDuplicate() {
+  if (dupOverridden) return;
+  const title = document.getElementById('f-title').value.trim();
+  const mid = selectedMosque ? selectedMosque.id : null;
+  const isDup = KNOWN_DUPS.some(d => title.includes(d.title) && d.mosqueId === mid);
+  document.getElementById('dup-warning').classList.toggle('show', isDup);
+}
+
+document.querySelector('.btn-proceed')?.addEventListener('click', () => {
+  dupOverridden = true;
+  document.getElementById('dup-warning').classList.remove('show');
+});
+
+// ═══════════ FORM VALIDATION ═══════════
+
+function validate() {
+  let ok = true;
+  const title = document.getElementById('f-title').value.trim();
+  const errTitle = document.getElementById('err-title');
+  const errMosque = document.getElementById('err-mosque');
+
+  if (!title) {
+    errTitle.classList.add('show');
+    document.getElementById('f-title').classList.add('error');
+    ok = false;
+  } else {
+    errTitle.classList.remove('show');
+    document.getElementById('f-title').classList.remove('error');
+  }
+
+  const hasMosque = selectedMosque !== null;
+  const hasNewMosque = addingNewMosque;
+  if (!hasMosque && !hasNewMosque) {
+    errMosque.classList.add('show');
+    ok = false;
+  } else {
+    errMosque.classList.remove('show');
+  }
+
+  if (hasNewMosque) {
+    const gov = document.getElementById('nm-gov').value;
+    const city = document.getElementById('nm-city').value;
+    const errG = document.getElementById('err-nm-gov');
+    const errC = document.getElementById('err-nm-city');
+    if (!gov) { errG.classList.add('show'); ok = false; } else errG.classList.remove('show');
+    if (!city) { errC.classList.add('show'); ok = false; } else errC.classList.remove('show');
+  }
+
+  return ok;
+}
+
+// ═══════════ SUBMIT ═══════════
+
+function handleSubmit(e) {
+  e.preventDefault();
+  if (!validate()) {
+    document.querySelector('.field-error.show')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  const title   = document.getElementById('f-title').value.trim();
+  const author  = document.getElementById('f-author').value.trim();
+  const cat     = document.getElementById('f-category').value;
+  const mosque  = selectedMosque
+    ? selectedMosque.name + ' · ' + selectedMosque.city
+    : (document.getElementById('nm-name').value.trim() || 'مسجد جديد') +
+      ' · ' + document.getElementById('nm-city').value;
+
+  showSuccess(title, author, cat, mosque);
+}
+
+function showSuccess(title, author, cat, mosque) {
+  document.getElementById('submit-form').style.display = 'none';
+  document.getElementById('page-header') && (document.querySelector('.page-header').style.display='none');
+
+  const isVol = role === 'volunteer';
+  const ss = document.getElementById('success-state');
+
+  // Icon
+  const iw = document.getElementById('s-icon-wrap');
+  iw.className = 'success-icon-wrap ' + (isVol ? 'volunteer-mode' : 'visitor-mode');
+  document.getElementById('s-icon').textContent = isVol ? '✅' : '⏳';
+
+  // Headline
+  const hl = document.getElementById('s-headline');
+  hl.className = 'success-headline ' + (isVol ? 'volunteer-mode' : 'visitor-mode');
+  hl.textContent = isVol ? 'تم تسجيل الكتاب بنجاح!' : 'طلبك قيد المراجعة';
+
+  // Desc
+  document.getElementById('s-desc').textContent = isVol
+    ? 'الكتاب متاح الآن للعموم في صفحة التصفح. شكراً على مساهمتك!'
+    : 'سيراجع فريقنا طلبك ويُنشره خلال 24–48 ساعة. يمكنك متابعة حالته من ملفك الشخصي.';
+
+  // Book card
+  const firstLetter = title ? title[0] : '؟';
+  const avatar = document.getElementById('s-avatar');
+  avatar.textContent = firstLetter;
+  avatar.className = 'success-book-avatar ' + (cat ? 'cat-'+cat : 'cat-أخرى');
+  document.getElementById('s-book-title').textContent = title;
+  document.getElementById('s-book-meta').textContent =
+    [author||'مؤلف غير محدد', cat||'—', mosque].filter(Boolean).join(' · ');
+
+  // Steps
+  const stepsEl = document.getElementById('s-steps');
+  if (isVol) {
+    stepsEl.innerHTML = `
+      <div class="success-step">
+        <div class="success-step-icon done">✅</div>
+        <div class="success-step-text"><strong>تم التسجيل</strong> — الكتاب ظهر فوراً في صفحة التصفح</div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-icon next">📚</div>
+        <div class="success-step-text"><strong>هل وجدت كتاباً آخر؟</strong> يمكنك تسجيل المزيد من الكتب</div>
+      </div>
+    `;
+  } else {
+    stepsEl.innerHTML = `
+      <div class="success-step">
+        <div class="success-step-icon done">✅</div>
+        <div class="success-step-text"><strong>استُلم الطلب</strong> — تم حفظ بياناتك بنجاح</div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-icon pending-icon">🔍</div>
+        <div class="success-step-text"><strong>قيد المراجعة</strong> — سيراجع فريقنا الطلب قريباً</div>
+      </div>
+      <div class="success-step">
+        <div class="success-step-icon next">🌍</div>
+        <div class="success-step-text"><strong>النشر</strong> — سيظهر الكتاب للعموم بعد الموافقة</div>
+      </div>
+    `;
+  }
+
+  ss.classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetForm() {
+  document.getElementById('submit-form').reset();
+  document.getElementById('submit-form').style.display = '';
+  document.querySelector('.page-header').style.display = '';
+  document.getElementById('success-state').classList.remove('show');
+  selectedMosque = null;
+  addingNewMosque = false;
+  dupOverridden = false;
+  document.getElementById('selected-mosque-card').classList.add('hidden');
+  document.getElementById('mosque-search-field').classList.remove('hidden');
+  document.getElementById('new-mosque-section').classList.add('hidden');
+  document.getElementById('dup-warning').classList.remove('show');
+  document.getElementById('book-preview').classList.remove('show');
+  document.getElementById('book-upload-area').classList.remove('has-image');
+  document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.field-input.error').forEach(e=>e.classList.remove('error'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
