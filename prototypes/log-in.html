@@ -4,29 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0B1F14">
+    <meta name="description" content="على رفوف المساجد — منصة فهرسة كتب مساجد مصر">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>على رفوف المساجد — الدخول</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+
     <style>
+        /* ═══════════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════════ */
         :root {
+            /* Palette */
             --ink: #0B1F14;
             --ink-mid: #1C3D28;
             --ink-soft: #2C5A3C;
+            --ink-light: #3D7A52;
             --gold: #C49A3C;
             --gold-mid: #D4B060;
             --gold-pale: #EDD898;
+            --gold-dim: rgba(196, 154, 60, .18);
             --cream: #FDF8EE;
             --cream-b: #F5EDD8;
             --cream-bb: #EDE0C4;
             --border: #D8CBAA;
+            --border-focus: #C49A3C;
             --text: #2A1E0C;
             --muted: #8A7A5C;
+            --error: #B5341A;
+            --error-glow: rgba(181, 52, 26, .12);
+            --success: #2C5A3C;
+
+            /* Radii */
             --r: 10px;
+            --r-lg: 16px;
+            --r-xl: 22px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, .08), 0 2px 6px rgba(0, 0, 0, .05);
+            --shadow-gold: 0 0 0 3px rgba(196, 154, 60, .18);
+            --shadow-form: 0 24px 64px rgba(11, 31, 20, .10), 0 8px 24px rgba(11, 31, 20, .07);
+
+            /* Motion */
+            --ease-out-expo: cubic-bezier(.16, 1, .3, 1);
+            --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
         }
 
+        /* ═══════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════ */
         *,
         *::before,
         *::after {
@@ -41,395 +75,20 @@
             font-family: 'Noto Naskh Arabic', serif;
             direction: rtl;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ══════════════════════════════════════
-   LAYOUT
-══════════════════════════════════════ */
+        /* ═══════════════════════════════════════════════
+       PAGE LAYOUT
+    ═══════════════════════════════════════════════ */
         .page {
             display: flex;
             min-height: 100vh;
         }
 
-        /* ══════════════════════════════════════
-   FORM PANEL  (right side in RTL)
-══════════════════════════════════════ */
-        .form-panel {
-            flex: 1;
-            background: var(--cream);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 32px;
-            overflow-y: auto;
-            order: 1;
-            /* RTL: first visually = right side */
-        }
-
-        .form-box {
-            width: 100%;
-            max-width: 400px;
-            animation: riseIn .45s ease both;
-        }
-
-        @keyframes riseIn {
-            from {
-                opacity: 0;
-                transform: translateY(14px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ─── tabs ─── */
-        .tabs {
-            display: flex;
-            background: var(--cream-b);
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            padding: 4px;
-            gap: 4px;
-            margin-bottom: 30px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 9px;
-            border: none;
-            background: none;
-            border-radius: 9px;
-            font-family: 'Noto Naskh Arabic', serif;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all .22s;
-        }
-
-        .tab-btn.active {
-            background: white;
-            color: var(--text);
-            font-weight: 600;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
-        }
-
-        /* ─── heading ─── */
-        .form-heading {
-            font-family: 'Amiri', serif;
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 5px;
-            line-height: 1.4;
-        }
-
-        .form-sub {
-            font-size: 14px;
-            color: var(--muted);
-            margin-bottom: 26px;
-            line-height: 1.8;
-        }
-
-        /* ─── social buttons ─── */
-        .social-col {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-            margin-bottom: 20px;
-        }
-
-        .btn-oauth {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            height: 44px;
-            background: white;
-            border: 1.5px solid var(--border);
-            border-radius: var(--r);
-            font-family: 'Noto Naskh Arabic', serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            cursor: pointer;
-            transition: all .18s;
-            width: 100%;
-        }
-
-        .btn-oauth:hover {
-            border-color: #B0A080;
-            background: #FFFDF8;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-        }
-
-        .oauth-icon {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-        }
-
-        /* ─── divider ─── */
-        .or-line {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--muted);
-            font-size: 12px;
-            margin: 18px 0;
-        }
-
-        .or-line::before,
-        .or-line::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        /* ─── fields ─── */
-        .field {
-            margin-bottom: 15px;
-        }
-
-        .field-lbl {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 6px;
-        }
-
-        .req {
-            color: var(--gold);
-            margin-inline-start: 1px;
-        }
-
-        .field-wrap {
-            position: relative;
-        }
-
-        .field-input {
-            width: 100%;
-            height: 46px;
-            background: white;
-            border: 1.5px solid var(--border);
-            border-radius: var(--r);
-            padding: 0 14px;
-            font-family: 'Noto Naskh Arabic', serif;
-            font-size: 15px;
-            color: var(--text);
-            outline: none;
-            transition: border-color .18s, box-shadow .18s;
-        }
-
-        .field-input::placeholder {
-            color: #B8A88A;
-            font-size: 14px;
-        }
-
-        .field-input:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(196, 154, 60, .14);
-        }
-
-        .field-input.has-toggle {
-            padding-left: 42px;
-        }
-
-        .toggle-vis {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--muted);
-            padding: 4px;
-            line-height: 1;
-            font-size: 16px;
-            transition: color .18s;
-        }
-
-        .toggle-vis:hover {
-            color: var(--text);
-        }
-
-        /* location row */
-        .loc-wrap {
-            margin-bottom: 15px;
-        }
-
-        .loc-label-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 18px 0 12px;
-        }
-
-        .loc-label-row::before,
-        .loc-label-row::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        .loc-label-text {
-            font-size: 12px;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-
-        .loc-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .field-select {
-            width: 100%;
-            height: 46px;
-            background: white;
-            border: 1.5px solid var(--border);
-            border-radius: var(--r);
-            padding: 0 14px 0 32px;
-            font-family: 'Noto Naskh Arabic', serif;
-            font-size: 14px;
-            color: var(--text);
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7A5C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 12px center;
-            transition: border-color .18s;
-        }
-
-        .field-select:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(196, 154, 60, .14);
-        }
-
-        .field-select:disabled {
-            color: var(--muted);
-            background-color: var(--cream-b);
-        }
-
-        /* ─── submit ─── */
-        .btn-submit {
-            width: 100%;
-            height: 50px;
-            background: var(--ink);
-            color: white;
-            border: none;
-            border-radius: var(--r);
-            font-family: 'Noto Naskh Arabic', serif;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 4px;
-            transition: background .2s, transform .1s;
-            letter-spacing: .01em;
-        }
-
-        .btn-submit:hover {
-            background: var(--ink-soft);
-        }
-
-        .btn-submit:active {
-            transform: scale(.99);
-        }
-
-        /* gold underline accent on submit */
-        .btn-submit-wrap {
-            position: relative;
-        }
-
-        .btn-submit-wrap::after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 20px;
-            right: 20px;
-            height: 3px;
-            background: var(--gold);
-            border-radius: 0 0 4px 4px;
-            opacity: 0;
-            transition: opacity .2s;
-        }
-
-        .btn-submit-wrap:hover::after {
-            opacity: .7;
-        }
-
-        /* ─── footer ─── */
-        .form-footer {
-            text-align: center;
-            margin-top: 18px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .form-footer a {
-            color: var(--ink-soft);
-            font-weight: 600;
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color .18s;
-        }
-
-        .form-footer a:hover {
-            border-color: var(--gold);
-            color: var(--text);
-        }
-
-        /* ─── form state switching ─── */
-        .form-state {
-            display: none;
-        }
-
-        .form-state.active {
-            display: block;
-            animation: riseIn .3s ease both;
-        }
-
-        /* ─── error shake ─── */
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            20% {
-                transform: translateX(-7px);
-            }
-
-            40% {
-                transform: translateX(7px);
-            }
-
-            60% {
-                transform: translateX(-4px);
-            }
-
-            80% {
-                transform: translateX(4px);
-            }
-        }
-
-        .field-input.error {
-            border-color: #C0392B;
-            box-shadow: 0 0 0 3px rgba(192, 57, 43, .1);
-        }
-
-        /* ══════════════════════════════════════
-   BRAND PANEL  (left side in RTL)
-══════════════════════════════════════ */
+        /* ═══════════════════════════════════════════════
+       BRAND PANEL — Left side in RTL
+    ═══════════════════════════════════════════════ */
         .brand-panel {
             width: 44%;
             flex-shrink: 0;
@@ -444,23 +103,55 @@
             order: 2;
         }
 
-        /* ─ background pattern ─ */
-        .brand-panel .geo-bg {
+        /* Animated geometric pattern */
+        .geo-bg {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
-            opacity: .14;
+            opacity: .12;
             pointer-events: none;
+            animation: patternDrift 40s linear infinite;
+            transform-origin: center center;
         }
 
-        /* ─ vignette over pattern ─ */
-        .brand-panel::after {
+        @keyframes patternDrift {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.04) rotate(1.5deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* Layered radial vignette + gold ambient glow */
+        .brand-panel::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, rgba(11, 31, 20, .7));
+            background:
+                radial-gradient(ellipse 55% 55% at 50% 50%, rgba(196, 154, 60, .06) 0%, transparent 70%),
+                radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(11, 31, 20, .85));
             pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Bottom fade */
+        .brand-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(to top, rgba(11, 31, 20, .9), transparent);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .brand-inner {
@@ -470,52 +161,79 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0;
+            animation: brandReveal .9s var(--ease-out-expo) both;
         }
 
-        /* ─ ornament ─ */
+        @keyframes brandReveal {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Ornament with pulsing gold halo */
         .brand-ornament {
-            width: 64px;
-            height: 64px;
-            border: 1.5px solid rgba(212, 176, 96, .5);
-            border-radius: 14px;
+            width: 72px;
+            height: 72px;
+            border: 1.5px solid rgba(212, 176, 96, .45);
+            border-radius: var(--r-lg);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             position: relative;
         }
 
         .brand-ornament::before {
             content: '';
             position: absolute;
-            inset: 5px;
-            border: 1px solid rgba(212, 176, 96, .25);
+            inset: 6px;
+            border: 1px solid rgba(212, 176, 96, .22);
             border-radius: 8px;
             transform: rotate(45deg);
         }
 
+        /* Halo pulse */
+        .brand-ornament::after {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border-radius: 20px;
+            background: radial-gradient(ellipse at center, rgba(196, 154, 60, .18) 0%, transparent 70%);
+            animation: haloPulse 3.5s ease-in-out infinite;
+        }
+
+        @keyframes haloPulse {
+
+            0%,
+            100% {
+                opacity: .5;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
         .brand-ornament-letter {
             font-family: 'Amiri', serif;
-            font-size: 28px;
+            font-size: 32px;
             color: var(--gold-pale);
             line-height: 1;
             position: relative;
             z-index: 1;
         }
 
-        /* ─ gold rule ─ */
-        .gold-rule {
-            width: 48px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold-mid), transparent);
-            margin: 20px 0;
-        }
-
-        /* ─ title ─ */
         .brand-title {
             font-family: 'Amiri', serif;
-            font-size: 38px;
+            font-size: 42px;
             font-weight: 700;
             line-height: 1.55;
             color: var(--gold-pale);
@@ -523,31 +241,62 @@
             text-align: center;
         }
 
-        /* ─ tagline ─ */
+        .gold-rule {
+            width: 56px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-mid), transparent);
+            margin: 22px auto;
+        }
+
         .brand-tagline {
             font-family: 'Amiri', serif;
             font-style: italic;
-            font-size: 14px;
-            color: rgba(255, 255, 255, .38);
+            font-size: 15px;
+            color: rgba(255, 255, 255, .35);
             line-height: 2;
-            max-width: 260px;
+            max-width: 280px;
             text-align: center;
-            margin-top: 6px;
         }
 
-        /* ─ back link ─ */
+        /* Decorative line pair below tagline */
+        .brand-deco {
+            margin-top: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-deco-line {
+            width: 32px;
+            height: 1px;
+            background: rgba(196, 154, 60, .25);
+        }
+
+        .brand-deco-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(196, 154, 60, .4);
+        }
+
+        /* Browse without login link */
         .brand-back {
             position: absolute;
-            bottom: 28px;
+            bottom: 32px;
             left: 0;
             right: 0;
+            z-index: 3;
             text-align: center;
             font-family: 'Noto Naskh Arabic', serif;
-            font-size: 12.5px;
-            color: rgba(255, 255, 255, .3);
+            font-size: 13px;
+            color: rgba(255, 255, 255, .28);
             text-decoration: none;
             transition: color .2s;
-            letter-spacing: .02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            animation: brandReveal 1.1s var(--ease-out-expo) .3s both;
         }
 
         .brand-back:hover {
@@ -555,14 +304,644 @@
         }
 
         .brand-back svg {
-            vertical-align: -2px;
-            margin-inline-end: 5px;
+            flex-shrink: 0;
         }
 
-        /* ══════════════════════════════════════
-   MOBILE
-══════════════════════════════════════ */
-        @media (max-width: 700px) {
+        /* ═══════════════════════════════════════════════
+       FORM PANEL — Right side in RTL
+    ═══════════════════════════════════════════════ */
+        .form-panel {
+            flex: 1;
+            background: var(--cream);
+            /* Subtle parchment texture via noise gradient */
+            background-image:
+                radial-gradient(ellipse 120% 80% at 20% 0%, rgba(196, 154, 60, .04) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 100% at 80% 100%, rgba(44, 90, 60, .03) 0%, transparent 60%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 32px;
+            overflow-y: auto;
+            order: 1;
+        }
+
+        /* ═══════════════════════════════════════════════
+       FORM BOX
+    ═══════════════════════════════════════════════ */
+        .form-box {
+            width: 100%;
+            max-width: 420px;
+            animation: pageEnter .55s var(--ease-out-expo) both;
+        }
+
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════
+       TABS
+    ═══════════════════════════════════════════════ */
+        .tabs {
+            display: flex;
+            background: var(--cream-b);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 32px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            border-radius: 12px;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .22s var(--ease-out-expo);
+            position: relative;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--text);
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Gold underline indicator on active tab */
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        .tab-btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* ═══════════════════════════════════════════════
+       HEADING
+    ═══════════════════════════════════════════════ */
+        .form-heading {
+            font-family: 'Amiri', serif;
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .form-sub {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 28px;
+            line-height: 1.9;
+        }
+
+        /* ═══════════════════════════════════════════════
+       OAUTH BUTTONS
+    ═══════════════════════════════════════════════ */
+        .social-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .btn-oauth {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 46px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color .18s, box-shadow .18s, background .18s, transform .1s;
+            width: 100%;
+        }
+
+        .btn-oauth:hover {
+            border-color: #B8A880;
+            background: #FFFDF8;
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .btn-oauth:active {
+            transform: translateY(0) scale(.99);
+        }
+
+        .btn-oauth:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .oauth-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* ═══════════════════════════════════════════════
+       DIVIDER
+    ═══════════════════════════════════════════════ */
+        .or-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 12px;
+            margin: 20px 0;
+        }
+
+        .or-line::before,
+        .or-line::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ═══════════════════════════════════════════════
+       FIELDS
+    ═══════════════════════════════════════════════ */
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field-lbl {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 7px;
+            transition: color .18s;
+        }
+
+        .field:focus-within .field-lbl {
+            color: var(--ink-soft);
+        }
+
+        .req {
+            color: var(--gold);
+            margin-inline-start: 1px;
+        }
+
+        .field-wrap {
+            position: relative;
+        }
+
+        .field-input {
+            width: 100%;
+            height: 48px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 0 14px;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field-input::placeholder {
+            color: #C4B494;
+            font-size: 14px;
+        }
+
+        .field-input:focus {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .field-input.has-toggle {
+            padding-left: 46px;
+        }
+
+        /* Error state */
+        .field-input.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px var(--error-glow);
+        }
+
+        /* Valid micro-feedback */
+        .field-input.valid {
+            border-color: var(--success);
+        }
+
+        /* Toggle visibility button */
+        .toggle-vis {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 6px;
+            line-height: 1;
+            transition: color .18s, transform .18s;
+            border-radius: 6px;
+        }
+
+        .toggle-vis:hover {
+            color: var(--ink-soft);
+        }
+
+        .toggle-vis:active {
+            transform: translateY(-50%) scale(.9);
+        }
+
+        .toggle-vis:focus-visible {
+            outline: 2px solid var(--gold);
+        }
+
+        /* ═══════════════════════════════════════════════
+       PASSWORD STRENGTH
+    ═══════════════════════════════════════════════ */
+        .pass-strength {
+            margin-top: 8px;
+            height: 3px;
+            background: var(--cream-bb);
+            border-radius: 3px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .pass-strength.visible {
+            opacity: 1;
+        }
+
+        .pass-strength-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .35s var(--ease-out-expo), background .35s;
+        }
+
+        .pass-strength-bar[data-level="1"] {
+            width: 25%;
+            background: #C0392B;
+        }
+
+        .pass-strength-bar[data-level="2"] {
+            width: 50%;
+            background: #E67E22;
+        }
+
+        .pass-strength-bar[data-level="3"] {
+            width: 75%;
+            background: #D4B060;
+        }
+
+        .pass-strength-bar[data-level="4"] {
+            width: 100%;
+            background: #2C5A3C;
+        }
+
+        .pass-strength-label {
+            font-size: 11px;
+            margin-top: 4px;
+            color: var(--muted);
+            transition: color .3s;
+            min-height: 1em;
+        }
+
+        /* ═══════════════════════════════════════════════
+       LOCATION SECTION
+    ═══════════════════════════════════════════════ */
+        .loc-label-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0 14px;
+        }
+
+        .loc-label-row::before,
+        .loc-label-row::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .loc-label-text {
+            font-size: 11.5px;
+            color: var(--muted);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .loc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field-select {
+            width: 100%;
+            height: 48px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 0 14px 0 34px;
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7A5C' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 12px center;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .field-select:focus {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .field-select.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px var(--error-glow);
+        }
+
+        .field-select:disabled {
+            color: var(--muted);
+            background-color: var(--cream-b);
+            cursor: not-allowed;
+        }
+
+        /* ═══════════════════════════════════════════════
+       SUBMIT BUTTON
+    ═══════════════════════════════════════════════ */
+        .btn-submit-wrap {
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .btn-submit {
+            width: 100%;
+            height: 52px;
+            background: var(--ink);
+            color: white;
+            border: none;
+            border-radius: var(--r);
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .01em;
+            position: relative;
+            overflow: hidden;
+            transition: background .25s, transform .12s, box-shadow .25s;
+        }
+
+        /* Shimmer sweep on hover */
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, .08), transparent);
+            transition: left .55s var(--ease-out-expo);
+            pointer-events: none;
+        }
+
+        .btn-submit:hover::before {
+            left: 160%;
+        }
+
+        /* Gold underline shadow */
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 16px;
+            right: 16px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 0 0 4px 4px;
+            opacity: 0;
+            transition: opacity .25s, bottom .25s;
+            filter: blur(1px);
+        }
+
+        .btn-submit:hover {
+            background: var(--ink-mid);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(11, 31, 20, .2);
+        }
+
+        .btn-submit:hover::after {
+            opacity: .8;
+            bottom: -6px;
+        }
+
+        .btn-submit:active {
+            transform: translateY(0) scale(.99);
+            box-shadow: none;
+        }
+
+        .btn-submit:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-submit:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+        }
+
+        /* Loading spinner inside button */
+        .btn-submit .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════
+       FORM FOOTER
+    ═══════════════════════════════════════════════ */
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .form-footer a {
+            color: var(--ink-soft);
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 1.5px solid transparent;
+            transition: border-color .18s, color .18s;
+            padding-bottom: 1px;
+        }
+
+        .form-footer a:hover {
+            border-color: var(--gold);
+            color: var(--text);
+        }
+
+        /* ═══════════════════════════════════════════════
+       FORM STATE SWITCHING
+    ═══════════════════════════════════════════════ */
+        .form-state {
+            display: none;
+        }
+
+        .form-state.active {
+            display: block;
+            animation: stateEnter .3s var(--ease-out-expo) both;
+        }
+
+        @keyframes stateEnter {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Staggered field entrance */
+        .form-state.active .field:nth-child(1) {
+            animation: fieldIn .35s var(--ease-out-expo) .05s both;
+        }
+
+        .form-state.active .field:nth-child(2) {
+            animation: fieldIn .35s var(--ease-out-expo) .1s both;
+        }
+
+        .form-state.active .field:nth-child(3) {
+            animation: fieldIn .35s var(--ease-out-expo) .15s both;
+        }
+
+        .form-state.active .field:nth-child(4) {
+            animation: fieldIn .35s var(--ease-out-expo) .2s both;
+        }
+
+        .form-state.active .loc-wrap {
+            animation: fieldIn .35s var(--ease-out-expo) .22s both;
+        }
+
+        .form-state.active .btn-submit-wrap {
+            animation: fieldIn .35s var(--ease-out-expo) .25s both;
+        }
+
+        @keyframes fieldIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════
+       ERROR SHAKE
+    ═══════════════════════════════════════════════ */
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            15% {
+                transform: translateX(-8px);
+            }
+
+            30% {
+                transform: translateX(8px);
+            }
+
+            45% {
+                transform: translateX(-5px);
+            }
+
+            60% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-2px);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════
+       INLINE ERROR HINT
+    ═══════════════════════════════════════════════ */
+        .field-hint {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 5px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-hint.visible {
+            display: flex;
+        }
+
+        /* ═══════════════════════════════════════════════
+       MOBILE
+    ═══════════════════════════════════════════════ */
+        @media (max-width: 720px) {
             .page {
                 flex-direction: column;
             }
@@ -570,11 +949,11 @@
             .brand-panel {
                 width: 100%;
                 order: 1;
-                padding: 28px 24px;
+                padding: 20px 24px;
                 flex-direction: row;
                 align-items: center;
                 justify-content: flex-start;
-                gap: 14px;
+                gap: 16px;
                 min-height: unset;
             }
 
@@ -583,21 +962,25 @@
             }
 
             .brand-panel .geo-bg {
-                opacity: .08;
+                opacity: .07;
             }
 
             .brand-inner {
                 flex-direction: row;
-                gap: 14px;
+                gap: 16px;
                 align-items: center;
                 text-align: right;
             }
 
             .brand-ornament {
-                width: 48px;
-                height: 48px;
+                width: 44px;
+                height: 44px;
                 margin-bottom: 0;
                 flex-shrink: 0;
+            }
+
+            .brand-ornament::after {
+                display: none;
             }
 
             .brand-ornament-letter {
@@ -606,21 +989,32 @@
 
             .brand-title {
                 font-size: 20px;
-                margin-bottom: 0;
             }
 
             .gold-rule,
-            .brand-tagline {
-                display: none;
-            }
-
+            .brand-tagline,
+            .brand-deco,
             .brand-back {
                 display: none;
             }
 
             .form-panel {
                 order: 2;
-                padding: 28px 20px 48px;
+                padding: 28px 20px 52px;
+            }
+
+            .form-box {
+                max-width: 100%;
+            }
+
+            .loc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .form-heading {
+                font-size: 26px;
             }
         }
     </style>
@@ -629,23 +1023,24 @@
 <body>
     <div class="page">
 
-        <!-- ██ FORM PANEL ██ (RTL: right side) -->
+        <!-- ██ FORM PANEL ██ -->
         <main class="form-panel" role="main" aria-label="نموذج الدخول">
             <div class="form-box">
 
+                <!-- Tabs -->
                 <div class="tabs" role="tablist" aria-label="الدخول أو إنشاء حساب">
                     <button class="tab-btn active" role="tab" aria-selected="true" id="tab-login"
-                        aria-controls="state-login" onclick="switchTab('login')">
+                        aria-controls="state-login" data-tab="login">
                         تسجيل الدخول
                     </button>
                     <button class="tab-btn" role="tab" aria-selected="false" id="tab-register"
-                        aria-controls="state-register" onclick="switchTab('register')">
+                        aria-controls="state-register" data-tab="register">
                         إنشاء حساب
                     </button>
                 </div>
 
-                <!-- ─────── LOGIN ─────── -->
-                <div class="form-state active" id="state-login" role="tabpanel" aria-labelledby="tab-login">
+                <!-- ─── LOGIN ─── -->
+                <section class="form-state active" id="state-login" role="tabpanel" aria-labelledby="tab-login">
                     <h1 class="form-heading">أهلاً بعودتك</h1>
                     <p class="form-sub">سجّل دخولك للمساهمة في فهرسة كتب مساجد مصر</p>
 
@@ -680,18 +1075,30 @@
                     <div class="or-line">أو بالبريد الإلكتروني</div>
 
                     <div class="field">
-                        <label class="field-lbl" for="l-email">البريد الإلكتروني<span class="req"> *</span></label>
+                        <label class="field-lbl" for="l-email">البريد الإلكتروني<span class="req" aria-hidden="true">
+                                *</span></label>
                         <input class="field-input" id="l-email" type="email" placeholder="name@example.com"
-                            autocomplete="email" dir="ltr">
+                            autocomplete="email" dir="ltr" aria-required="true">
+                        <p class="field-hint" id="l-email-hint" role="alert" aria-live="polite">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            يرجى إدخال بريد إلكتروني صحيح
+                        </p>
                     </div>
 
                     <div class="field">
-                        <label class="field-lbl" for="l-pass">كلمة المرور<span class="req"> *</span></label>
+                        <label class="field-lbl" for="l-pass">كلمة المرور<span class="req" aria-hidden="true">
+                                *</span></label>
                         <div class="field-wrap">
                             <input class="field-input has-toggle" id="l-pass" type="password" placeholder="••••••••"
-                                autocomplete="current-password">
-                            <button class="toggle-vis" type="button" onclick="toggleVis('l-pass', this)"
+                                autocomplete="current-password" aria-required="true">
+                            <button class="toggle-vis" type="button" data-target="l-pass"
                                 aria-label="إظهار أو إخفاء كلمة المرور">
+                                <!-- Eye icon (shown) -->
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" aria-hidden="true">
                                     <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z" />
@@ -699,22 +1106,31 @@
                                 </svg>
                             </button>
                         </div>
+                        <p class="field-hint" id="l-pass-hint" role="alert" aria-live="polite">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            يرجى إدخال كلمة المرور
+                        </p>
                     </div>
 
                     <div class="btn-submit-wrap">
-                        <button class="btn-submit" type="button" onclick="handleLogin()">
+                        <button class="btn-submit" type="button" id="btn-login">
                             تسجيل الدخول
                         </button>
                     </div>
 
                     <p class="form-footer">
                         ليس لديك حساب؟
-                        <a href="#" onclick="switchTab('register'); return false;">إنشاء حساب جديد</a>
+                        <a href="#" data-switch="register">إنشاء حساب جديد</a>
                     </p>
-                </div>
+                </section>
 
-                <!-- ─────── REGISTER ─────── -->
-                <div class="form-state" id="state-register" role="tabpanel" aria-labelledby="tab-register">
+                <!-- ─── REGISTER ─── -->
+                <section class="form-state" id="state-register" role="tabpanel" aria-labelledby="tab-register">
                     <h1 class="form-heading">انضم إلينا</h1>
                     <p class="form-sub">أنشئ حساباً للمساهمة في فهرسة كتب مساجد مصر</p>
 
@@ -749,23 +1165,45 @@
                     <div class="or-line">أو بالبريد الإلكتروني</div>
 
                     <div class="field">
-                        <label class="field-lbl" for="r-name">الاسم الكامل<span class="req"> *</span></label>
+                        <label class="field-lbl" for="r-name">الاسم الكامل<span class="req" aria-hidden="true">
+                                *</span></label>
                         <input class="field-input" id="r-name" type="text" placeholder="مثال: محمد أحمد"
-                            autocomplete="name">
+                            autocomplete="name" aria-required="true">
+                        <p class="field-hint" id="r-name-hint" role="alert" aria-live="polite">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            يرجى إدخال الاسم الكامل
+                        </p>
                     </div>
 
                     <div class="field">
-                        <label class="field-lbl" for="r-email">البريد الإلكتروني<span class="req"> *</span></label>
+                        <label class="field-lbl" for="r-email">البريد الإلكتروني<span class="req" aria-hidden="true">
+                                *</span></label>
                         <input class="field-input" id="r-email" type="email" placeholder="name@example.com"
-                            autocomplete="email" dir="ltr">
+                            autocomplete="email" dir="ltr" aria-required="true">
+                        <p class="field-hint" id="r-email-hint" role="alert" aria-live="polite">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            يرجى إدخال بريد إلكتروني صحيح
+                        </p>
                     </div>
 
                     <div class="field">
-                        <label class="field-lbl" for="r-pass">كلمة المرور<span class="req"> *</span></label>
+                        <label class="field-lbl" for="r-pass">كلمة المرور<span class="req" aria-hidden="true">
+                                *</span></label>
                         <div class="field-wrap">
                             <input class="field-input has-toggle" id="r-pass" type="password"
-                                placeholder="٨ أحرف على الأقل" autocomplete="new-password">
-                            <button class="toggle-vis" type="button" onclick="toggleVis('r-pass', this)"
+                                placeholder="٨ أحرف على الأقل" autocomplete="new-password" aria-required="true"
+                                aria-describedby="r-pass-strength-label">
+                            <button class="toggle-vis" type="button" data-target="r-pass"
                                 aria-label="إظهار أو إخفاء كلمة المرور">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" aria-hidden="true">
@@ -774,18 +1212,40 @@
                                 </svg>
                             </button>
                         </div>
+                        <!-- Password strength meter -->
+                        <div class="pass-strength" id="r-pass-strength" aria-hidden="true">
+                            <div class="pass-strength-bar" id="r-pass-strength-bar" data-level="0" style="width:0">
+                            </div>
+                        </div>
+                        <p class="pass-strength-label" id="r-pass-strength-label" aria-live="polite"></p>
+                        <p class="field-hint" id="r-pass-hint" role="alert" aria-live="polite">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            كلمة المرور يجب أن تكون ٨ أحرف على الأقل
+                        </p>
                     </div>
 
                     <!-- Location -->
                     <div class="loc-wrap">
                         <div class="loc-label-row" aria-hidden="true">
-                            <span class="loc-label-text">موقعك الجغرافي</span>
+                            <span class="loc-label-text">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" aria-hidden="true">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                موقعك الجغرافي
+                            </span>
                         </div>
                         <div class="loc-grid">
                             <div class="field" style="margin-bottom:0">
-                                <label class="field-lbl" for="r-gov">المحافظة<span class="req"> *</span></label>
-                                <select class="field-select" id="r-gov" onchange="updateCities()"
-                                    aria-label="اختر المحافظة">
+                                <label class="field-lbl" for="r-gov">المحافظة<span class="req" aria-hidden="true">
+                                        *</span></label>
+                                <select class="field-select" id="r-gov" aria-required="true">
                                     <option value="">اختر المحافظة</option>
                                     <option>القاهرة</option>
                                     <option>الجيزة</option>
@@ -812,65 +1272,56 @@
                                 </select>
                             </div>
                             <div class="field" style="margin-bottom:0">
-                                <label class="field-lbl" for="r-city">المدينة<span class="req"> *</span></label>
-                                <select class="field-select" id="r-city" disabled aria-label="اختر المدينة">
+                                <label class="field-lbl" for="r-city">المدينة<span class="req" aria-hidden="true">
+                                        *</span></label>
+                                <select class="field-select" id="r-city" disabled aria-required="true">
                                     <option value="">اختر المحافظة أولاً</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="btn-submit-wrap" style="margin-top:4px">
-                        <button class="btn-submit" type="button" onclick="handleRegister()">
+                    <div class="btn-submit-wrap" style="margin-top:12px">
+                        <button class="btn-submit" type="button" id="btn-register">
                             إنشاء الحساب
                         </button>
                     </div>
 
                     <p class="form-footer">
                         لديك حساب بالفعل؟
-                        <a href="#" onclick="switchTab('login'); return false;">تسجيل الدخول</a>
+                        <a href="#" data-switch="login">تسجيل الدخول</a>
                     </p>
-                </div>
+                </section>
 
             </div>
         </main>
 
-        <!-- ██ BRAND PANEL ██ (RTL: left side) -->
+        <!-- ██ BRAND PANEL ██ -->
         <aside class="brand-panel" role="complementary" aria-label="هوية المنصة">
 
-            <!-- Islamic Geometric Pattern — 8-pointed star tile -->
+            <!-- Islamic Geometric Pattern -->
             <svg class="geo-bg" viewBox="0 0 280 560" xmlns="http://www.w3.org/2000/svg"
                 preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                 <defs>
                     <pattern id="islamicStar" x="0" y="0" width="70" height="70" patternUnits="userSpaceOnUse">
-                        <!-- Bounding square -->
                         <rect x=".5" y=".5" width="69" height="69" fill="none" stroke="#C49A3C" stroke-width=".35" />
-                        <!-- 45° rotated inner square -->
                         <rect x="11" y="11" width="48" height="48" transform="rotate(45 35 35)" fill="none"
                             stroke="#C49A3C" stroke-width=".35" />
-                        <!-- 8-pointed star at center (35,35) outer r=16, inner r=7 -->
-                        <!-- outer pts @0°,45°,90°,135°,180°,225°,270°,315° -->
-                        <!-- inner pts @22.5°,67.5°,112.5°,157.5°,202.5°,247.5°,292.5°,337.5° -->
                         <polygon
                             points="35,19 37.68,27.82 46.31,22.69 41.18,31.32 51,35 41.18,38.68 46.31,47.31 37.68,42.18 35,51 32.32,42.18 23.69,47.31 28.82,38.68 19,35 28.82,31.32 23.69,22.69 32.32,27.82"
                             fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
-                        <!-- Corner star at (0,0) — tiles across borders to form interlocking pattern -->
                         <polygon
                             points="0,-16 2.68,-7.18 11.31,-11.31 6.18,-3.68 16,0 6.18,3.68 11.31,11.31 2.68,7.18 0,16 -2.68,7.18 -11.31,11.31 -6.18,3.68 -16,0 -6.18,-3.68 -11.31,-11.31 -2.68,-7.18"
                             fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
-                        <!-- Corner repeat at (70,0) -->
                         <polygon
                             points="70,-16 72.68,-7.18 81.31,-11.31 76.18,-3.68 86,0 76.18,3.68 81.31,11.31 72.68,7.18 70,16 67.32,7.18 58.69,11.31 63.82,3.68 54,0 63.82,-3.68 58.69,-11.31 67.32,-7.18"
                             fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
-                        <!-- Corner repeat at (0,70) -->
                         <polygon
                             points="0,54 2.68,62.82 11.31,58.69 6.18,66.32 16,70 6.18,73.68 11.31,81.31 2.68,77.18 0,86 -2.68,77.18 -11.31,81.31 -6.18,73.68 -16,70 -6.18,66.32 -11.31,58.69 -2.68,62.82"
                             fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
-                        <!-- Corner repeat at (70,70) -->
                         <polygon
                             points="70,54 72.68,62.82 81.31,58.69 76.18,66.32 86,70 76.18,73.68 81.31,81.31 72.68,77.18 70,86 67.32,77.18 58.69,81.31 63.82,73.68 54,70 63.82,66.32 58.69,58.69 67.32,62.82"
                             fill="none" stroke="#C49A3C" stroke-width=".5" stroke-linejoin="round" />
-                        <!-- Cross connectors -->
                         <line x1="35" y1="0" x2="35" y2="19" stroke="#C49A3C" stroke-width=".25" />
                         <line x1="35" y1="51" x2="35" y2="70" stroke="#C49A3C" stroke-width=".25" />
                         <line x1="0" y1="35" x2="19" y2="35" stroke="#C49A3C" stroke-width=".25" />
@@ -893,10 +1344,16 @@
                     معظم المساجد يكون بها مكتبة ثرية بالكتب —
                     ولا يكاد يقرأها أحد
                 </p>
+
+                <div class="brand-deco" aria-hidden="true">
+                    <div class="brand-deco-line"></div>
+                    <div class="brand-deco-dot"></div>
+                    <div class="brand-deco-line"></div>
+                </div>
             </div>
 
             <a href="/browse" class="brand-back">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     aria-hidden="true">
                     <polyline points="9 18 15 12 9 6" />
                 </svg>
@@ -907,6 +1364,11 @@
     </div>
 
     <script>
+        'use strict';
+
+        /* ═══════════════════════════════════════════════
+           DATA
+        ═══════════════════════════════════════════════ */
         const CITIES = {
             'القاهرة': ['القاهرة', 'مدينة نصر', 'مصر الجديدة', 'شبرا', 'حلوان', 'المعادي', 'الزيتون', 'عين شمس'],
             'الجيزة': ['الجيزة', '6 أكتوبر', 'الشيخ زايد', 'البدرشين', 'أوسيم', 'الحوامدية'],
@@ -932,88 +1394,230 @@
             'السويس': ['السويس', 'عتاقة', 'الجناين'],
         };
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.toggle('active', b.id === 'tab-' + tab);
-                b.setAttribute('aria-selected', b.id === 'tab-' + tab ? 'true' : 'false');
-            });
-            document.querySelectorAll('.form-state').forEach(s =>
-                s.classList.toggle('active', s.id === 'state-' + tab)
-            );
+        /* ═══════════════════════════════════════════════
+           STATE
+        ═══════════════════════════════════════════════ */
+        const state = {
+            activeTab: 'login',
+            submitting: false,
+        };
+
+        /* ═══════════════════════════════════════════════
+           UTILITIES
+        ═══════════════════════════════════════════════ */
+        const $ = (id) => document.getElementById(id);
+        const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+        function markError(inputEl, hintId) {
+            inputEl.classList.add('error');
+            inputEl.classList.remove('valid');
+            $(`${hintId}-hint`)?.classList.add('visible');
+            const removeErr = () => {
+                inputEl.classList.remove('error');
+                $(`${hintId}-hint`)?.classList.remove('visible');
+                inputEl.removeEventListener('input', removeErr);
+            };
+            inputEl.addEventListener('input', removeErr);
         }
 
+        function clearError(inputEl, hintId) {
+            inputEl.classList.remove('error');
+            $(`${hintId}-hint`)?.classList.remove('visible');
+        }
+
+        function shakeForm(sectionId) {
+            const el = $(sectionId);
+            el.style.animation = 'none';
+            void el.offsetHeight; // force reflow
+            el.style.animation = 'shake .45s ease';
+            el.addEventListener('animationend', () => { el.style.animation = ''; }, { once: true });
+        }
+
+        function setButtonLoading(btn, label) {
+            btn.disabled = true;
+            btn.innerHTML = `${label}<span class="spinner" aria-hidden="true"></span>`;
+        }
+
+        function setButtonSuccess(btn, label) {
+            btn.disabled = false;
+            btn.style.background = 'var(--ink-soft)';
+            btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+           style="vertical-align:middle;margin-left:6px" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      ${label}`;
+        }
+
+        /* ═══════════════════════════════════════════════
+           TAB SWITCHING
+        ═══════════════════════════════════════════════ */
+        function switchTab(tab) {
+            if (tab === state.activeTab) return;
+            state.activeTab = tab;
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === tab;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            document.querySelectorAll('.form-state').forEach(sec => {
+                sec.classList.toggle('active', sec.id === `state-${tab}`);
+            });
+        }
+
+        /* ═══════════════════════════════════════════════
+           PASSWORD VISIBILITY TOGGLE
+        ═══════════════════════════════════════════════ */
+        const eyeOpen = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
+        const eyeOff = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+        function toggleVisibility(btn) {
+            const inp = $(btn.dataset.target);
+            const showing = inp.type === 'text';
+            inp.type = showing ? 'password' : 'text';
+            btn.innerHTML = showing ? eyeOpen : eyeOff;
+            btn.setAttribute('aria-label', showing ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور');
+        }
+
+        /* ═══════════════════════════════════════════════
+           PASSWORD STRENGTH
+        ═══════════════════════════════════════════════ */
+        const STRENGTH_LABELS = ['', 'ضعيفة جداً', 'ضعيفة', 'جيدة', 'قوية ✓'];
+
+        function measureStrength(pw) {
+            if (!pw) return 0;
+            let score = 0;
+            if (pw.length >= 8) score++;
+            if (pw.length >= 12) score++;
+            if (/[A-Z]/.test(pw) || /[a-z]/.test(pw)) score = Math.max(score, 1);
+            if (/\d/.test(pw)) score = Math.min(score + 1, 4);
+            if (/[^A-Za-z0-9]/.test(pw)) score = Math.min(score + 1, 4);
+            return Math.max(1, Math.min(score, 4));
+        }
+
+        function updateStrength(pw) {
+            const bar = $('r-pass-strength-bar');
+            const meter = $('r-pass-strength');
+            const label = $('r-pass-strength-label');
+            if (!bar) return;
+            if (!pw) {
+                meter.classList.remove('visible');
+                label.textContent = '';
+                return;
+            }
+            const level = measureStrength(pw);
+            meter.classList.add('visible');
+            bar.dataset.level = level;
+            label.textContent = STRENGTH_LABELS[level];
+        }
+
+        /* ═══════════════════════════════════════════════
+           CITY DROPDOWN
+        ═══════════════════════════════════════════════ */
         function updateCities() {
-            const gov = document.getElementById('r-gov').value;
-            const sel = document.getElementById('r-city');
+            const gov = $('r-gov').value;
+            const sel = $('r-city');
             const list = CITIES[gov] || [];
             sel.disabled = !list.length;
             sel.innerHTML = list.length
                 ? list.map(c => `<option value="${c}">${c}</option>`).join('')
                 : '<option value="">لا توجد مدن مسجلة</option>';
+            clearError(sel, 'r-city');
         }
 
-        function toggleVis(fieldId, btn) {
-            const inp = document.getElementById(fieldId);
-            const showing = inp.type === 'text';
-            inp.type = showing ? 'password' : 'text';
-            btn.innerHTML = showing
-                ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>`
-                : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-        }
-
-        function markError(id) {
-            const el = document.getElementById(id);
-            el.classList.add('error');
-            el.addEventListener('input', () => el.classList.remove('error'), { once: true });
-        }
-
-        function shakeForm(stateId) {
-            const el = document.getElementById(stateId);
-            el.style.animation = 'none';
-            el.offsetHeight;
-            el.style.animation = 'shake .4s ease';
-            setTimeout(() => el.style.animation = '', 500);
-        }
-
+        /* ═══════════════════════════════════════════════
+           FORM HANDLERS
+        ═══════════════════════════════════════════════ */
         function handleLogin() {
-            const email = document.getElementById('l-email');
-            const pass = document.getElementById('l-pass');
-            let ok = true;
-            if (!email.value.includes('@')) { markError('l-email'); ok = false; }
-            if (pass.value.length < 1) { markError('l-pass'); ok = false; }
-            if (!ok) { shakeForm('state-login'); return; }
+            if (state.submitting) return;
 
-            const btn = document.querySelector('#state-login .btn-submit');
-            btn.textContent = '…جاري التحقق';
-            btn.disabled = true;
-            setTimeout(() => { btn.textContent = '✓ تم تسجيل الدخول'; }, 1200);
+            const email = $('l-email');
+            const pass = $('l-pass');
+            let valid = true;
+
+            if (!isEmail(email.value)) { markError(email, 'l-email'); valid = false; }
+            if (!pass.value.trim()) { markError(pass, 'l-pass'); valid = false; }
+
+            if (!valid) { shakeForm('state-login'); return; }
+
+            state.submitting = true;
+            const btn = $('btn-login');
+            setButtonLoading(btn, 'جاري التحقق');
+
+            // Simulate async request
+            setTimeout(() => {
+                setButtonSuccess(btn, 'تم تسجيل الدخول');
+                state.submitting = false;
+            }, 1400);
         }
 
         function handleRegister() {
-            const name = document.getElementById('r-name');
-            const email = document.getElementById('r-email');
-            const pass = document.getElementById('r-pass');
-            const gov = document.getElementById('r-gov');
-            const city = document.getElementById('r-city');
-            let ok = true;
-            if (!name.value.trim()) { markError('r-name'); ok = false; }
-            if (!email.value.includes('@')) { markError('r-email'); ok = false; }
-            if (pass.value.length < 8) { markError('r-pass'); ok = false; }
-            if (!gov.value) { markError('r-gov'); ok = false; }
-            if (!city.value || city.disabled) { markError('r-city'); ok = false; }
-            if (!ok) { shakeForm('state-register'); return; }
+            if (state.submitting) return;
 
-            const btn = document.querySelector('#state-register .btn-submit');
-            btn.textContent = '…جاري إنشاء الحساب';
-            btn.disabled = true;
-            setTimeout(() => { btn.textContent = '✓ تم إنشاء الحساب'; }, 1200);
+            const name = $('r-name');
+            const email = $('r-email');
+            const pass = $('r-pass');
+            const gov = $('r-gov');
+            const city = $('r-city');
+            let valid = true;
+
+            if (!name.value.trim()) { markError(name, 'r-name'); valid = false; }
+            if (!isEmail(email.value)) { markError(email, 'r-email'); valid = false; }
+            if (pass.value.length < 8) { markError(pass, 'r-pass'); valid = false; }
+            if (!gov.value) { markError(gov, 'r-gov'); valid = false; }
+            if (!city.value || city.disabled) { markError(city, 'r-city'); valid = false; }
+
+            if (!valid) { shakeForm('state-register'); return; }
+
+            state.submitting = true;
+            const btn = $('btn-register');
+            setButtonLoading(btn, 'جاري إنشاء الحساب');
+
+            setTimeout(() => {
+                setButtonSuccess(btn, 'تم إنشاء الحساب');
+                state.submitting = false;
+            }, 1600);
         }
 
-        // Add shake keyframe dynamically (can't put @keyframes inside conditionals)
-        const shakeStyle = document.createElement('style');
-        shakeStyle.textContent =
-            '@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}';
-        document.head.appendChild(shakeStyle);
+        /* ═══════════════════════════════════════════════
+           EVENT DELEGATION — clean, no inline handlers
+        ═══════════════════════════════════════════════ */
+        document.addEventListener('click', (e) => {
+            // Tab buttons
+            const tabBtn = e.target.closest('[data-tab]');
+            if (tabBtn) { switchTab(tabBtn.dataset.tab); return; }
+
+            // Switch links (footer)
+            const switchLink = e.target.closest('[data-switch]');
+            if (switchLink) { e.preventDefault(); switchTab(switchLink.dataset.switch); return; }
+
+            // Password toggle
+            const togBtn = e.target.closest('.toggle-vis');
+            if (togBtn) { toggleVisibility(togBtn); return; }
+
+            // Submit buttons
+            if (e.target.id === 'btn-login') { handleLogin(); return; }
+            if (e.target.id === 'btn-register') { handleRegister(); return; }
+        });
+
+        // City dropdown
+        document.addEventListener('change', (e) => {
+            if (e.target.id === 'r-gov') updateCities();
+        });
+
+        // Password strength (live)
+        document.addEventListener('input', (e) => {
+            if (e.target.id === 'r-pass') updateStrength(e.target.value);
+        });
+
+        // Enter-key submission
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            if (state.activeTab === 'login') handleLogin();
+            else handleRegister();
+        });
     </script>
 </body>
 

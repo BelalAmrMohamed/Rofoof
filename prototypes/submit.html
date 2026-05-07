@@ -2,735 +2,1755 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>على رفوف المساجد — تسجيل كتاب</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#085041">
+<meta name="description" content="سجّل كتاباً وجدته في مسجد وساهم في بناء مكتبة المساجد المفتوحة">
+<!-- PWA-ready: add manifest.json & sw.js to complete PWA setup -->
+<!-- <link rel="manifest" href="/manifest.json"> -->
+<title>تسجيل كتاب — على رفوف المساجد</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+
 <style>
+/* ╔═══════════════════════════════════════════╗
+   ║  TOKENS                                   ║
+   ╚═══════════════════════════════════════════╝ */
 :root {
+  /* Palette */
   --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5;
-  --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
-  --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27;
+  --teal-400:#1D9E75; --teal-500:#178C67; --teal-600:#0F6E56;
+  --teal-700:#0C5A45; --teal-800:#085041; --teal-900:#04342C;
+
+  --amber-50:#FAEEDA; --amber-100:#FAD9A0; --amber-200:#EF9F27;
   --amber-400:#BA7517; --amber-800:#633806;
-  --coral-50:#FAECE7; --coral-600:#993C1D; --coral-800:#712B13;
-  --gray-50:#F9F8F6; --gray-100:#F1EFE8; --gray-200:#D3D1C7;
-  --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+
+  --coral-50:#FAECE7; --coral-600:#993C1D;
+
+  --gray-50:#F8F7F4; --gray-100:#EFEDE6; --gray-150:#E5E2D8;
+  --gray-200:#D3D1C7; --gray-400:#888780; --gray-600:#5F5E5A;
+  --gray-800:#444441; --gray-900:#2C2C2A;
+
   --blue-50:#E6F1FB; --blue-800:#0C447C;
   --purple-50:#EEEDFE; --purple-800:#3C3489;
   --green-50:#EAF3DE; --green-800:#27500A;
   --pink-50:#FBEAF0; --pink-800:#72243E;
-  --bg:#F9F8F6; --surface:#FFFFFF; --border:#E5DDD4;
-  --text:var(--gray-900); --text-sec:var(--gray-600); --text-muted:var(--gray-400);
-  --danger:#C0392B; --danger-bg:#FDF2F1;
-  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:20px;
+
+  /* Semantic */
+  --bg: #F6F4EF;
+  --surface: rgba(255,255,255,0.92);
+  --surface-solid: #FFFFFF;
+  --border: rgba(180,170,155,0.45);
+  --border-solid: #E0DACF;
+  --text: var(--gray-900);
+  --text-sec: var(--gray-600);
+  --text-muted: var(--gray-400);
+  --danger: #C0392B;
+  --danger-bg: #FDF2F1;
+
+  /* Radius */
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px; --r-2xl:28px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(4,52,44,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(4,52,44,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(4,52,44,0.12), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(4,52,44,0.06), 0 0 0 1.5px var(--border);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-/* ── NAV ── */
-.navbar{position:sticky;top:0;z-index:200;background:var(--teal-800);height:60px;border-bottom:1px solid rgba(255,255,255,.08);}
-.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:24px;}
-.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
-.brand-mark{width:36px;height:36px;border-radius:var(--r-md);background:var(--teal-400);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;}
-.brand-name{color:#fff;font-size:15px;font-weight:700;line-height:1.2;white-space:nowrap;}
-.brand-sub{color:rgba(255,255,255,.5);font-size:11px;}
-.nav-links{display:flex;gap:4px;flex:1;}
-.nav-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;font-weight:500;padding:6px 14px;border-radius:var(--r-md);transition:.18s;}
-.nav-link:hover{color:#fff;background:rgba(255,255,255,.1);}
-.nav-link.active{color:#fff;background:rgba(255,255,255,.15);}
-.nav-actions{display:flex;gap:8px;align-items:center;margin-right:auto;}
-.btn-nav-submit{background:var(--amber-200);color:var(--amber-800);border:none;padding:7px 16px;border-radius:var(--r-md);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.18s;white-space:nowrap;}
-.btn-nav-login{background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.3);padding:7px 16px;border-radius:var(--r-md);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:.18s;white-space:nowrap;}
+/* ╔═══════════════════════════════════════════╗
+   ║  RESET & BASE                             ║
+   ╚═══════════════════════════════════════════╝ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── PROTOTYPE ROLE SWITCHER ── */
-.role-bar{background:#2C2C2A;padding:8px 24px;display:flex;align-items:center;justify-content:center;gap:16px;}
-.role-bar-label{font-size:12px;color:var(--gray-400);}
-.role-tabs{display:flex;background:rgba(255,255,255,.07);border-radius:100px;padding:2px;gap:2px;}
-.role-tab{padding:4px 14px;border-radius:100px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--gray-400);cursor:pointer;transition:.18s;}
-.role-tab.active{background:var(--amber-200);color:var(--amber-800);}
-.role-note{font-size:11px;color:var(--gray-600);}
+html { scroll-behavior: smooth; }
 
-/* ── PAGE HEADER ── */
-.page-header{max-width:680px;margin:0 auto;padding:32px 24px 0;}
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);margin-bottom:20px;}
-.breadcrumb a{color:var(--teal-600);text-decoration:none;font-weight:500;}
-.breadcrumb a:hover{text-decoration:underline;}
-.breadcrumb-sep{color:var(--gray-200);}
-.page-title{font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px;}
-.page-sub{font-size:14px;color:var(--text-sec);}
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  line-height: 1.65;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Subtle arabesque dot-grid texture */
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(15,110,86,0.09) 1px, transparent 0);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+}
 
-/* ── ROLE BADGE ── */
-.role-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:700;margin-top:12px;}
-.role-badge.volunteer{background:var(--teal-50);color:var(--teal-600);}
-.role-badge.visitor{background:var(--amber-50);color:var(--amber-400);}
-.role-badge-dot{width:7px;height:7px;border-radius:50%;}
-.volunteer .role-badge-dot{background:var(--teal-400);}
-.visitor .role-badge-dot{background:var(--amber-200);}
+/* ╔═══════════════════════════════════════════╗
+   ║  NAVBAR                                   ║
+   ╚═══════════════════════════════════════════╝ */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: linear-gradient(135deg, var(--teal-900) 0%, var(--teal-800) 100%);
+  height: 62px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(4,52,44,0.25);
+}
 
-/* ── FORM LAYOUT ── */
-.form-wrap{max-width:680px;margin:0 auto;padding:24px 24px 80px;}
-.form-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);overflow:visible;margin-bottom:16px;}
-.form-card-header{padding:20px 24px 16px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:12px;}
-.section-num{width:28px;height:28px;border-radius:50%;background:var(--teal-600);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.section-title{font-size:16px;font-weight:700;color:var(--text);}
-.section-sub{font-size:12.5px;color:var(--text-muted);margin-top:1px;}
-.form-card-body{padding:20px 24px;}
-.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.nav-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-/* ── FIELD ── */
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
-.field:last-child{margin-bottom:0;}
-.field-label{font-size:13px;font-weight:600;color:var(--text);}
-.field-req{color:var(--teal-600);margin-right:2px;}
-.field-hint{font-size:11.5px;color:var(--text-muted);margin-top:1px;}
-.field-input{height:44px;padding:0 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;color:var(--text);outline:none;transition:.18s;direction:rtl;width:100%;}
-.field-input::placeholder{color:var(--text-muted);}
-.field-input:focus{border-color:var(--teal-400);background:var(--surface);box-shadow:0 0 0 3px rgba(29,158,117,.1);}
-.field-input.error{border-color:var(--danger);}
-.field-textarea{height:88px;padding:10px 14px;resize:vertical;line-height:1.6;}
-.field-select{height:44px;padding:0 14px;appearance:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat left 12px center;border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;color:var(--text);outline:none;cursor:pointer;transition:.18s;direction:rtl;width:100%;}
-.field-select:focus{border-color:var(--teal-400);background-color:var(--surface);box-shadow:0 0 0 3px rgba(29,158,117,.1);}
-.field-error{font-size:12px;color:var(--danger);display:none;}
-.field-error.show{display:block;}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
 
-/* ── IMAGE UPLOAD ── */
-.upload-area{border:2px dashed var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:.18s;min-height:110px;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;}
-.upload-area:hover{border-color:var(--teal-400);background:var(--teal-50);}
-.upload-area.has-image{border-style:solid;border-color:var(--teal-200);}
-.upload-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px;pointer-events:none;}
-.upload-icon{font-size:28px;opacity:.45;}
-.upload-label{font-size:13px;font-weight:600;color:var(--text-sec);}
-.upload-sub{font-size:11.5px;color:var(--text-muted);}
-.upload-preview{width:100%;height:140px;position:relative;display:none;}
-.upload-preview.show{display:block;}
-.upload-preview img{width:100%;height:100%;object-fit:cover;}
-.upload-remove{position:absolute;top:8px;left:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.brand-mark {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(145deg, var(--teal-400), var(--teal-600));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 800; color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
 
-/* ── MOSQUE SEARCH ── */
-.mosque-search-wrap{position:relative;}
-.mosque-search-input{height:44px;padding:0 14px 0 44px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;color:var(--text);outline:none;transition:.18s;direction:rtl;width:100%;}
-.mosque-search-input::placeholder{color:var(--text-muted);}
-.mosque-search-input:focus{border-color:var(--teal-400);background:var(--surface);box-shadow:0 0 0 3px rgba(29,158,117,.1);}
-.mosque-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
-.mosque-dropdown{position:absolute;top:calc(100% + 6px);right:0;left:0;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:100;overflow:hidden;max-height:280px;overflow-y:auto;display:none;}
-.mosque-dropdown.open{display:block;animation:dropIn .18s ease;}
-@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-.mosque-dropdown::-webkit-scrollbar{width:4px;}
-.mosque-dropdown::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:100px;}
-.mosque-item{padding:12px 16px;cursor:pointer;transition:.15s;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.mosque-item:hover{background:var(--teal-50);}
-.mosque-item:last-child{border-bottom:none;}
-.mosque-item-name{font-size:14px;font-weight:600;color:var(--text);}
-.mosque-item-loc{font-size:12px;color:var(--text-muted);margin-top:2px;}
-.mosque-item-gov{font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--gray-100);color:var(--gray-600);white-space:nowrap;}
-.mosque-add-new-row{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--teal-600);font-size:13px;font-weight:700;background:var(--teal-50);transition:.15s;}
-.mosque-add-new-row:hover{background:var(--teal-100);}
-.mosque-no-results{padding:20px 16px;text-align:center;color:var(--text-muted);font-size:13px;}
+.brand-name { color: #fff; font-size: 14.5px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+.brand-sub  { color: rgba(255,255,255,0.45); font-size: 10.5px; }
 
-/* ── SELECTED MOSQUE ── */
-.selected-mosque{background:var(--teal-50);border:1.5px solid var(--teal-100);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;animation:fadeIn .2s ease;}
-.selected-mosque-info{}
-.selected-mosque-name{font-size:15px;font-weight:700;color:var(--teal-800);}
-.selected-mosque-loc{font-size:12.5px;color:var(--teal-600);margin-top:2px;}
-.btn-deselect{background:rgba(15,110,86,.12);border:none;color:var(--teal-600);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.18s;flex-shrink:0;}
-.btn-deselect:hover{background:rgba(15,110,86,.22);}
+.nav-links { display: flex; gap: 2px; flex: 1; }
 
-/* ── NEW MOSQUE FORM ── */
-.new-mosque-section{border:1.5px dashed var(--teal-100);border-radius:var(--r-lg);padding:20px;background:var(--teal-50);margin-top:16px;animation:expandIn .25s ease;}
-@keyframes expandIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-.new-mosque-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.new-mosque-title{font-size:14px;font-weight:700;color:var(--teal-800);}
-.new-mosque-sub{font-size:12px;color:var(--teal-600);margin-top:2px;}
-.btn-cancel-new{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:2px;}
+.nav-link {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--r-sm);
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.nav-link.active { color: #fff; background: rgba(255,255,255,0.14); }
 
-/* ── DUPLICATE WARNING ── */
-.dup-warning{background:#FEF9EC;border:1.5px solid var(--amber-100);border-right:3px solid var(--amber-200);border-radius:var(--r-md);padding:12px 16px;display:none;gap:10px;align-items:flex-start;margin-top:12px;}
-.dup-warning.show{display:flex;animation:fadeIn .2s ease;}
-.dup-warning-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
-.dup-warning-text{}
-.dup-warning-title{font-size:13px;font-weight:700;color:var(--amber-400);}
-.dup-warning-sub{font-size:12px;color:var(--gray-600);margin-top:2px;line-height:1.5;}
-.btn-proceed{background:none;border:none;color:var(--teal-600);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0;margin-top:6px;text-decoration:underline;}
+.nav-actions { margin-right: auto; display: flex; align-items: center; gap: 8px; }
 
-/* ── SUBMIT AREA ── */
-.submit-area{margin-top:8px;}
-.visitor-notice{background:var(--amber-50);border:1.5px solid var(--amber-100);border-right:3px solid var(--amber-200);border-radius:var(--r-md);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-800);line-height:1.6;display:none;}
-.visitor-notice.show{display:block;}
-.btn-submit-main{width:100%;height:52px;background:var(--teal-600);color:#fff;border:none;border-radius:var(--r-lg);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-submit-main:hover{background:var(--teal-800);}
-.btn-submit-main:active{transform:scale(.99);}
-.submit-footnote{text-align:center;font-size:12px;color:var(--text-muted);margin-top:10px;}
+.btn-nav-user {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.9);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-nav-user:hover { background: rgba(255,255,255,0.18); }
 
-/* ── SUCCESS STATE ── */
-.success-state{max-width:680px;margin:0 auto;padding:40px 24px 80px;display:none;}
-.success-state.show{display:block;animation:fadeInUp .4s ease;}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-.success-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-xl);overflow:hidden;}
-.success-header{padding:32px 32px 24px;text-align:center;}
-.success-icon-wrap{width:72px;height:72px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;}
-.success-icon-wrap.volunteer-mode{background:var(--teal-50);}
-.success-icon-wrap.visitor-mode{background:var(--amber-50);}
-.success-headline{font-size:22px;font-weight:800;margin-bottom:8px;}
-.success-headline.volunteer-mode{color:var(--teal-800);}
-.success-headline.visitor-mode{color:var(--amber-400);}
-.success-desc{font-size:14px;color:var(--text-sec);line-height:1.7;}
-.success-book-card{margin:0 24px;background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;display:flex;gap:14px;align-items:center;}
-.success-book-avatar{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0;}
-.success-book-title{font-size:16px;font-weight:700;}
-.success-book-meta{font-size:12.5px;color:var(--text-sec);margin-top:3px;}
-.success-steps{margin:20px 24px 0;display:flex;flex-direction:column;gap:10px;}
-.success-step{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);}
-.success-step-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.success-step-icon.done{background:var(--teal-50);}
-.success-step-icon.pending-icon{background:var(--amber-50);}
-.success-step-icon.next{background:var(--gray-100);}
-.success-step-text{font-size:13px;color:var(--text-sec);}
-.success-step-text strong{color:var(--text);font-weight:700;}
-.success-actions{padding:20px 24px 24px;display:flex;gap:10px;}
-.btn-success-primary{flex:1;height:46px;background:var(--teal-600);color:#fff;border:none;border-radius:var(--r-md);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.18s;}
-.btn-success-primary:hover{background:var(--teal-800);}
-.btn-success-ghost{flex:1;height:46px;background:none;color:var(--text-sec);border:1.5px solid var(--border);border-radius:var(--r-md);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:.18s;}
-.btn-success-ghost:hover{background:var(--gray-100);}
+/* ── Hamburger for mobile ── */
+.nav-mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: rgba(255,255,255,0.85);
+  margin-right: auto;
+}
 
-/* ── UTILS ── */
-.hidden{display:none!important;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .nav-mobile-toggle { display: flex; align-items: center; }
+}
 
-/* category colors */
-.cat-فقه{background:var(--teal-50);color:var(--teal-800);}
-.cat-حديث{background:var(--blue-50);color:var(--blue-800);}
-.cat-تفسير{background:var(--purple-50);color:var(--purple-800);}
-.cat-سيرة{background:var(--coral-50);color:var(--coral-800);}
-.cat-عقيدة{background:var(--amber-50);color:var(--amber-800);}
-.cat-تزكية{background:var(--green-50);color:var(--green-800);}
-.cat-أدب{background:var(--pink-50);color:var(--pink-800);}
-.cat-تاريخ{background:var(--gray-100);color:var(--gray-800);}
-.cat-أخرى{background:var(--gray-100);color:var(--gray-800);}
+/* ╔═══════════════════════════════════════════╗
+   ║  PROTOTYPE ROLE SWITCHER                  ║
+   ╚═══════════════════════════════════════════╝ */
+.role-bar {
+  background: linear-gradient(to left, #1e1e1c, #252523);
+  padding: 7px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  flex-wrap: wrap;
+}
+
+.role-bar-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  padding: 3px 10px 3px 4px;
+}
+
+.role-bar-label { font-size: 11px; color: var(--gray-600); }
+
+.role-pill-icon {
+  width: 18px; height: 18px;
+  background: rgba(239,159,39,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+}
+
+.role-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.role-tab {
+  padding: 4px 13px;
+  border-radius: 100px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+}
+.role-tab.active { background: var(--amber-200); color: var(--amber-800); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+
+.role-note {
+  font-size: 11px;
+  color: var(--gray-600);
+  display: flex; align-items: center; gap: 4px;
+}
+.role-note-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--teal-400);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.5; transform:scale(1.4); }
+}
+
+/* ╔═══════════════════════════════════════════╗
+   ║  PAGE HEADER                              ║
+   ╚═══════════════════════════════════════════╝ */
+.page-header {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 36px 24px 0;
+  animation: fadeUp 0.5s var(--ease-out) both;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+}
+.breadcrumb a { color: var(--teal-600); text-decoration: none; font-weight: 600; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb-sep { color: var(--gray-200); font-size: 16px; }
+
+.page-title {
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.page-sub { font-size: 14px; color: var(--text-sec); }
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 13px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 14px;
+  transition: all 0.3s var(--ease-out);
+}
+.role-badge.volunteer { background: var(--teal-50); color: var(--teal-600); border: 1px solid var(--teal-100); }
+.role-badge.visitor   { background: var(--amber-50); color: var(--amber-400); border: 1px solid var(--amber-100); }
+
+.role-badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+.volunteer .role-badge-dot { background: var(--teal-400); animation: pulse 2.5s infinite; }
+.visitor   .role-badge-dot { background: var(--amber-200); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  PROGRESS INDICATOR                       ║
+   ╚═══════════════════════════════════════════╝ */
+.form-progress {
+  max-width: 700px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  animation: fadeUp 0.55s var(--ease-out) 0.05s both;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.progress-step-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--surface-solid);
+  border: 2px solid var(--border-solid);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s var(--ease-out);
+}
+.progress-step.active .progress-step-circle {
+  background: var(--teal-600);
+  border-color: var(--teal-600);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(15,110,86,0.15);
+}
+.progress-step.done .progress-step-circle {
+  background: var(--teal-100);
+  border-color: var(--teal-200);
+  color: var(--teal-700);
+}
+
+.progress-step-label { font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.progress-step.active .progress-step-label { color: var(--teal-700); }
+.progress-step.done   .progress-step-label { color: var(--teal-600); }
+
+.progress-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-solid);
+  margin: 0 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-line-fill {
+  height: 100%;
+  background: var(--teal-400);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.5s var(--ease-out);
+}
+
+/* ╔═══════════════════════════════════════════╗
+   ║  FORM LAYOUT                              ║
+   ╚═══════════════════════════════════════════╝ */
+.form-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 24px 24px 100px;
+}
+
+.form-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-xl);
+  overflow: visible;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.form-card:focus-within {
+  box-shadow: var(--shadow-md), 0 0 0 1.5px rgba(15,110,86,0.2);
+}
+
+.form-card-header {
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.section-num {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--teal-500), var(--teal-700));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(15,110,86,0.3);
+}
+
+.section-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.section-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.form-card-body { padding: 22px 24px; }
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 540px) { .form-grid-2 { grid-template-columns: 1fr; gap: 0; } }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  FIELD                                    ║
+   ╚═══════════════════════════════════════════╝ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.field:last-child { margin-bottom: 0; }
+
+.field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.field-req { color: var(--teal-500); }
+.field-hint { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+
+.field-input {
+  height: 46px;
+  padding: 0 14px;
+  background: var(--gray-50);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  direction: rtl;
+  width: 100%;
+}
+.field-input::placeholder { color: var(--text-muted); }
+.field-input:hover { border-color: var(--gray-400); }
+.field-input:focus {
+  border-color: var(--teal-400);
+  background: var(--surface-solid);
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+}
+.field-input.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+
+.field-textarea { height: 90px; padding: 12px 14px; resize: vertical; line-height: 1.6; }
+
+.field-select {
+  height: 46px;
+  padding: 0 14px;
+  padding-left: 40px;
+  appearance: none;
+  background: var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat left 12px center;
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  direction: rtl;
+  width: 100%;
+}
+.field-select:hover { border-color: var(--gray-400); }
+.field-select:focus {
+  border-color: var(--teal-400);
+  background-color: var(--surface-solid);
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--danger);
+  display: none;
+  align-items: center;
+  gap: 4px;
+  animation: shake 0.35s var(--ease-out);
+}
+.field-error.show { display: flex; }
+
+@keyframes shake {
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px);}
+  75%{transform:translateX(4px);}
+}
+
+/* ╔═══════════════════════════════════════════╗
+   ║  IMAGE UPLOAD                             ║
+   ╚═══════════════════════════════════════════╝ */
+.upload-area {
+  border: 2px dashed var(--border-solid);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.22s var(--ease-out);
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+  position: relative;
+}
+.upload-area:hover {
+  border-color: var(--teal-400);
+  background: var(--teal-50);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.upload-area:focus-visible {
+  outline: 2px solid var(--teal-400);
+  outline-offset: 2px;
+}
+.upload-area.has-image { border-style: solid; border-color: var(--teal-200); }
+.upload-area.drag-over { border-color: var(--teal-400); background: var(--teal-50); transform: scale(1.01); }
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 22px;
+  pointer-events: none;
+  text-align: center;
+}
+.upload-icon { font-size: 30px; opacity: 0.5; }
+.upload-label { font-size: 13px; font-weight: 600; color: var(--text-sec); }
+.upload-sub   { font-size: 11px; color: var(--text-muted); }
+
+.upload-preview { width: 100%; height: 148px; position: relative; display: none; }
+.upload-preview.show { display: block; }
+.upload-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.upload-remove {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background 0.18s, transform 0.18s;
+}
+.upload-remove:hover { background: rgba(0,0,0,0.8); transform: scale(1.1); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  MOSQUE SEARCH                            ║
+   ╚═══════════════════════════════════════════╝ */
+.mosque-search-wrap { position: relative; }
+
+.mosque-search-input {
+  height: 46px;
+  padding: 0 14px 0 44px;
+  background: var(--gray-50);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  direction: rtl;
+  width: 100%;
+}
+.mosque-search-input::placeholder { color: var(--text-muted); }
+.mosque-search-input:focus {
+  border-color: var(--teal-400);
+  background: var(--surface-solid);
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+}
+
+.mosque-search-icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.mosque-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0; left: 0;
+  background: var(--surface-solid);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  overflow: hidden;
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+}
+.mosque-dropdown.open {
+  display: block;
+  animation: dropIn 0.22s var(--ease-out);
+}
+
+@keyframes dropIn {
+  from { opacity:0; transform:translateY(-8px) scale(0.98); }
+  to   { opacity:1; transform:translateY(0)   scale(1); }
+}
+
+.mosque-dropdown::-webkit-scrollbar { width: 4px; }
+.mosque-dropdown::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 100px; }
+
+.mosque-item {
+  padding: 13px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mosque-item:hover { background: var(--teal-50); }
+.mosque-item:last-child { border-bottom: none; }
+.mosque-item:focus-visible { background: var(--teal-50); outline: none; }
+
+.mosque-item-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.mosque-item-loc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.mosque-item-gov {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 100px;
+  background: var(--teal-50);
+  color: var(--teal-700);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mosque-add-new-row {
+  padding: 13px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--teal-600);
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(29,158,117,0.04);
+  border-top: 1.5px solid var(--teal-50);
+  transition: background 0.15s;
+}
+.mosque-add-new-row:hover { background: var(--teal-50); }
+.mosque-add-new-row-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--teal-100);
+  color: var(--teal-700);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.mosque-no-results {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ╔═══════════════════════════════════════════╗
+   ║  SELECTED MOSQUE CARD                     ║
+   ╚═══════════════════════════════════════════╝ */
+.selected-mosque {
+  background: linear-gradient(135deg, var(--teal-50) 0%, rgba(255,255,255,0.8) 100%);
+  border: 1.5px solid var(--teal-100);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: expandIn 0.25s var(--ease-spring);
+}
+
+.selected-mosque-name { font-size: 15px; font-weight: 700; color: var(--teal-800); }
+.selected-mosque-loc  { font-size: 12.5px; color: var(--teal-600); margin-top: 2px; }
+
+.btn-deselect {
+  background: rgba(15,110,86,0.1);
+  border: none;
+  color: var(--teal-600);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+.btn-deselect:hover { background: rgba(15,110,86,0.2); transform: rotate(90deg); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  NEW MOSQUE FORM                          ║
+   ╚═══════════════════════════════════════════╝ */
+.new-mosque-section {
+  border: 1.5px dashed var(--teal-100);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  background: linear-gradient(135deg, var(--teal-50) 0%, rgba(255,255,255,0.7) 100%);
+  margin-top: 16px;
+  animation: expandIn 0.28s var(--ease-spring);
+}
+
+@keyframes expandIn {
+  from { opacity:0; transform:translateY(-10px) scale(0.98); }
+  to   { opacity:1; transform:translateY(0)     scale(1); }
+}
+
+.new-mosque-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.new-mosque-title { font-size: 14px; font-weight: 700; color: var(--teal-800); }
+.new-mosque-sub   { font-size: 12px; color: var(--teal-600); margin-top: 2px; }
+
+.btn-cancel-new {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px 4px;
+  border-radius: var(--r-xs);
+  transition: color 0.18s, transform 0.18s;
+}
+.btn-cancel-new:hover { color: var(--danger); transform: rotate(90deg); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  DUPLICATE WARNING                        ║
+   ╚═══════════════════════════════════════════╝ */
+.dup-warning {
+  background: #FFFAED;
+  border: 1.5px solid var(--amber-100);
+  border-right: 4px solid var(--amber-200);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  display: none;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 14px;
+}
+.dup-warning.show { display: flex; animation: fadeUp 0.22s var(--ease-out); }
+.dup-warning-icon  { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.dup-warning-title { font-size: 13px; font-weight: 700; color: var(--amber-400); }
+.dup-warning-sub   { font-size: 12px; color: var(--gray-600); margin-top: 3px; line-height: 1.55; }
+
+.btn-proceed {
+  background: none;
+  border: 1px solid var(--teal-200);
+  color: var(--teal-600);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 8px;
+  transition: all 0.18s;
+}
+.btn-proceed:hover { background: var(--teal-50); border-color: var(--teal-400); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  SUBMIT AREA                              ║
+   ╚═══════════════════════════════════════════╝ */
+.submit-area { margin-top: 8px; }
+
+.visitor-notice {
+  background: linear-gradient(135deg, #FAEEDA 0%, #FEF6E4 100%);
+  border: 1.5px solid var(--amber-100);
+  border-right: 4px solid var(--amber-200);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  color: var(--amber-800);
+  line-height: 1.6;
+  display: none;
+  animation: fadeUp 0.25s var(--ease-out);
+}
+.visitor-notice.show { display: block; }
+
+.btn-submit-main {
+  width: 100%;
+  height: 54px;
+  background: linear-gradient(135deg, var(--teal-500) 0%, var(--teal-700) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-lg);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s var(--ease-out);
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15,110,86,0.35), 0 1px 0 rgba(255,255,255,0.1) inset;
+  letter-spacing: 0.2px;
+}
+.btn-submit-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.btn-submit-main:hover::before { transform: translateX(100%); }
+.btn-submit-main:hover {
+  background: linear-gradient(135deg, var(--teal-600) 0%, var(--teal-800) 100%);
+  box-shadow: 0 6px 24px rgba(15,110,86,0.45), 0 1px 0 rgba(255,255,255,0.1) inset;
+  transform: translateY(-1px);
+}
+.btn-submit-main:active { transform: translateY(0) scale(0.99); box-shadow: 0 2px 8px rgba(15,110,86,0.3); }
+.btn-submit-main:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+.btn-submit-main.loading { pointer-events: none; }
+.btn-submit-loading { display: none; }
+.btn-submit-main.loading .btn-submit-text { display: none; }
+.btn-submit-main.loading .btn-submit-loading { display: flex; align-items: center; gap: 8px; }
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.submit-footnote {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* ╔═══════════════════════════════════════════╗
+   ║  SUCCESS STATE                            ║
+   ╚═══════════════════════════════════════════╝ */
+.success-state {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: none;
+}
+.success-state.show { display: block; animation: fadeUp 0.45s var(--ease-out); }
+
+.success-card {
+  background: var(--surface-solid);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.success-header {
+  padding: 40px 32px 28px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.success-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(29,158,117,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.success-icon-wrap {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+  position: relative;
+}
+.success-icon-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: ring-pulse 2s ease-in-out infinite;
+}
+.success-icon-wrap.volunteer-mode { background: var(--teal-50); border: 2px solid var(--teal-100); }
+.success-icon-wrap.volunteer-mode::after { border-color: rgba(29,158,117,0.2); }
+.success-icon-wrap.visitor-mode   { background: var(--amber-50); border: 2px solid var(--amber-100); }
+.success-icon-wrap.visitor-mode::after { border-color: rgba(239,159,39,0.2); }
+
+@keyframes ring-pulse {
+  0%,100% { transform:scale(1); opacity:1; }
+  50%      { transform:scale(1.08); opacity:0.5; }
+}
+
+.success-headline {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+.success-headline.volunteer-mode { color: var(--teal-800); }
+.success-headline.visitor-mode   { color: var(--amber-400); }
+
+.success-desc { font-size: 14px; color: var(--text-sec); line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+/* Book summary inside success */
+.success-book-card {
+  margin: 0 24px;
+  background: var(--gray-50);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.success-book-avatar {
+  width: 50px; height: 50px;
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.success-book-title { font-size: 16px; font-weight: 700; }
+.success-book-meta  { font-size: 12.5px; color: var(--text-sec); margin-top: 3px; line-height: 1.5; }
+
+/* Steps */
+.success-steps { margin: 20px 24px 0; display: flex; flex-direction: column; gap: 10px; }
+
+.success-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  background: var(--surface-solid);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-md);
+  animation: fadeUp 0.4s var(--ease-out) both;
+}
+.success-step:nth-child(1) { animation-delay: 0.05s; }
+.success-step:nth-child(2) { animation-delay: 0.12s; }
+.success-step:nth-child(3) { animation-delay: 0.19s; }
+
+.success-step-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.success-step-icon.done    { background: var(--teal-50); }
+.success-step-icon.pending-icon { background: var(--amber-50); }
+.success-step-icon.next    { background: var(--gray-100); }
+
+.success-step-text { font-size: 13px; color: var(--text-sec); line-height: 1.5; }
+.success-step-text strong { color: var(--text); font-weight: 700; }
+
+/* Actions */
+.success-actions {
+  padding: 20px 24px 24px;
+  display: flex;
+  gap: 10px;
+}
+.btn-success-primary {
+  flex: 1; height: 48px;
+  background: linear-gradient(135deg, var(--teal-500), var(--teal-700));
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 3px 12px rgba(15,110,86,0.3);
+}
+.btn-success-primary:hover { box-shadow: 0 5px 18px rgba(15,110,86,0.4); transform: translateY(-1px); }
+
+.btn-success-ghost {
+  flex: 1; height: 48px;
+  background: none;
+  color: var(--text-sec);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-success-ghost:hover { background: var(--gray-100); border-color: var(--gray-400); color: var(--text); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  FOOTER                                   ║
+   ╚═══════════════════════════════════════════╝ */
+footer {
+  background: linear-gradient(135deg, var(--teal-900) 0%, #02241F 100%);
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  padding: 28px 24px;
+  font-size: 13px;
+}
+footer strong { color: rgba(255,255,255,0.8); }
+
+/* ╔═══════════════════════════════════════════╗
+   ║  UTILITIES & ANIMATIONS                   ║
+   ╚═══════════════════════════════════════════╝ */
+.hidden { display: none !important; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+
+/* Stagger form cards on load */
+.form-card:nth-child(1) { animation: fadeUp 0.5s var(--ease-out) 0.1s both; }
+.form-card:nth-child(2) { animation: fadeUp 0.5s var(--ease-out) 0.18s both; }
+.submit-area            { animation: fadeUp 0.5s var(--ease-out) 0.26s both; }
+
+/* Category colors */
+.cat-فقه    { background:var(--teal-50);   color:var(--teal-800); }
+.cat-حديث   { background:var(--blue-50);   color:var(--blue-800); }
+.cat-تفسير  { background:var(--purple-50); color:var(--purple-800); }
+.cat-سيرة   { background:var(--coral-50);  color:var(--coral-600); }
+.cat-عقيدة  { background:var(--amber-50);  color:var(--amber-800); }
+.cat-تزكية  { background:var(--green-50);  color:var(--green-800); }
+.cat-أدب    { background:var(--pink-50);   color:var(--pink-800); }
+.cat-تاريخ  { background:var(--gray-100);  color:var(--gray-800); }
+.cat-أخرى   { background:var(--gray-100);  color:var(--gray-800); }
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--teal-400);
+  outline-offset: 2px;
+}
+
+/* Smooth scroll target padding */
+.form-card { scroll-margin-top: 80px; }
 </style>
 </head>
 <body>
 
-<!-- ═══ NAV ═══ -->
-<nav class="navbar">
-  <div class="nav-inner">
-    <a href="browse.html" class="nav-brand">
-      <div class="brand-mark">ر</div>
-      <div>
-        <div class="brand-name">على رفوف المساجد</div>
-        <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+<!-- ═══ NAVBAR ═══ -->
+<header>
+  <nav class="navbar" aria-label="التنقل الرئيسي">
+    <div class="nav-inner">
+      <a href="browse.html" class="nav-brand" aria-label="الصفحة الرئيسية — على رفوف المساجد">
+        <div class="brand-mark" aria-hidden="true">ر</div>
+        <div>
+          <div class="brand-name">على رفوف المساجد</div>
+          <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+        </div>
+      </a>
+
+      <nav class="nav-links" aria-label="روابط التنقل">
+        <a href="browse.html" class="nav-link">تصفح</a>
+        <a href="#" class="nav-link active" aria-current="page">تسجيل كتاب</a>
+        <a href="#" class="nav-link">عن المنصة</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn-nav-user" type="button" aria-label="ملف المستخدم">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          أحمد محمود
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
       </div>
-    </a>
-    <div class="nav-links">
-      <a href="browse.html" class="nav-link">تصفح</a>
-      <a href="#" class="nav-link active">تسجيل كتاب</a>
-      <a href="#" class="nav-link">عن المنصة</a>
+
+      <button class="nav-mobile-toggle" type="button" aria-label="قائمة التنقل">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
-    <div class="nav-actions">
-      <button class="btn-nav-login">أحمد محمود ▾</button>
-    </div>
-  </div>
-</nav>
+  </nav>
+</header>
 
 <!-- ═══ PROTOTYPE ROLE SWITCHER ═══ -->
-<div class="role-bar" role="note" aria-label="أداة النموذج الأولي">
-  <span class="role-note">🛠 أداة النموذج الأولي:</span>
-  <span class="role-bar-label">تسجيل الدخول كـ</span>
-  <div class="role-tabs">
-    <button class="role-tab" id="tab-visitor" onclick="setRole('visitor')">زائر مسجّل</button>
-    <button class="role-tab active" id="tab-volunteer" onclick="setRole('volunteer')">متطوع</button>
+<div class="role-bar" role="note" aria-label="أداة النموذج الأولي — للتجربة فقط">
+  <span class="role-note">
+    <span class="role-pill-icon">🛠</span>
+    نموذج أولي
+  </span>
+  <div class="role-bar-chip">
+    <span class="role-bar-label">الدخول كـ</span>
+    <div class="role-tabs" role="group" aria-label="اختيار دور المستخدم">
+      <button class="role-tab"        id="tab-visitor"   data-role="visitor"   type="button">زائر مسجّل</button>
+      <button class="role-tab active" id="tab-volunteer" data-role="volunteer" type="button">متطوع</button>
+    </div>
   </div>
-  <span class="role-note" id="role-note-text">الإضافة فورية بدون مراجعة</span>
+  <span class="role-note" id="role-note-text">
+    <span class="role-note-dot" aria-hidden="true"></span>
+    الإضافة فورية بدون مراجعة
+  </span>
 </div>
 
 <!-- ═══ PAGE HEADER ═══ -->
-<div class="page-header">
+<div class="page-header" id="page-header">
   <nav class="breadcrumb" aria-label="مسار التنقل">
     <a href="browse.html">تصفح الكتب</a>
-    <span class="breadcrumb-sep">›</span>
-    <span>تسجيل كتاب</span>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span aria-current="page">تسجيل كتاب</span>
   </nav>
   <h1 class="page-title">تسجيل كتاب جديد</h1>
   <p class="page-sub" id="page-sub">أضف كتاباً وجدته في مسجد لتتمكن المجتمع من اكتشافه</p>
-  <div class="role-badge volunteer" id="role-badge">
-    <div class="role-badge-dot"></div>
+  <div class="role-badge volunteer" id="role-badge" aria-live="polite">
+    <div class="role-badge-dot" aria-hidden="true"></div>
     <span id="role-badge-text">متطوع — الإضافة فورية</span>
   </div>
 </div>
 
 <!-- ═══ FORM ═══ -->
-<form class="form-wrap" id="submit-form" novalidate onsubmit="handleSubmit(event)">
+<main>
+  <form class="form-wrap" id="submit-form" novalidate aria-label="نموذج تسجيل كتاب">
 
-  <!-- Section 1: Book Info -->
-  <div class="form-card">
-    <div class="form-card-header">
-      <div class="section-num" aria-hidden="true">١</div>
-      <div>
-        <div class="section-title">معلومات الكتاب</div>
-        <div class="section-sub">الحقول المطلوبة مشار إليها بـ *</div>
-      </div>
-    </div>
-    <div class="form-card-body">
-
-      <!-- Title -->
-      <div class="field">
-        <label class="field-label" for="f-title">عنوان الكتاب <span class="field-req">*</span></label>
-        <input class="field-input" id="f-title" type="text" placeholder="مثال: فقه السنة" autocomplete="off" oninput="checkDuplicate()">
-        <span class="field-error" id="err-title">يرجى إدخال عنوان الكتاب</span>
+    <!-- ── Section 1: Book Info ── -->
+    <article class="form-card" aria-labelledby="section1-title">
+      <div class="form-card-header">
+        <div class="section-num" aria-hidden="true">١</div>
+        <div>
+          <h2 class="section-title" id="section1-title">معلومات الكتاب</h2>
+          <p class="section-sub">الحقول المطلوبة مشار إليها بـ <span aria-label="نجمة">*</span></p>
+        </div>
       </div>
 
-      <!-- Author + Category -->
-      <div class="form-grid-2">
+      <div class="form-card-body">
+
+        <!-- Title -->
         <div class="field">
-          <label class="field-label" for="f-author">اسم المؤلف</label>
-          <input class="field-input" id="f-author" type="text" placeholder="مثال: السيد سابق">
-        </div>
-        <div class="field">
-          <label class="field-label" for="f-category">التصنيف</label>
-          <select class="field-input field-select" id="f-category">
-            <option value="">اختر تصنيفاً...</option>
-            <option value="فقه">فقه</option>
-            <option value="حديث">حديث</option>
-            <option value="تفسير">تفسير</option>
-            <option value="سيرة">سيرة</option>
-            <option value="عقيدة">عقيدة</option>
-            <option value="تزكية">تزكية</option>
-            <option value="أدب">أدب</option>
-            <option value="تاريخ">تاريخ</option>
-            <option value="أخرى">أخرى</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Edition + Publisher -->
-      <div class="form-grid-2">
-        <div class="field">
-          <label class="field-label" for="f-edition">رقم الطبعة</label>
-          <input class="field-input" id="f-edition" type="text" placeholder="مثال: الطبعة الثالثة">
-        </div>
-        <div class="field">
-          <label class="field-label" for="f-publisher">دار النشر</label>
-          <input class="field-input" id="f-publisher" type="text" placeholder="مثال: دار الفكر">
-        </div>
-      </div>
-
-      <!-- Notes -->
-      <div class="field">
-        <label class="field-label" for="f-notes">ملاحظات إضافية</label>
-        <textarea class="field-input field-textarea" id="f-notes" placeholder="وصف مختصر عن الكتاب، حالته، أو أي معلومات مفيدة للقراء..."></textarea>
-      </div>
-
-      <!-- Book image upload -->
-      <div class="field">
-        <label class="field-label">صورة الكتاب</label>
-        <p class="field-hint">اختياري · يُفضَّل صورة الغلاف لتسهيل التعرف عليه</p>
-        <div class="upload-area" id="book-upload-area" role="button" tabindex="0" aria-label="رفع صورة الكتاب" onclick="document.getElementById('book-img-input').click()">
-          <input type="file" id="book-img-input" accept="image/jpeg,image/png,image/webp" hidden onchange="previewImage(this,'book-preview','book-preview-img','book-upload-area')">
-          <div class="upload-placeholder" id="book-upload-ph">
-            <div class="upload-icon">📷</div>
-            <p class="upload-label">انقر لرفع صورة الغلاف</p>
-            <p class="upload-sub">JPEG · PNG · WebP · أقصى حجم 5MB</p>
-          </div>
-          <div class="upload-preview" id="book-preview">
-            <img src="" alt="صورة الكتاب" id="book-preview-img">
-            <button type="button" class="upload-remove" onclick="removeImage(event,'book-img-input','book-preview','book-upload-area','book-upload-ph')" aria-label="إزالة الصورة">✕</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div><!-- /form-card -->
-
-  <!-- Section 2: Mosque -->
-  <div class="form-card">
-    <div class="form-card-header">
-      <div class="section-num" aria-hidden="true">٢</div>
-      <div>
-        <div class="section-title">المسجد الذي يحتوي على الكتاب</div>
-        <div class="section-sub">ابحث أولاً — إذا لم تجد المسجد يمكنك إضافته</div>
-      </div>
-    </div>
-    <div class="form-card-body">
-
-      <!-- Mosque search -->
-      <div class="field" id="mosque-search-field">
-        <label class="field-label" for="mosque-search">ابحث عن المسجد <span class="field-req">*</span></label>
-        <div class="mosque-search-wrap">
-          <span class="mosque-search-icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <label class="field-label" for="f-title">
+            عنوان الكتاب <span class="field-req" aria-label="مطلوب">*</span>
+          </label>
+          <input class="field-input" id="f-title" type="text"
+            placeholder="مثال: فقه السنة" autocomplete="off"
+            aria-required="true" aria-describedby="err-title">
+          <span class="field-error" id="err-title" role="alert">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            يرجى إدخال عنوان الكتاب
           </span>
-          <input type="text" class="mosque-search-input" id="mosque-search"
-            placeholder="ابحث بالاسم أو المدينة أو المحافظة..."
-            autocomplete="off" oninput="onMosqueSearch(this.value)" onfocus="onMosqueSearch(this.value)">
-          <div class="mosque-dropdown" id="mosque-dropdown" role="listbox" aria-label="نتائج البحث عن المساجد"></div>
-        </div>
-        <span class="field-error" id="err-mosque">يرجى اختيار مسجد أو إضافة مسجد جديد</span>
-      </div>
-
-      <!-- Selected mosque display -->
-      <div class="selected-mosque hidden" id="selected-mosque-card" role="status">
-        <div class="selected-mosque-info">
-          <div class="selected-mosque-name" id="sel-mosque-name">—</div>
-          <div class="selected-mosque-loc" id="sel-mosque-loc">—</div>
-        </div>
-        <button type="button" class="btn-deselect" onclick="deselectMosque()" aria-label="إلغاء اختيار المسجد">✕</button>
-      </div>
-
-      <!-- Duplicate warning -->
-      <div class="dup-warning" id="dup-warning" role="alert">
-        <span class="dup-warning-icon">⚠️</span>
-        <div class="dup-warning-text">
-          <p class="dup-warning-title">هذا الكتاب مسجّل بالفعل في هذا المسجد</p>
-          <p class="dup-warning-sub">يبدو أن هناك إدخالاً موجوداً بهذا العنوان في نفس المسجد. يمكنك المتابعة إذا كانت نسختك مختلفة (طبعة مختلفة مثلاً).</p>
-          <button type="button" class="btn-proceed">متابعة على أي حال</button>
-        </div>
-      </div>
-
-      <!-- New mosque form -->
-      <div class="new-mosque-section hidden" id="new-mosque-section">
-        <div class="new-mosque-header">
-          <div>
-            <p class="new-mosque-title">🕌 إضافة مسجد جديد</p>
-            <p class="new-mosque-sub">لم يُسجَّل هذا المسجد بعد في المنصة</p>
-          </div>
-          <button type="button" class="btn-cancel-new" onclick="cancelNewMosque()" aria-label="إلغاء إضافة مسجد جديد">✕</button>
         </div>
 
-        <div class="form-grid-2" style="margin-bottom:16px;">
+        <!-- Author + Category -->
+        <div class="form-grid-2">
           <div class="field">
-            <label class="field-label" for="nm-gov">المحافظة <span class="field-req">*</span></label>
-            <select class="field-input field-select" id="nm-gov" onchange="updateNmCities(this.value)">
-              <option value="">اختر المحافظة...</option>
-              <option>المنيا</option><option>القاهرة</option><option>الإسكندرية</option>
-              <option>أسيوط</option><option>سوهاج</option><option>الجيزة</option>
-              <option>الشرقية</option><option>الدقهلية</option><option>المنوفية</option>
-              <option>الفيوم</option><option>بني سويف</option><option>قنا</option>
-              <option>الأقصر</option><option>أسوان</option>
-            </select>
-            <span class="field-error" id="err-nm-gov">يرجى اختيار المحافظة</span>
+            <label class="field-label" for="f-author">اسم المؤلف</label>
+            <input class="field-input" id="f-author" type="text" placeholder="مثال: السيد سابق">
           </div>
           <div class="field">
-            <label class="field-label" for="nm-city">المدينة / المركز <span class="field-req">*</span></label>
-            <select class="field-input field-select" id="nm-city">
-              <option value="">اختر المحافظة أولاً...</option>
+            <label class="field-label" for="f-category">التصنيف</label>
+            <select class="field-input field-select" id="f-category" aria-label="تصنيف الكتاب">
+              <option value="">اختر تصنيفاً...</option>
+              <option value="فقه">فقه</option>
+              <option value="حديث">حديث</option>
+              <option value="تفسير">تفسير</option>
+              <option value="سيرة">سيرة</option>
+              <option value="عقيدة">عقيدة</option>
+              <option value="تزكية">تزكية</option>
+              <option value="أدب">أدب</option>
+              <option value="تاريخ">تاريخ</option>
+              <option value="أخرى">أخرى</option>
             </select>
-            <span class="field-error" id="err-nm-city">يرجى اختيار المدينة</span>
           </div>
         </div>
 
-        <div class="field" style="margin-bottom:16px;">
-          <label class="field-label" for="nm-name">اسم المسجد</label>
-          <p class="field-hint">اختياري — كثير من المساجد في مصر لا تحمل اسماً رسمياً</p>
-          <input class="field-input" id="nm-name" type="text" placeholder="مثال: مسجد النور">
+        <!-- Edition + Publisher -->
+        <div class="form-grid-2">
+          <div class="field">
+            <label class="field-label" for="f-edition">رقم الطبعة</label>
+            <input class="field-input" id="f-edition" type="text" placeholder="مثال: الطبعة الثالثة">
+          </div>
+          <div class="field">
+            <label class="field-label" for="f-publisher">دار النشر</label>
+            <input class="field-input" id="f-publisher" type="text" placeholder="مثال: دار الفكر">
+          </div>
         </div>
 
+        <!-- Notes -->
         <div class="field">
-          <label class="field-label">صورة المسجد</label>
-          <p class="field-hint">اختياري · تساعد القراء على التعرف عليه</p>
-          <div class="upload-area" id="mosque-upload-area" style="min-height:90px;" role="button" tabindex="0" aria-label="رفع صورة المسجد" onclick="document.getElementById('mosque-img-input').click()">
-            <input type="file" id="mosque-img-input" accept="image/jpeg,image/png,image/webp" hidden onchange="previewImage(this,'mosque-preview','mosque-preview-img','mosque-upload-area')">
-            <div class="upload-placeholder" id="mosque-upload-ph">
-              <div class="upload-icon" style="font-size:22px;">🕌</div>
-              <p class="upload-label" style="font-size:12.5px;">انقر لرفع صورة المسجد</p>
-              <p class="upload-sub">اختياري · أقصى حجم 5MB</p>
+          <label class="field-label" for="f-notes">ملاحظات إضافية</label>
+          <textarea class="field-input field-textarea" id="f-notes"
+            placeholder="وصف مختصر، حالة الكتاب، أو أي معلومات مفيدة للقراء..."></textarea>
+        </div>
+
+        <!-- Book image upload -->
+        <div class="field">
+          <label class="field-label" id="book-img-label">صورة الكتاب</label>
+          <p class="field-hint">اختياري · يُفضَّل صورة الغلاف لتسهيل التعرف عليه</p>
+          <div class="upload-area" id="book-upload-area" role="button" tabindex="0"
+            aria-labelledby="book-img-label" aria-describedby="book-upload-hint">
+            <input type="file" id="book-img-input" accept="image/jpeg,image/png,image/webp"
+              hidden aria-label="اختيار صورة الكتاب">
+            <div class="upload-placeholder" id="book-upload-ph">
+              <div class="upload-icon" aria-hidden="true">📷</div>
+              <p class="upload-label">انقر أو اسحب صورة الغلاف</p>
+              <p class="upload-sub" id="book-upload-hint">JPEG · PNG · WebP · أقصى حجم 5MB</p>
             </div>
-            <div class="upload-preview" id="mosque-preview">
-              <img src="" alt="صورة المسجد" id="mosque-preview-img">
-              <button type="button" class="upload-remove" onclick="removeImage(event,'mosque-img-input','mosque-preview','mosque-upload-area','mosque-upload-ph')" aria-label="إزالة الصورة">✕</button>
+            <div class="upload-preview" id="book-preview">
+              <img src="" alt="معاينة صورة الكتاب" id="book-preview-img">
+              <button type="button" class="upload-remove" id="book-remove-btn" aria-label="إزالة صورة الكتاب">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
             </div>
           </div>
         </div>
 
-      </div><!-- /new-mosque-section -->
-
-    </div>
-  </div><!-- /form-card -->
-
-  <!-- Submit -->
-  <div class="submit-area">
-    <div class="visitor-notice" id="visitor-notice">
-      <strong>ملاحظة:</strong> بما أنك مسجّل كزائر، سيُرسَل طلبك إلى فريق المراجعة قبل نشره للعموم. ستجد حالة طلبك في ملفك الشخصي.
-    </div>
-    <button type="submit" class="btn-submit-main">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-      <span id="submit-label">تسجيل الكتاب</span>
-    </button>
-    <p class="submit-footnote">بالإرسال فأنت تقر بأن المعلومات صحيحة وأن الكتاب موجود فعلاً في المسجد المذكور</p>
-  </div>
-
-</form>
-
-<!-- ═══ SUCCESS STATE ═══ -->
-<div class="success-state" id="success-state">
-  <div class="success-card">
-    <div class="success-header">
-      <div class="success-icon-wrap" id="s-icon-wrap">
-        <span id="s-icon"></span>
       </div>
-      <h2 class="success-headline" id="s-headline"></h2>
-      <p class="success-desc" id="s-desc"></p>
+    </article><!-- /form-card 1 -->
+
+    <!-- ── Section 2: Mosque ── -->
+    <article class="form-card" aria-labelledby="section2-title">
+      <div class="form-card-header">
+        <div class="section-num" aria-hidden="true">٢</div>
+        <div>
+          <h2 class="section-title" id="section2-title">المسجد الذي يحتوي على الكتاب</h2>
+          <p class="section-sub">ابحث أولاً — إذا لم تجد المسجد يمكنك إضافته</p>
+        </div>
+      </div>
+
+      <div class="form-card-body">
+
+        <!-- Mosque search -->
+        <div class="field" id="mosque-search-field">
+          <label class="field-label" for="mosque-search">
+            ابحث عن المسجد <span class="field-req" aria-label="مطلوب">*</span>
+          </label>
+          <div class="mosque-search-wrap">
+            <span class="mosque-search-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+            </span>
+            <input type="text" class="mosque-search-input" id="mosque-search"
+              placeholder="ابحث بالاسم أو المدينة أو المحافظة..."
+              autocomplete="off" aria-autocomplete="list"
+              aria-controls="mosque-dropdown" aria-expanded="false"
+              role="combobox">
+            <div class="mosque-dropdown" id="mosque-dropdown" role="listbox" aria-label="نتائج البحث عن المساجد"></div>
+          </div>
+          <span class="field-error" id="err-mosque" role="alert">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            يرجى اختيار مسجد أو إضافة مسجد جديد
+          </span>
+        </div>
+
+        <!-- Selected mosque card -->
+        <div class="selected-mosque hidden" id="selected-mosque-card" role="status" aria-live="polite">
+          <div class="selected-mosque-info">
+            <div class="selected-mosque-name" id="sel-mosque-name">—</div>
+            <div class="selected-mosque-loc"  id="sel-mosque-loc">—</div>
+          </div>
+          <button type="button" class="btn-deselect" id="btn-deselect" aria-label="إلغاء اختيار المسجد">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Duplicate warning -->
+        <div class="dup-warning" id="dup-warning" role="alert" aria-live="polite">
+          <span class="dup-warning-icon" aria-hidden="true">⚠️</span>
+          <div>
+            <p class="dup-warning-title">هذا الكتاب مسجّل بالفعل في هذا المسجد</p>
+            <p class="dup-warning-sub">يبدو أن هناك إدخالاً موجوداً بهذا العنوان. يمكنك المتابعة إذا كانت نسختك مختلفة (طبعة مختلفة مثلاً).</p>
+            <button type="button" class="btn-proceed" id="btn-proceed">متابعة على أي حال</button>
+          </div>
+        </div>
+
+        <!-- New mosque form -->
+        <section class="new-mosque-section hidden" id="new-mosque-section" aria-labelledby="nm-title">
+          <div class="new-mosque-header">
+            <div>
+              <p class="new-mosque-title" id="nm-title">🕌 إضافة مسجد جديد</p>
+              <p class="new-mosque-sub">لم يُسجَّل هذا المسجد بعد في المنصة</p>
+            </div>
+            <button type="button" class="btn-cancel-new" id="btn-cancel-new" aria-label="إلغاء إضافة مسجد جديد">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom:16px;">
+            <div class="field">
+              <label class="field-label" for="nm-gov">المحافظة <span class="field-req">*</span></label>
+              <select class="field-input field-select" id="nm-gov" aria-required="true" aria-describedby="err-nm-gov">
+                <option value="">اختر المحافظة...</option>
+                <option>المنيا</option><option>القاهرة</option><option>الإسكندرية</option>
+                <option>أسيوط</option><option>سوهاج</option><option>الجيزة</option>
+                <option>الشرقية</option><option>الدقهلية</option><option>المنوفية</option>
+                <option>الفيوم</option><option>بني سويف</option><option>قنا</option>
+                <option>الأقصر</option><option>أسوان</option>
+              </select>
+              <span class="field-error" id="err-nm-gov" role="alert">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                يرجى اختيار المحافظة
+              </span>
+            </div>
+            <div class="field">
+              <label class="field-label" for="nm-city">المدينة / المركز <span class="field-req">*</span></label>
+              <select class="field-input field-select" id="nm-city" aria-required="true" aria-describedby="err-nm-city">
+                <option value="">اختر المحافظة أولاً...</option>
+              </select>
+              <span class="field-error" id="err-nm-city" role="alert">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                يرجى اختيار المدينة
+              </span>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:16px;">
+            <label class="field-label" for="nm-name">اسم المسجد</label>
+            <p class="field-hint">اختياري — كثير من المساجد في مصر لا تحمل اسماً رسمياً</p>
+            <input class="field-input" id="nm-name" type="text" placeholder="مثال: مسجد النور">
+          </div>
+
+          <div class="field">
+            <label class="field-label" id="mosque-img-label">صورة المسجد</label>
+            <p class="field-hint">اختياري · تساعد القراء على التعرف عليه</p>
+            <div class="upload-area" id="mosque-upload-area" role="button" tabindex="0"
+              style="min-height:90px;" aria-labelledby="mosque-img-label">
+              <input type="file" id="mosque-img-input" accept="image/jpeg,image/png,image/webp"
+                hidden aria-label="اختيار صورة المسجد">
+              <div class="upload-placeholder" id="mosque-upload-ph">
+                <div class="upload-icon" style="font-size:22px;" aria-hidden="true">🕌</div>
+                <p class="upload-label" style="font-size:12.5px;">انقر لرفع صورة المسجد</p>
+                <p class="upload-sub">اختياري · أقصى حجم 5MB</p>
+              </div>
+              <div class="upload-preview" id="mosque-preview">
+                <img src="" alt="معاينة صورة المسجد" id="mosque-preview-img">
+                <button type="button" class="upload-remove" id="mosque-remove-btn" aria-label="إزالة صورة المسجد">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section><!-- /new-mosque-section -->
+
+      </div>
+    </article><!-- /form-card 2 -->
+
+    <!-- ── Submit ── -->
+    <div class="submit-area">
+      <div class="visitor-notice" id="visitor-notice" role="note">
+        <strong>ملاحظة:</strong> بما أنك مسجّل كزائر، سيُرسَل طلبك إلى فريق المراجعة قبل نشره للعموم. ستجد حالة طلبك في ملفك الشخصي.
+      </div>
+      <button type="submit" class="btn-submit-main" id="btn-submit">
+        <span class="btn-submit-text">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <span id="submit-label">تسجيل الكتاب</span>
+        </span>
+        <span class="btn-submit-loading">
+          <span class="spinner" aria-hidden="true"></span>
+          جاري الحفظ...
+        </span>
+      </button>
+      <p class="submit-footnote">
+        بالإرسال فأنت تقر بأن المعلومات صحيحة وأن الكتاب موجود فعلاً في المسجد المذكور
+      </p>
     </div>
 
-    <!-- Submitted book summary -->
-    <div class="success-book-card" id="s-book-card">
-      <div class="success-book-avatar cat-فقه" id="s-avatar">ف</div>
-      <div>
-        <p class="success-book-title" id="s-book-title"></p>
-        <p class="success-book-meta" id="s-book-meta"></p>
+  </form><!-- /submit-form -->
+
+  <!-- ═══ SUCCESS STATE ═══ -->
+  <section class="success-state" id="success-state" aria-live="polite" aria-label="حالة التسجيل">
+    <div class="success-card">
+      <div class="success-header">
+        <div class="success-icon-wrap" id="s-icon-wrap">
+          <span id="s-icon" aria-hidden="true"></span>
+        </div>
+        <h2 class="success-headline" id="s-headline"></h2>
+        <p class="success-desc" id="s-desc"></p>
+      </div>
+
+      <div class="success-book-card" id="s-book-card">
+        <div class="success-book-avatar cat-فقه" id="s-avatar" aria-hidden="true">ف</div>
+        <div>
+          <p class="success-book-title" id="s-book-title"></p>
+          <p class="success-book-meta"  id="s-book-meta"></p>
+        </div>
+      </div>
+
+      <div class="success-steps" id="s-steps"></div>
+
+      <div class="success-actions">
+        <button class="btn-success-ghost"   id="btn-register-another" type="button">تسجيل كتاب آخر</button>
+        <button class="btn-success-primary" id="btn-browse"           type="button">تصفح الكتب</button>
       </div>
     </div>
+  </section>
+</main>
 
-    <!-- Steps (different per role) -->
-    <div class="success-steps" id="s-steps"></div>
-
-    <div class="success-actions">
-      <button class="btn-success-ghost" onclick="resetForm()">تسجيل كتاب آخر</button>
-      <button class="btn-success-primary" onclick="window.location.href='browse.html'">تصفح الكتب</button>
-    </div>
-  </div>
-</div>
-
-<footer style="background:var(--teal-900);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:13px;">
-  <strong style="color:rgba(255,255,255,.8);">على رفوف المساجد</strong> — مبادرة مجتمعية مفتوحة
+<footer>
+  <strong>على رفوف المساجد</strong> — مبادرة مجتمعية مفتوحة
 </footer>
 
 <script>
-// ═══════════ DATA ═══════════
-
+/* ═══════════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════════ */
 const CITIES = {
-  'المنيا':['مدينة المنيا','ملوي','سمالوط','مغاغة','بني مزار','المطاهرة','أبو قرقاص'],
-  'القاهرة':['مدينة نصر','المعادي','الزيتون','شبرا','حلوان','مصر الجديدة','العباسية','الدراسة'],
-  'الإسكندرية':['المنتزه','سيدي بشر','اللبان','كرموز','العجمي','برج العرب','أبو قير'],
-  'أسيوط':['مدينة أسيوط','ديروط','القوصية','البداري','أبو تيج','منفلوط'],
-  'سوهاج':['مدينة سوهاج','أخميم','طهطا','جرجا','دار السلام','المراغة'],
-  'الجيزة':['مدينة الجيزة','العياط','أطفيح','الصف','البدرشين','الحوامدية'],
-  'الشرقية':['الزقازيق','العاشر من رمضان','بلبيس','ميت غمر','منيا القمح'],
-  'الدقهلية':['المنصورة','طلخا','بلقاس','أجا','السنبلاوين'],
-  'المنوفية':['شبين الكوم','منوف','السادات','قويسنا'],
-  'الفيوم':['مدينة الفيوم','سنورس','يوسف الصديق','إطسا'],
-  'بني سويف':['مدينة بني سويف','الواسطى','ناصر','إهناسيا'],
-  'قنا':['مدينة قنا','نجع حمادي','دشنا','قوص'],
-  'الأقصر':['مدينة الأقصر','أرمنت','إسنا','الزينية'],
-  'أسوان':['مدينة أسوان','كوم أمبو','إدفو','نصر النوبة'],
+  'المنيا':      ['مدينة المنيا','ملوي','سمالوط','مغاغة','بني مزار','المطاهرة','أبو قرقاص'],
+  'القاهرة':     ['مدينة نصر','المعادي','الزيتون','شبرا','حلوان','مصر الجديدة','العباسية','الدراسة'],
+  'الإسكندرية': ['المنتزه','سيدي بشر','اللبان','كرموز','العجمي','برج العرب','أبو قير'],
+  'أسيوط':       ['مدينة أسيوط','ديروط','القوصية','البداري','أبو تيج','منفلوط'],
+  'سوهاج':       ['مدينة سوهاج','أخميم','طهطا','جرجا','دار السلام','المراغة'],
+  'الجيزة':      ['مدينة الجيزة','العياط','أطفيح','الصف','البدرشين','الحوامدية'],
+  'الشرقية':     ['الزقازيق','العاشر من رمضان','بلبيس','ميت غمر','منيا القمح'],
+  'الدقهلية':    ['المنصورة','طلخا','بلقاس','أجا','السنبلاوين'],
+  'المنوفية':    ['شبين الكوم','منوف','السادات','قويسنا'],
+  'الفيوم':      ['مدينة الفيوم','سنورس','يوسف الصديق','إطسا'],
+  'بني سويف':   ['مدينة بني سويف','الواسطى','ناصر','إهناسيا'],
+  'قنا':          ['مدينة قنا','نجع حمادي','دشنا','قوص'],
+  'الأقصر':      ['مدينة الأقصر','أرمنت','إسنا','الزينية'],
+  'أسوان':       ['مدينة أسوان','كوم أمبو','إدفو','نصر النوبة'],
 };
 
 const MOSQUES = [
-  {id:1, name:'مسجد النور',     city:'مدينة المنيا', gov:'المنيا'},
-  {id:2, name:'مسجد الرحمة',   city:'ملوي',          gov:'المنيا'},
-  {id:3, name:'مسجد الأنصار',  city:'مدينة أسيوط',  gov:'أسيوط'},
-  {id:4, name:'مسجد التوحيد',  city:'مدينة نصر',    gov:'القاهرة'},
-  {id:5, name:'مسجد السلام',   city:'المعادي',       gov:'القاهرة'},
-  {id:6, name:'مسجد الهداية',  city:'سمالوط',        gov:'المنيا'},
-  {id:7, name:'مسجد الإيمان',  city:'سيدي بشر',     gov:'الإسكندرية'},
-  {id:8, name:'مسجد عمر',      city:'الزيتون',       gov:'القاهرة'},
-  {id:9, name:'مسجد الفتح',    city:'المنتزه',       gov:'الإسكندرية'},
-  {id:10,name:'مسجد الصحابة',  city:'مغاغة',         gov:'المنيا'},
-  {id:11,name:'مسجد الرسالة',  city:'مدينة سوهاج',  gov:'سوهاج'},
+  {id:1,  name:'مسجد النور',    city:'مدينة المنيا', gov:'المنيا'},
+  {id:2,  name:'مسجد الرحمة',  city:'ملوي',          gov:'المنيا'},
+  {id:3,  name:'مسجد الأنصار', city:'مدينة أسيوط',  gov:'أسيوط'},
+  {id:4,  name:'مسجد التوحيد', city:'مدينة نصر',    gov:'القاهرة'},
+  {id:5,  name:'مسجد السلام',  city:'المعادي',       gov:'القاهرة'},
+  {id:6,  name:'مسجد الهداية', city:'سمالوط',        gov:'المنيا'},
+  {id:7,  name:'مسجد الإيمان', city:'سيدي بشر',     gov:'الإسكندرية'},
+  {id:8,  name:'مسجد عمر',     city:'الزيتون',       gov:'القاهرة'},
+  {id:9,  name:'مسجد الفتح',   city:'المنتزه',       gov:'الإسكندرية'},
+  {id:10, name:'مسجد الصحابة', city:'مغاغة',         gov:'المنيا'},
+  {id:11, name:'مسجد الرسالة', city:'مدينة سوهاج',  gov:'سوهاج'},
 ];
 
-// Known duplicates for demo
 const KNOWN_DUPS = [
-  {title:'فقه السنة', mosqueId:1},
+  {title:'فقه السنة',      mosqueId:1},
   {title:'رياض الصالحين', mosqueId:2},
-  {title:'تفسير ابن كثير', mosqueId:6},
+  {title:'تفسير ابن كثير',mosqueId:6},
 ];
 
-// ═══════════ STATE ═══════════
+/* ═══════════════════════════════════════════════════════════════
+   STATE  (single source of truth)
+═══════════════════════════════════════════════════════════════ */
+const state = {
+  role:           'volunteer',  // 'volunteer' | 'visitor'
+  selectedMosque: null,         // mosque object or null
+  addingNewMosque:false,
+  dupOverridden:  false,
+};
 
-let role = 'volunteer';
-let selectedMosque = null;
-let addingNewMosque = false;
-let dupOverridden = false;
-
-// ═══════════ ROLE ═══════════
-
+/* ═══════════════════════════════════════════════════════════════
+   ROLE
+═══════════════════════════════════════════════════════════════ */
 function setRole(r) {
-  role = r;
-  document.getElementById('tab-visitor').classList.toggle('active', r==='visitor');
-  document.getElementById('tab-volunteer').classList.toggle('active', r==='volunteer');
+  state.role = r;
+
+  // Tabs
+  document.getElementById('tab-visitor').classList.toggle('active',   r === 'visitor');
+  document.getElementById('tab-volunteer').classList.toggle('active', r === 'volunteer');
+
+  const isVol = r === 'volunteer';
+
+  // Badge
   const badge = document.getElementById('role-badge');
-  const badgeText = document.getElementById('role-badge-text');
-  const note = document.getElementById('role-note-text');
-  const submitLabel = document.getElementById('submit-label');
-  const visitorNotice = document.getElementById('visitor-notice');
-  if (r==='volunteer') {
-    badge.className='role-badge volunteer';
-    badgeText.textContent='متطوع — الإضافة فورية';
-    note.textContent='الإضافة فورية بدون مراجعة';
-    submitLabel.textContent='تسجيل الكتاب';
-    visitorNotice.classList.remove('show');
-  } else {
-    badge.className='role-badge visitor';
-    badgeText.textContent='زائر مسجّل — يحتاج مراجعة';
-    note.textContent='الطلب سيُرسَل للمراجعة';
-    submitLabel.textContent='إرسال طلب التسجيل';
-    visitorNotice.classList.add('show');
+  badge.className = `role-badge ${isVol ? 'volunteer' : 'visitor'}`;
+  document.getElementById('role-badge-text').textContent =
+    isVol ? 'متطوع — الإضافة فورية' : 'زائر مسجّل — يحتاج مراجعة';
+
+  // Note
+  document.getElementById('role-note-text').innerHTML = `
+    <span class="role-note-dot" aria-hidden="true"></span>
+    ${isVol ? 'الإضافة فورية بدون مراجعة' : 'الطلب سيُرسَل للمراجعة'}
+  `;
+
+  // Submit label
+  document.getElementById('submit-label').textContent =
+    isVol ? 'تسجيل الكتاب' : 'إرسال طلب التسجيل';
+
+  // Visitor notice
+  document.getElementById('visitor-notice').classList.toggle('show', !isVol);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   IMAGE UPLOAD (shared between book & mosque)
+═══════════════════════════════════════════════════════════════ */
+function setupUploadArea({ areaId, inputId, previewId, imgId, phId, removeId }) {
+  const area    = document.getElementById(areaId);
+  const input   = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  const img     = document.getElementById(imgId);
+  const ph      = document.getElementById(phId);
+  const removeBtn = document.getElementById(removeId);
+
+  // Click to open
+  area.addEventListener('click', () => input.click());
+  area.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+
+  // Drag and drop
+  area.addEventListener('dragover',  e => { e.preventDefault(); area.classList.add('drag-over'); });
+  area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+  area.addEventListener('drop', e => {
+    e.preventDefault();
+    area.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  });
+
+  input.addEventListener('change', () => { if (input.files[0]) processFile(input.files[0]); });
+
+  removeBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    input.value = '';
+    preview.classList.remove('show');
+    area.classList.remove('has-image');
+    ph.style.display = '';
+    img.src = '';
+  });
+
+  function processFile(file) {
+    if (!file.type.startsWith('image/')) { showToast('الملف المحدد ليس صورة'); return; }
+    if (file.size > 5 * 1024 * 1024)    { showToast('حجم الصورة يتجاوز 5MB'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.src = e.target.result;
+      preview.classList.add('show');
+      ph.style.display = 'none';
+      area.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
   }
 }
-setRole('volunteer');
 
-// ═══════════ IMAGE UPLOAD ═══════════
-
-function previewImage(input, previewId, imgId, areaId) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { alert('حجم الصورة يتجاوز 5MB'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById(imgId).src = e.target.result;
-    document.getElementById(previewId).classList.add('show');
-    const ph = document.getElementById(areaId).querySelector('.upload-placeholder');
-    if (ph) ph.style.display='none';
-    document.getElementById(areaId).classList.add('has-image');
-  };
-  reader.readAsDataURL(file);
+/* ═══════════════════════════════════════════════════════════════
+   TOAST (replaces alert())
+═══════════════════════════════════════════════════════════════ */
+function showToast(msg, type = 'error') {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    Object.assign(toast.style, {
+      position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+      background: type === 'error' ? '#C0392B' : '#0F6E56',
+      color:'#fff', padding:'10px 20px', borderRadius:'100px',
+      fontSize:'14px', fontFamily:'Tajawal,sans-serif', fontWeight:'600',
+      boxShadow:'0 4px 20px rgba(0,0,0,0.25)', zIndex:'9999',
+      transition:'opacity 0.3s', whiteSpace:'nowrap',
+    });
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
-function removeImage(evt, inputId, previewId, areaId, phId) {
-  evt.stopPropagation();
-  document.getElementById(inputId).value='';
-  document.getElementById(previewId).classList.remove('show');
-  document.getElementById(areaId).classList.remove('has-image');
-  const ph = document.getElementById(phId || areaId.replace('-area','') + '-ph');
-  if (ph) ph.style.display='';
-  // Also find by looking in area
-  const area = document.getElementById(areaId);
-  const placeholder = area.querySelector('.upload-placeholder');
-  if (placeholder) placeholder.style.display='';
-}
+/* ═══════════════════════════════════════════════════════════════
+   MOSQUE SEARCH
+═══════════════════════════════════════════════════════════════ */
+const mosqueSearchInput = document.getElementById('mosque-search');
+const mosqueDropdown    = document.getElementById('mosque-dropdown');
 
-// ═══════════ MOSQUE SEARCH ═══════════
-
-function onMosqueSearch(query) {
-  if (selectedMosque) return;
-  const dropdown = document.getElementById('mosque-dropdown');
+function renderDropdown(query) {
   const q = query.trim();
-
-  const matches = q ? MOSQUES.filter(m =>
-    m.name.includes(q) || m.city.includes(q) || m.gov.includes(q)
-  ) : MOSQUES;
+  const matches = q
+    ? MOSQUES.filter(m => m.name.includes(q) || m.city.includes(q) || m.gov.includes(q))
+    : MOSQUES;
 
   let html = '';
   if (matches.length) {
     html = matches.map(m => `
-      <div class="mosque-item" role="option" tabindex="0"
-        onclick="selectMosque(${m.id})"
-        onkeydown="if(event.key==='Enter')selectMosque(${m.id})">
+      <div class="mosque-item" role="option" tabindex="0" data-id="${m.id}">
         <div>
-          <div class="mosque-item-name">${m.name}</div>
-          <div class="mosque-item-loc">${m.city}، محافظة ${m.gov}</div>
+          <div class="mosque-item-name">${escapeHtml(m.name)}</div>
+          <div class="mosque-item-loc">${escapeHtml(m.city)}، محافظة ${escapeHtml(m.gov)}</div>
         </div>
-        <span class="mosque-item-gov">${m.gov}</span>
-      </div>
-    `).join('');
+        <span class="mosque-item-gov">${escapeHtml(m.gov)}</span>
+      </div>`).join('');
   } else {
-    html = `<div class="mosque-no-results">لا توجد نتائج لـ "${q}"</div>`;
+    html = `<div class="mosque-no-results">لا توجد نتائج لـ «${escapeHtml(q)}»</div>`;
   }
+
   html += `
-    <div class="mosque-add-new-row" onclick="showNewMosqueForm()" role="option" tabindex="0">
-      <span>＋</span> إضافة مسجد جديد غير موجود في القائمة
-    </div>
-  `;
-  dropdown.innerHTML = html;
-  dropdown.classList.add('open');
+    <div class="mosque-add-new-row" role="option" tabindex="0" id="add-new-row">
+      <span class="mosque-add-new-row-icon" aria-hidden="true">+</span>
+      إضافة مسجد جديد غير موجود في القائمة
+    </div>`;
+
+  mosqueDropdown.innerHTML = html;
+  mosqueDropdown.classList.add('open');
+  mosqueSearchInput.setAttribute('aria-expanded', 'true');
 }
 
+function closeDropdown() {
+  mosqueDropdown.classList.remove('open');
+  mosqueSearchInput.setAttribute('aria-expanded', 'false');
+}
+
+mosqueSearchInput.addEventListener('input',  () => { if (!state.selectedMosque) renderDropdown(mosqueSearchInput.value); });
+mosqueSearchInput.addEventListener('focus',  () => { if (!state.selectedMosque) renderDropdown(mosqueSearchInput.value); });
+
+mosqueDropdown.addEventListener('click', e => {
+  const item = e.target.closest('[data-id]');
+  if (item) { selectMosque(parseInt(item.dataset.id, 10)); return; }
+  if (e.target.closest('#add-new-row')) showNewMosqueForm();
+});
+
+mosqueDropdown.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const item = e.target.closest('[data-id]');
+  if (item) { selectMosque(parseInt(item.dataset.id, 10)); return; }
+  if (e.target.closest('#add-new-row')) showNewMosqueForm();
+});
+
+document.addEventListener('click', e => {
+  if (!document.querySelector('.mosque-search-wrap')?.contains(e.target)) closeDropdown();
+});
+
 function selectMosque(id) {
-  const m = MOSQUES.find(x => x.id===id);
+  const m = MOSQUES.find(x => x.id === id);
   if (!m) return;
-  selectedMosque = m;
-  addingNewMosque = false;
-  document.getElementById('mosque-dropdown').classList.remove('open');
-  document.getElementById('mosque-search').value = '';
+  state.selectedMosque   = m;
+  state.addingNewMosque  = false;
+
+  closeDropdown();
+  mosqueSearchInput.value = '';
 
   document.getElementById('mosque-search-field').classList.add('hidden');
   document.getElementById('new-mosque-section').classList.add('hidden');
 
-  const card = document.getElementById('selected-mosque-card');
   document.getElementById('sel-mosque-name').textContent = '🕌 ' + m.name;
-  document.getElementById('sel-mosque-loc').textContent = m.city + '، محافظة ' + m.gov;
-  card.classList.remove('hidden');
-
+  document.getElementById('sel-mosque-loc').textContent  = m.city + '، محافظة ' + m.gov;
+  document.getElementById('selected-mosque-card').classList.remove('hidden');
   document.getElementById('err-mosque').classList.remove('show');
+
   checkDuplicate();
 }
 
 function deselectMosque() {
-  selectedMosque = null;
+  state.selectedMosque = null;
   document.getElementById('selected-mosque-card').classList.add('hidden');
   document.getElementById('mosque-search-field').classList.remove('hidden');
   document.getElementById('dup-warning').classList.remove('show');
-  document.getElementById('mosque-search').value = '';
-  document.getElementById('mosque-search').focus();
+  mosqueSearchInput.value = '';
+  mosqueSearchInput.focus();
 }
 
 function showNewMosqueForm() {
-  addingNewMosque = true;
-  selectedMosque = null;
-  document.getElementById('mosque-dropdown').classList.remove('open');
+  state.addingNewMosque = true;
+  state.selectedMosque  = null;
+  closeDropdown();
   document.getElementById('selected-mosque-card').classList.add('hidden');
   document.getElementById('new-mosque-section').classList.remove('hidden');
   document.getElementById('err-mosque').classList.remove('show');
   document.getElementById('dup-warning').classList.remove('show');
-  document.getElementById('mosque-search').value = '';
+  mosqueSearchInput.value = '';
 }
 
 function cancelNewMosque() {
-  addingNewMosque = false;
+  state.addingNewMosque = false;
   document.getElementById('new-mosque-section').classList.add('hidden');
   document.getElementById('mosque-search-field').classList.remove('hidden');
 }
 
-function updateNmCities(gov) {
+document.getElementById('nm-gov').addEventListener('change', function () {
+  const cities = CITIES[this.value] || [];
   const sel = document.getElementById('nm-city');
-  const cities = CITIES[gov] || [];
   sel.innerHTML = cities.length
-    ? cities.map(c=>`<option value="${c}">${c}</option>`).join('')
+    ? cities.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
     : '<option value="">لا توجد مدن</option>';
-}
-
-// Close dropdown on outside click
-document.addEventListener('click', e => {
-  const wrap = document.querySelector('.mosque-search-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('mosque-dropdown').classList.remove('open');
-  }
 });
 
-// ═══════════ DUPLICATE CHECK ═══════════
-
+/* ═══════════════════════════════════════════════════════════════
+   DUPLICATE CHECK
+═══════════════════════════════════════════════════════════════ */
 function checkDuplicate() {
-  if (dupOverridden) return;
+  if (state.dupOverridden) return;
   const title = document.getElementById('f-title').value.trim();
-  const mid = selectedMosque ? selectedMosque.id : null;
+  const mid   = state.selectedMosque ? state.selectedMosque.id : null;
   const isDup = KNOWN_DUPS.some(d => title.includes(d.title) && d.mosqueId === mid);
   document.getElementById('dup-warning').classList.toggle('show', isDup);
 }
 
-document.querySelector('.btn-proceed')?.addEventListener('click', () => {
-  dupOverridden = true;
+document.getElementById('f-title').addEventListener('input', checkDuplicate);
+
+document.getElementById('btn-proceed').addEventListener('click', () => {
+  state.dupOverridden = true;
   document.getElementById('dup-warning').classList.remove('show');
 });
 
-// ═══════════ FORM VALIDATION ═══════════
+/* ═══════════════════════════════════════════════════════════════
+   VALIDATION
+═══════════════════════════════════════════════════════════════ */
+function setFieldError(inputId, errorId, hasError) {
+  document.getElementById(inputId)?.classList.toggle('error', hasError);
+  document.getElementById(errorId)?.classList.toggle('show', hasError);
+}
 
 function validate() {
   let ok = true;
-  const title = document.getElementById('f-title').value.trim();
-  const errTitle = document.getElementById('err-title');
-  const errMosque = document.getElementById('err-mosque');
 
+  // Title required
+  const title = document.getElementById('f-title').value.trim();
   if (!title) {
-    errTitle.classList.add('show');
-    document.getElementById('f-title').classList.add('error');
+    setFieldError('f-title', 'err-title', true);
     ok = false;
   } else {
-    errTitle.classList.remove('show');
-    document.getElementById('f-title').classList.remove('error');
+    setFieldError('f-title', 'err-title', false);
   }
 
-  const hasMosque = selectedMosque !== null;
-  const hasNewMosque = addingNewMosque;
+  // Mosque required
+  const hasMosque    = state.selectedMosque !== null;
+  const hasNewMosque = state.addingNewMosque;
+  const errMosque    = document.getElementById('err-mosque');
   if (!hasMosque && !hasNewMosque) {
     errMosque.classList.add('show');
     ok = false;
@@ -738,121 +1758,185 @@ function validate() {
     errMosque.classList.remove('show');
   }
 
+  // New mosque sub-fields
   if (hasNewMosque) {
-    const gov = document.getElementById('nm-gov').value;
+    const gov  = document.getElementById('nm-gov').value;
     const city = document.getElementById('nm-city').value;
-    const errG = document.getElementById('err-nm-gov');
-    const errC = document.getElementById('err-nm-city');
-    if (!gov) { errG.classList.add('show'); ok = false; } else errG.classList.remove('show');
-    if (!city) { errC.classList.add('show'); ok = false; } else errC.classList.remove('show');
+    if (!gov)  { setFieldError('nm-gov',  'err-nm-gov',  true);  ok = false; }
+    else         setFieldError('nm-gov',  'err-nm-gov',  false);
+    if (!city) { setFieldError('nm-city', 'err-nm-city', true);  ok = false; }
+    else         setFieldError('nm-city', 'err-nm-city', false);
   }
 
   return ok;
 }
 
-// ═══════════ SUBMIT ═══════════
+/* ═══════════════════════════════════════════════════════════════
+   SUBMIT
+═══════════════════════════════════════════════════════════════ */
+document.getElementById('submit-form').addEventListener('submit', handleSubmit);
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
   if (!validate()) {
-    document.querySelector('.field-error.show')?.scrollIntoView({behavior:'smooth',block:'center'});
+    document.querySelector('.field-error.show')?.scrollIntoView({ behavior:'smooth', block:'center' });
     return;
   }
 
-  const title   = document.getElementById('f-title').value.trim();
-  const author  = document.getElementById('f-author').value.trim();
-  const cat     = document.getElementById('f-category').value;
-  const mosque  = selectedMosque
-    ? selectedMosque.name + ' · ' + selectedMosque.city
+  // Loading state
+  const btn = document.getElementById('btn-submit');
+  btn.classList.add('loading');
+
+  // Simulate async API call
+  await delay(900);
+
+  btn.classList.remove('loading');
+
+  const title  = document.getElementById('f-title').value.trim();
+  const author = document.getElementById('f-author').value.trim();
+  const cat    = document.getElementById('f-category').value;
+  const mosque = state.selectedMosque
+    ? state.selectedMosque.name + ' · ' + state.selectedMosque.city
     : (document.getElementById('nm-name').value.trim() || 'مسجد جديد') +
       ' · ' + document.getElementById('nm-city').value;
 
   showSuccess(title, author, cat, mosque);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SUCCESS STATE
+═══════════════════════════════════════════════════════════════ */
 function showSuccess(title, author, cat, mosque) {
   document.getElementById('submit-form').style.display = 'none';
-  document.getElementById('page-header') && (document.querySelector('.page-header').style.display='none');
+  document.getElementById('page-header').style.display = 'none';
 
-  const isVol = role === 'volunteer';
-  const ss = document.getElementById('success-state');
+  const isVol = state.role === 'volunteer';
+  const ss    = document.getElementById('success-state');
 
   // Icon
   const iw = document.getElementById('s-icon-wrap');
-  iw.className = 'success-icon-wrap ' + (isVol ? 'volunteer-mode' : 'visitor-mode');
+  iw.className = `success-icon-wrap ${isVol ? 'volunteer-mode' : 'visitor-mode'}`;
   document.getElementById('s-icon').textContent = isVol ? '✅' : '⏳';
 
   // Headline
   const hl = document.getElementById('s-headline');
-  hl.className = 'success-headline ' + (isVol ? 'volunteer-mode' : 'visitor-mode');
+  hl.className = `success-headline ${isVol ? 'volunteer-mode' : 'visitor-mode'}`;
   hl.textContent = isVol ? 'تم تسجيل الكتاب بنجاح!' : 'طلبك قيد المراجعة';
 
-  // Desc
+  // Description
   document.getElementById('s-desc').textContent = isVol
     ? 'الكتاب متاح الآن للعموم في صفحة التصفح. شكراً على مساهمتك!'
     : 'سيراجع فريقنا طلبك ويُنشره خلال 24–48 ساعة. يمكنك متابعة حالته من ملفك الشخصي.';
 
   // Book card
-  const firstLetter = title ? title[0] : '؟';
   const avatar = document.getElementById('s-avatar');
-  avatar.textContent = firstLetter;
-  avatar.className = 'success-book-avatar ' + (cat ? 'cat-'+cat : 'cat-أخرى');
-  document.getElementById('s-book-title').textContent = title;
-  document.getElementById('s-book-meta').textContent =
-    [author||'مؤلف غير محدد', cat||'—', mosque].filter(Boolean).join(' · ');
+  avatar.textContent = title ? title[0] : '؟';
+  avatar.className   = `success-book-avatar ${cat ? 'cat-' + cat : 'cat-أخرى'}`;
+  document.getElementById('s-book-title').textContent = title || '—';
+  document.getElementById('s-book-meta').textContent  =
+    [author || 'مؤلف غير محدد', cat || '—', mosque].filter(Boolean).join(' · ');
 
   // Steps
   const stepsEl = document.getElementById('s-steps');
-  if (isVol) {
-    stepsEl.innerHTML = `
-      <div class="success-step">
-        <div class="success-step-icon done">✅</div>
-        <div class="success-step-text"><strong>تم التسجيل</strong> — الكتاب ظهر فوراً في صفحة التصفح</div>
-      </div>
-      <div class="success-step">
-        <div class="success-step-icon next">📚</div>
-        <div class="success-step-text"><strong>هل وجدت كتاباً آخر؟</strong> يمكنك تسجيل المزيد من الكتب</div>
-      </div>
-    `;
-  } else {
-    stepsEl.innerHTML = `
-      <div class="success-step">
-        <div class="success-step-icon done">✅</div>
-        <div class="success-step-text"><strong>استُلم الطلب</strong> — تم حفظ بياناتك بنجاح</div>
-      </div>
-      <div class="success-step">
-        <div class="success-step-icon pending-icon">🔍</div>
-        <div class="success-step-text"><strong>قيد المراجعة</strong> — سيراجع فريقنا الطلب قريباً</div>
-      </div>
-      <div class="success-step">
-        <div class="success-step-icon next">🌍</div>
-        <div class="success-step-text"><strong>النشر</strong> — سيظهر الكتاب للعموم بعد الموافقة</div>
-      </div>
-    `;
-  }
+  stepsEl.innerHTML = isVol
+    ? `<div class="success-step">
+         <div class="success-step-icon done">✅</div>
+         <div class="success-step-text"><strong>تم التسجيل</strong> — الكتاب ظهر فوراً في صفحة التصفح</div>
+       </div>
+       <div class="success-step">
+         <div class="success-step-icon next">📚</div>
+         <div class="success-step-text"><strong>هل وجدت كتاباً آخر؟</strong> يمكنك تسجيل المزيد</div>
+       </div>`
+    : `<div class="success-step">
+         <div class="success-step-icon done">✅</div>
+         <div class="success-step-text"><strong>استُلم الطلب</strong> — تم حفظ بياناتك بنجاح</div>
+       </div>
+       <div class="success-step">
+         <div class="success-step-icon pending-icon">🔍</div>
+         <div class="success-step-text"><strong>قيد المراجعة</strong> — سيراجع فريقنا الطلب قريباً</div>
+       </div>
+       <div class="success-step">
+         <div class="success-step-icon next">🌍</div>
+         <div class="success-step-text"><strong>النشر</strong> — سيظهر الكتاب للعموم بعد الموافقة</div>
+       </div>`;
 
   ss.classList.add('show');
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function resetForm() {
   document.getElementById('submit-form').reset();
   document.getElementById('submit-form').style.display = '';
-  document.querySelector('.page-header').style.display = '';
+  document.getElementById('page-header').style.display  = '';
   document.getElementById('success-state').classList.remove('show');
-  selectedMosque = null;
-  addingNewMosque = false;
-  dupOverridden = false;
+
+  // Reset state
+  state.selectedMosque  = null;
+  state.addingNewMosque = false;
+  state.dupOverridden   = false;
+
+  // Reset UI
   document.getElementById('selected-mosque-card').classList.add('hidden');
   document.getElementById('mosque-search-field').classList.remove('hidden');
   document.getElementById('new-mosque-section').classList.add('hidden');
   document.getElementById('dup-warning').classList.remove('show');
-  document.getElementById('book-preview').classList.remove('show');
-  document.getElementById('book-upload-area').classList.remove('has-image');
-  document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('show'));
-  document.querySelectorAll('.field-input.error').forEach(e=>e.classList.remove('error'));
-  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Clear image previews
+  ['book', 'mosque'].forEach(prefix => {
+    document.getElementById(prefix + '-preview')?.classList.remove('show');
+    document.getElementById(prefix + '-upload-area')?.classList.remove('has-image');
+    const ph = document.getElementById(prefix + '-upload-ph');
+    if (ph) ph.style.display = '';
+  });
+
+  // Clear errors
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════════ */
+const escapeHtml = str => str.replace(/[&<>"']/g, m =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[m]);
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
+(function init() {
+  // Role tab event delegation
+  document.querySelector('.role-tabs').addEventListener('click', e => {
+    const tab = e.target.closest('[data-role]');
+    if (tab) setRole(tab.dataset.role);
+  });
+
+  // Deselect mosque
+  document.getElementById('btn-deselect').addEventListener('click', deselectMosque);
+
+  // Cancel new mosque
+  document.getElementById('btn-cancel-new').addEventListener('click', cancelNewMosque);
+
+  // Success action buttons
+  document.getElementById('btn-register-another').addEventListener('click', resetForm);
+  document.getElementById('btn-browse').addEventListener('click', () => { window.location.href = 'browse.html'; });
+
+  // Upload areas
+  setupUploadArea({
+    areaId:'book-upload-area', inputId:'book-img-input', previewId:'book-preview',
+    imgId:'book-preview-img', phId:'book-upload-ph', removeId:'book-remove-btn',
+  });
+  setupUploadArea({
+    areaId:'mosque-upload-area', inputId:'mosque-img-input', previewId:'mosque-preview',
+    imgId:'mosque-preview-img', phId:'mosque-upload-ph', removeId:'mosque-remove-btn',
+  });
+
+  // Set initial role
+  setRole('volunteer');
+})();
 </script>
 </body>
 </html>

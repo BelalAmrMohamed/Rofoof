@@ -649,7 +649,13 @@
 
     .sel {
       width: 100%;
-      padding: 13px 18px 13px 46px;
+      /*
+        RTL layout:
+          physical-right (= text start) gets 44px so the ✓ icon at inset-inline-start:14px
+          never overlaps the selected-option text.
+          physical-left  (= text end / arrow side) gets 46px for the chevron.
+      */
+      padding: 13px 44px 13px 46px;
       background: rgba(255, 255, 255, .05);
       border: 1.5px solid rgba(255, 255, 255, .1);
       border-radius: 13px;
@@ -698,12 +704,15 @@
 
     .sel-check {
       position: absolute;
-      right: 14px;
+      /* inset-inline-start respects RTL: in an RTL context this is the physical RIGHT edge */
+      inset-inline-start: 14px;
       top: 50%;
       transform: translateY(-50%) scale(0);
       color: var(--success);
-      font-weight: 700;
-      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
       transition: transform var(--dur-mid) var(--ease-spring);
     }
 
@@ -1223,7 +1232,12 @@
                   <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
               </span>
-              <span class="sel-check" id="gov-chk" aria-hidden="true">✓</span>
+              <span class="sel-check" id="gov-chk" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M3 7.5L6.5 11L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </span>
             </div>
           </div>
 
@@ -1242,7 +1256,12 @@
                   <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
               </span>
-              <span class="sel-check" id="city-chk" aria-hidden="true">✓</span>
+              <span class="sel-check" id="city-chk" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M3 7.5L6.5 11L12 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </span>
             </div>
           </div>
 
