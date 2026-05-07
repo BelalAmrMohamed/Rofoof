@@ -37,6 +37,8 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   ├── page.tsx                  # Home page (V2)
 │   ├── login/
 │   │   └── page.tsx              # Login & registration
+│   ├── onboarding/
+│   │   └── page.tsx              # First-time OAuth location setup
 │   ├── browse/
 │   │   ├── page.tsx              # Browse books & mosques
 │   │   ├── book/
@@ -44,7 +46,9 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   │   └── mosque/
 │   │       └── [id]/page.tsx     # Mosque detail
 │   ├── submit/
-│   │   └── page.tsx              # Submit a book (auth-protected)
+│   │   ├── page.tsx              # Submit a book (auth-protected)
+│   │   └── edit/
+│   │       └── [id]/page.tsx     # Edit own submission (volunteer/admin)
 │   ├── requests/
 │   │   └── page.tsx              # Admin moderation (admin-only)
 │   ├── profile/
@@ -57,8 +61,8 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   ├── BookCard.tsx
 │   ├── MosqueCard.tsx
 │   ├── BrowseFilters.tsx
-│   ├── LocationPicker.tsx
-│   ├── SubmitBookForm.tsx
+│   ├── LocationPicker.tsx        # Shared — used in browse, profile, and onboarding
+│   ├── SubmitBookForm.tsx        # Shared — used in /submit and /submit/edit/[id]
 │   ├── MosqueSearchSelect.tsx
 │   ├── SubmissionsList.tsx       # Admin requests list
 │   └── Navbar.tsx
@@ -79,7 +83,7 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   ├── database.ts               # Auto-generated from Supabase schema
 │   └── app.ts                    # App-specific types
 │
-├── middleware.ts                 # Next.js middleware (auth guards)
+├── middleware.ts                 # Next.js middleware (auth guards + onboarding redirect)
 ├── schema.sql                    # Database schema (source of truth)
 ├── .env.local                    # Local environment variables (gitignored)
 ├── .env.example                  # Template for environment variables
@@ -105,14 +109,24 @@ Session exists → check role from users table
     ↓
 role = 'visitor' or 'volunteer' → allow
 role not 'admin' → block /requests → redirect to /browse
+
+───────────────────────────────────────────────
+
+User completes OAuth sign-in (Google or Facebook)
+    ↓
+middleware.ts checks: users.governorate IS NULL?
+    ↓
+YES → redirect to /onboarding (location gate)
+NO  → proceed to /browse (or originally intended page)
 ```
 
 ### OAuth Setup (Supabase)
 
 1. Enable Google and Facebook providers in Supabase Auth settings
 2. Add OAuth credentials (from Google Cloud Console / Meta Developer)
-3. On first OAuth sign-in, trigger a database function to create a `users` row
-4. Prompt user to set governorate + city if not yet defined
+3. On first OAuth sign-in, a database trigger creates a `users` row with fullname from the OAuth provider profile
+4. middleware.ts detects missing location → redirects to `/onboarding`
+5. Email-registered users always have location set during registration → skip onboarding
 
 ### Session Persistence
 
@@ -120,7 +134,102 @@ Supabase Auth uses JWTs with refresh tokens stored in cookies. Sessions persist 
 
 ---
 
-## 4. Database Access Pattern
+## 4. Edition & Schema Design Decision
+
+**Decision (2026):** `edition` and `publisher` were moved from the `books` table to the `mosque_books` table.
+
+**Rationale:** The `books` table represents the canonical bibliographic identity of a work — title, author, category. These do not change between physical copies. Edition and publisher describe a _specific physical copy held at a specific location_. The `mosque_books` row is precisely that: one copy, in one place. Storing edition there allows:
+
+- Multiple editions of the same book to coexist in the same mosque as separate, fully-queryable rows
+- No data loss when a new edition is submitted (the old approach silently discarded the new edition's metadata)
+- Simpler duplicate detection: block if `(book_id, mosque_id, edition)` already exists (using `NULLS NOT DISTINCT` for unspecified editions)
+
+**Unique constraint:**
+
+```sql
+CONSTRAINT unique_book_mosque_edition UNIQUE NULLS NOT DISTINCT (book_id, mosque_id, edition)
+```
+
+This ensures:
+
+- Two rows with the same book + mosque + `NULL` edition → blocked (true duplicate)
+- Two rows with the same book + mosque + different edition strings → both allowed (different editions)
+
+---
+
+## 5. Admin RLS Strategy
+
+**Decision (2026):** Admin database access uses **SECURITY DEFINER PostgreSQL functions**, not the Supabase service role key client-side.
+
+**Rationale:** The service role key bypasses all RLS and must never be exposed to client-side code. Rather than creating permissive RLS policies that check roles on every query, two server-callable functions handle admin reads:
+
+- `admin_get_all_submissions()` — returns all rows from `admin_submissions_view`
+- `admin_get_pending_count()` — returns the count of pending entries (used for the realtime badge)
+
+Both functions contain an internal role check (`auth.uid()` must belong to a user with `role = 'admin'`). They are called from Next.js **server components** only, using the standard anon-key Supabase client — the JWT carries the user's identity, and the function enforces the admin check at the database level.
+
+```typescript
+// lib/queries/submissions.ts
+
+// Called from a server component — never from client-side code
+export async function getAllSubmissions() {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.rpc("admin_get_all_submissions");
+  if (error) throw error;
+  return data;
+}
+
+export async function getPendingCount() {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.rpc("admin_get_pending_count");
+  if (error) throw error;
+  return data as number;
+}
+```
+
+---
+
+## 6. Edit Submission Route
+
+**Decision (2026):** `/submit/edit/[id]` is a dedicated route that reuses the `SubmitBookForm` component in edit mode.
+
+**Why a dedicated route (not a modal):**
+
+- Shareable / linkable URL (the admin's "Edit & Approve" flow links directly to it)
+- Middleware can enforce ownership and role checks on the route itself
+- Back/forward browser navigation works correctly
+- Avoids complex modal state management
+
+**Edit mode behavior:**
+
+- The route fetches the `mosque_books` entry by `id`, pre-filling all form fields
+- For volunteers accessing their own submission: saving keeps status as `'approved'`
+- For admins accessing via `?context=admin`: saving sets status to `'approved'` and records `reviewed_by` + `reviewed_at`
+- RLS policy enforces that only the original submitter (if volunteer) or an admin can update the row
+
+```typescript
+// app/submit/edit/[id]/page.tsx
+
+import { SubmitBookForm } from '@/components/SubmitBookForm';
+import { getSubmissionById } from '@/lib/queries/submissions';
+
+export default async function EditSubmissionPage({ params }: { params: { id: string } }) {
+  const submission = await getSubmissionById(params.id); // throws if not authorized
+  const isAdminContext = /* check searchParams.context === 'admin' */;
+
+  return (
+    <SubmitBookForm
+      mode="edit"
+      initialData={submission}
+      adminContext={isAdminContext}
+    />
+  );
+}
+```
+
+---
+
+## 7. Database Access Pattern
 
 All database operations go through typed query functions in `lib/queries/`. Components and pages never call Supabase directly — they call these functions.
 
@@ -143,13 +252,67 @@ export async function submitBook(
 ) {
   const supabase = createServerClient();
   const status = isVolunteer ? "approved" : "pending";
-  // ... insert into books, then mosque_books
+  // 1. Upsert into books (find by title+author or create new)
+  // 2. Insert into mosque_books with edition, publisher, status
 }
 ```
 
 ---
 
-## 5. Image Handling
+## 8. Onboarding Middleware Logic
+
+```typescript
+// middleware.ts
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const supabase = createMiddlewareClient(request);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Protected routes — require authentication
+  if (["/submit", "/profile"].some((p) => pathname.startsWith(p))) {
+    if (!session) return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Onboarding gate — OAuth users without location
+  if (session && pathname !== "/onboarding" && pathname !== "/login") {
+    const { data: user } = await supabase
+      .from("users")
+      .select("governorate, city")
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (user && (!user.governorate || !user.city)) {
+      return NextResponse.redirect(new URL("/onboarding", request.url));
+    }
+  }
+
+  // Already authenticated — skip login
+  if (session && pathname === "/login") {
+    return NextResponse.redirect(new URL("/browse", request.url));
+  }
+
+  // Admin-only routes
+  if (pathname.startsWith("/requests")) {
+    if (!session) return NextResponse.redirect(new URL("/login", request.url));
+    const { data: user } = await supabase
+      .from("users")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .single();
+    if (user?.role !== "admin")
+      return NextResponse.redirect(new URL("/browse", request.url));
+  }
+
+  return NextResponse.next();
+}
+```
+
+---
+
+## 9. Image Handling
 
 - Images are uploaded to **Supabase Storage** (not stored in the DB)
 - The DB stores only the URL
@@ -163,7 +326,7 @@ export async function submitBook(
 
 ---
 
-## 6. Proximity / Location Sorting
+## 10. Proximity / Location Sorting
 
 **V1 (Simple):** Sort by governorate + city match. If user is in المنيا, show المنيا books first, then others.
 
@@ -184,7 +347,7 @@ ORDER BY distance_km ASC;
 
 ---
 
-## 7. RTL / Arabic Layout
+## 11. RTL / Arabic Layout
 
 - Set `dir="rtl"` and `lang="ar"` on the `<html>` element in `layout.tsx`
 - Use an Arabic-friendly font: **Cairo** or **Noto Sans Arabic** (Google Fonts)
@@ -192,10 +355,11 @@ ORDER BY distance_km ASC;
   - `margin-inline-start` instead of `margin-left`
   - `padding-inline-end` instead of `padding-right`
 - Test all layouts in RTL before finalizing
+- Unnamed mosque fallback display: `"مسجد — [المدينة]"` — standardize this string across all components
 
 ---
 
-## 8. Environment Variables
+## 12. Environment Variables
 
 ```bash
 # .env.example
@@ -203,7 +367,7 @@ ORDER BY distance_km ASC;
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # server-only, never expose to client
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # server-only; used only if RPC functions are insufficient
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -211,7 +375,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ---
 
-## 9. Deployment
+## 13. Deployment
 
 | Environment | URL              | Trigger            |
 | ----------- | ---------------- | ------------------ |
@@ -226,7 +390,9 @@ main          ← production (protected, requires PR)
   └── dev     ← staging / integration
         └── feature/browse-page
         └── feature/auth
+        └── feature/onboarding
         └── feature/submit-form
+        └── feature/edit-submission
         └── fix/mosque-search-bug
 ```
 
@@ -237,7 +403,7 @@ main          ← production (protected, requires PR)
 
 ---
 
-## 11. Real-Time Features (Supabase Realtime)
+## 14. Real-Time Features (Supabase Realtime)
 
 The admin navbar badge (pending submissions counter) must update live without page refresh.
 
@@ -254,14 +420,12 @@ export function usePendingCount() {
   const supabase = createBrowserClient();
 
   useEffect(() => {
-    // Initial fetch
+    // Initial fetch via SECURITY DEFINER RPC (respects RLS + admin check)
     supabase
-      .from("mosque_books")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "pending")
-      .then(({ count }) => setCount(count ?? 0));
+      .rpc("admin_get_pending_count")
+      .then(({ data }) => setCount(data ?? 0));
 
-    // Live subscription
+    // Live subscription — re-fetches count via RPC on any mosque_books change
     const channel = supabase
       .channel("pending_count")
       .on(
@@ -269,10 +433,8 @@ export function usePendingCount() {
         { event: "*", schema: "public", table: "mosque_books" },
         () => {
           supabase
-            .from("mosque_books")
-            .select("id", { count: "exact", head: true })
-            .eq("status", "pending")
-            .then(({ count }) => setCount(count ?? 0));
+            .rpc("admin_get_pending_count")
+            .then(({ data }) => setCount(data ?? 0));
         },
       )
       .subscribe();
@@ -289,12 +451,12 @@ export function usePendingCount() {
 ### Notes
 
 - Realtime must be enabled for the `mosque_books` table in the Supabase dashboard
-- The RLS policy for admins must allow SELECT on all statuses (not just approved), so the count query works
+- The RPC function `admin_get_pending_count()` handles the admin role check internally — no RLS change needed
 - The badge renders `null` (hidden) when count is 0 — never shows "0"
 
 ---
 
-## 12. Performance Considerations
+## 15. Performance Considerations
 
 | Concern          | Approach                                                                           |
 | ---------------- | ---------------------------------------------------------------------------------- |

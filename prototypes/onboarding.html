@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0D3322" />
+  <meta name="description" content="على رفوف المساجد — منصة مجتمعية لفهرسة الكتب في مكتبات المساجد" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- PWA manifest stub -->
+  <!-- <link rel="manifest" href="/manifest.json" /> -->
+
+  <title>على رفوف المساجد — إعداد حسابك</title>
+
+  <!-- Fonts: preconnect then load -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ── RESET ────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ── DESIGN TOKENS ────────────────────────────────────── */
+    :root {
+      --green: #0A2E1E;
+      --green-mid: #175237;
+      --green-light: #2A7050;
+      --green-glass: rgba(10, 46, 30, 0.55);
+      --gold: #C9A84C;
+      --gold-light: #E0C06E;
+      --gold-dim: rgba(201, 168, 76, .18);
+      --cream: #F4EDD8;
+      --cream-2: #E8DFC4;
+      --cream-3: #D4C9A8;
+      --text: #F0E8D0;
+      --text-2: rgba(240, 232, 208, .72);
+      --text-3: rgba(240, 232, 208, .42);
+      --white: #FFFFFF;
+      --error: #E05555;
+      --success: #4CAF7A;
+
+      /* Glassmorphic card */
+      --card-bg: rgba(12, 36, 24, 0.72);
+      --card-border: rgba(201, 168, 76, .22);
+      --card-shadow: 0 40px 100px rgba(0, 0, 0, .6), 0 0 0 1px var(--card-border);
+      --glass-blur: 20px;
+
+      /* Motion */
+      --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+      --ease-out: cubic-bezier(.22, 1, .36, 1);
+      --dur-fast: 0.22s;
+      --dur-mid: 0.42s;
+      --dur-slow: 0.65s;
+    }
+
+    /* ── BASE ─────────────────────────────────────────────── */
+    html {
+      height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100%;
+      min-height: 100dvh;
+      font-family: 'Cairo', sans-serif;
+      background: var(--green);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND LAYER ─────────────────────────────────── */
+    #bg-svg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: .11;
+      will-change: opacity;
+    }
+
+    /* ── AMBIENT GLOWS ────────────────────────────────────── */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(100px);
+      opacity: 0;
+      transition: opacity 2s ease;
+      will-change: opacity;
+    }
+
+    .orb-a {
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(201, 168, 76, .22), transparent 60%);
+      top: -260px;
+      right: -160px;
+    }
+
+    .orb-b {
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(42, 112, 80, .4), transparent 60%);
+      bottom: -160px;
+      left: -90px;
+    }
+
+    .orb-c {
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(201, 168, 76, .1), transparent 65%);
+      bottom: 20%;
+      right: 10%;
+    }
+
+    /* ── PARTICLES ────────────────────────────────────────── */
+    #canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ── STAGE / SCROLL CONTAINER ─────────────────────────── */
+    .stage {
+      position: relative;
+      z-index: 10;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      /* Ensures iOS safe-area is respected */
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+
+    /* ── CARD (glassmorphic) ──────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+      border-radius: 28px;
+      border: 1px solid var(--card-border);
+      width: 100%;
+      max-width: 500px;
+      padding: 44px 40px 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+
+      /* Initial hidden state for entrance animation */
+      opacity: 0;
+      transform: translateY(60px) scale(.97);
+      transition:
+        opacity var(--dur-slow) var(--ease-out),
+        transform var(--dur-slow) var(--ease-out);
+    }
+
+    .card.is-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Shimmering gold top accent */
+    .card-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold) 40%, var(--gold-light) 60%, transparent 100%);
+      background-size: 200% 100%;
+      animation: accent-shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes accent-shimmer {
+      0% {
+        background-position: 200% center;
+      }
+
+      100% {
+        background-position: -200% center;
+      }
+    }
+
+    /* Corner ornament */
+    .card-ornament {
+      position: absolute;
+      pointer-events: none;
+      opacity: .08;
+      right: -28px;
+      top: -28px;
+    }
+
+    .card-ornament-bl {
+      position: absolute;
+      pointer-events: none;
+      opacity: .05;
+      left: -28px;
+      bottom: -28px;
+      transform: rotate(180deg);
+    }
+
+    /* ── PROGRESS STEPPER ─────────────────────────────────── */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 36px;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity .4s ease, transform .4s ease;
+    }
+
+    .stepper.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(201, 168, 76, .3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-3);
+      transition: all var(--dur-mid) var(--ease-spring);
+      background: transparent;
+    }
+
+    .step-node.active .step-circle {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+      color: var(--gold);
+      box-shadow: 0 0 16px rgba(201, 168, 76, .25);
+    }
+
+    .step-node.done .step-circle {
+      border-color: var(--success);
+      background: rgba(76, 175, 122, .15);
+      color: var(--success);
+    }
+
+    .step-label {
+      font-size: 10.5px;
+      color: var(--text-3);
+      font-weight: 600;
+      letter-spacing: .03em;
+      white-space: nowrap;
+      transition: color var(--dur-mid) ease;
+    }
+
+    .step-node.active .step-label {
+      color: var(--gold-light);
+    }
+
+    .step-node.done .step-label {
+      color: var(--success);
+    }
+
+    .step-connector {
+      width: 64px;
+      height: 2px;
+      margin: 0 8px;
+      margin-bottom: 22px;
+      /* offset to align with circles */
+      background: rgba(201, 168, 76, .15);
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-connector-fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 1px;
+      transform: scaleX(0);
+      transform-origin: right;
+      /* RTL: fill from right */
+      transition: transform var(--dur-slow) var(--ease-out);
+    }
+
+    .step-connector.done .step-connector-fill {
+      transform: scaleX(1);
+    }
+
+    /* ── STEPS WRAPPER ────────────────────────────────────── */
+    .steps-container {
+      position: relative;
+      width: 100%;
+      /* Height transitions automatically as content changes */
+      overflow: hidden;
+    }
+
+    .step {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Transitions handled via JS adding/removing classes */
+    .step[data-state="hidden-left"] {
+      display: none;
+    }
+
+    .step[data-state="hidden-right"] {
+      display: none;
+    }
+
+    .step[data-state="entering"] {
+      animation: slide-in var(--dur-mid) var(--ease-out) forwards;
+    }
+
+    .step[data-state="active"] {}
+
+    .step[data-state="exiting"] {
+      animation: slide-out var(--dur-mid) var(--ease-out) forwards;
+    }
+
+    @keyframes slide-in {
+      from {
+        opacity: 0;
+        transform: translateX(-40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slide-out {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+    }
+
+    /* RTL reversed for going back */
+    .step[data-state="entering-back"] {
+      animation: slide-in-back var(--dur-mid) var(--ease-out) forwards;
+    }
+
+    .step[data-state="exiting-back"] {
+      animation: slide-out-back var(--dur-mid) var(--ease-out) forwards;
+    }
+
+    @keyframes slide-in-back {
+      from {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slide-out-back {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(-40px);
+      }
+    }
+
+    /* ── STEP 1 ELEMENTS ──────────────────────────────────── */
+    .brand-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #112a1c, #1a4530);
+      border-radius: 20px;
+      border: 1px solid rgba(201, 168, 76, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(201, 168, 76, .2);
+      animation: brand-float 5s ease-in-out infinite;
+    }
+
+    @keyframes brand-float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .brand-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 35% 35%, rgba(201, 168, 76, .35), transparent 65%);
+      animation: glow-pulse 3.5s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+
+      0%,
+      100% {
+        opacity: .6;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .brand-letter {
+      font-family: 'Amiri', serif;
+      font-size: 32px;
+      color: var(--gold);
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 20px rgba(201, 168, 76, .5);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(201, 168, 76, .12);
+      border: 1px solid rgba(201, 168, 76, .28);
+      color: var(--gold-light);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 13px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: dot-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes dot-pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(.7);
+      }
+    }
+
+    .s1-heading {
+      font-family: 'Amiri', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+
+    .s1-heading em {
+      font-style: normal;
+      color: var(--gold-light);
+      display: block;
+    }
+
+    .s1-sub {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.85;
+      margin-bottom: 28px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 12px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      font-weight: 500;
+      transition: all var(--dur-fast) ease;
+      cursor: default;
+      /* Staggered fade-in controlled by nth-child */
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .pill.is-visible {
+      animation: pill-in .4s var(--ease-spring) forwards;
+    }
+
+    @keyframes pill-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .pill:hover {
+      border-color: rgba(201, 168, 76, .35);
+      background: rgba(201, 168, 76, .07);
+      color: var(--text);
+    }
+
+    .pill-ico {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    /* ── STEP 2 ELEMENTS ──────────────────────────────────── */
+    .step-2-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .back-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(201, 168, 76, .25);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all var(--dur-fast) ease;
+    }
+
+    .back-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .back-btn svg {
+      transform: scaleX(-1);
+    }
+
+    /* flip for RTL */
+
+    .s2-heading {
+      font-family: 'Amiri', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .s2-sub {
+      font-size: 13.5px;
+      color: var(--text-3);
+      margin-bottom: 26px;
+      line-height: 1.75;
+    }
+
+    /* ── FORM FIELDS ──────────────────────────────────────── */
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+      letter-spacing: .04em;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    .label-req {
+      color: var(--gold);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .sel-wrap {
+      position: relative;
+    }
+
+    .sel {
+      width: 100%;
+      padding: 13px 18px 13px 46px;
+      background: rgba(255, 255, 255, .05);
+      border: 1.5px solid rgba(255, 255, 255, .1);
+      border-radius: 13px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14.5px;
+      color: var(--text);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      direction: rtl;
+      transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background var(--dur-fast) ease;
+      outline: none;
+      min-height: 50px;
+    }
+
+    .sel option {
+      background: #1a3d28;
+      color: var(--text);
+    }
+
+    .sel:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, .18);
+      background: rgba(201, 168, 76, .06);
+    }
+
+    .sel:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+    }
+
+    .sel-arrow {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      pointer-events: none;
+      transition: transform var(--dur-mid) ease, color var(--dur-fast) ease;
+    }
+
+    .sel:focus~.sel-arrow {
+      transform: translateY(-50%) rotate(180deg);
+      color: var(--gold);
+    }
+
+    .sel-check {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%) scale(0);
+      color: var(--success);
+      font-weight: 700;
+      font-size: 16px;
+      transition: transform var(--dur-mid) var(--ease-spring);
+    }
+
+    .sel-check.show {
+      transform: translateY(-50%) scale(1);
+    }
+
+    /* ── LOCATION BANNER ──────────────────────────────────── */
+    .loc-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(76, 175, 122, .1);
+      border: 1px solid rgba(76, 175, 122, .25);
+      border-radius: 13px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity var(--dur-mid) ease, transform var(--dur-mid) var(--ease-out);
+    }
+
+    .loc-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .loc-icon {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      background: rgba(76, 175, 122, .18);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+    }
+
+    .loc-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #7ee0a8;
+    }
+
+    .loc-hint {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    /* ── BUTTONS ──────────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
+      transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease, opacity var(--dur-fast) ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green-mid), var(--green-light));
+      color: var(--cream);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .07);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .12);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0) scale(.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-arrow {
+      display: inline-flex;
+      transition: transform var(--dur-fast) ease;
+    }
+
+    .btn-primary:hover:not(:disabled) .btn-arrow {
+      transform: translateX(-4px);
+      /* RTL: move left */
+    }
+
+    /* Ripple */
+    .btn-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(201, 168, 76, .3);
+      width: 0;
+      height: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: ripple-burst .7s ease-out forwards;
+    }
+
+    @keyframes ripple-burst {
+      to {
+        width: 420px;
+        height: 420px;
+        opacity: 0;
+      }
+    }
+
+    /* ── COMPLETION OVERLAY ───────────────────────────────── */
+    #completion {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--green);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur-mid) ease;
+    }
+
+    #completion.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Rotating star ring in completion */
+    .c-ring {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, .12);
+      animation: ring-spin 20s linear infinite;
+      opacity: 0;
+      transition: opacity .5s ease;
+    }
+
+    .c-ring:nth-child(2) {
+      width: 420px;
+      height: 420px;
+      border-color: rgba(201, 168, 76, .06);
+      animation-duration: 35s;
+      animation-direction: reverse;
+    }
+
+    #completion.show .c-ring {
+      opacity: 1;
+    }
+
+    @keyframes ring-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* SVG checkmark */
+    .c-check-wrap {
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      transform: scale(.5);
+      transition: opacity .5s .2s ease, transform .5s .2s var(--ease-spring);
+    }
+
+    #completion.show .c-check-wrap {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .c-check-bg {
+      width: 80px;
+      height: 80px;
+      background: rgba(201, 168, 76, .12);
+      border: 1.5px solid rgba(201, 168, 76, .35);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .c-check-svg {
+      color: var(--gold);
+    }
+
+    .c-check-path {
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      transition: stroke-dashoffset .6s .5s ease;
+    }
+
+    #completion.show .c-check-path {
+      stroke-dashoffset: 0;
+    }
+
+    .c-brand {
+      font-family: 'Amiri', serif;
+      font-size: 18px;
+      color: var(--gold);
+      letter-spacing: .05em;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity .5s .4s ease, transform .5s .4s var(--ease-out);
+      position: relative;
+      z-index: 1;
+    }
+
+    #completion.show .c-brand {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .c-line {
+      width: 60px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity .4s .6s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    #completion.show .c-line {
+      opacity: 1;
+    }
+
+    .c-msg {
+      font-family: 'Amiri', serif;
+      font-size: 46px;
+      font-weight: 700;
+      color: var(--white);
+      text-align: center;
+      line-height: 1.3;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s .65s ease, transform .6s .65s var(--ease-out);
+      position: relative;
+      z-index: 1;
+    }
+
+    #completion.show .c-msg {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .c-sub {
+      font-size: 14px;
+      color: rgba(255, 255, 255, .45);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .5s .85s ease, transform .5s .85s var(--ease-out);
+      position: relative;
+      z-index: 1;
+    }
+
+    #completion.show .c-sub {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .card {
+        padding: 36px 22px 28px;
+        border-radius: 24px;
+      }
+
+      .s1-heading {
+        font-size: 30px;
+      }
+
+      .badge {
+        font-size: 11px;
+      }
+
+      .pills {
+        gap: 6px;
+        margin-bottom: 26px;
+      }
+
+      .pill {
+        padding: 9px 13px;
+        font-size: 12px;
+      }
+
+      .s2-heading {
+        font-size: 26px;
+      }
+
+      .step-connector {
+        width: 40px;
+      }
+
+      .c-msg {
+        font-size: 36px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .card {
+        padding: 28px 16px 24px;
+      }
+
+      .s1-heading {
+        font-size: 26px;
+      }
+
+      .brand-icon {
+        width: 58px;
+        height: 58px;
+      }
+
+      .brand-letter {
+        font-size: 26px;
+      }
+    }
+
+    /* ── ACCESSIBILITY: reduced motion ────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       BACKGROUND
+  ══════════════════════════════════════════════════════════ -->
+  <svg id="bg-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true" focusable="false"></svg>
+
+  <div class="glow-orb orb-a" id="orb-a" aria-hidden="true"></div>
+  <div class="glow-orb orb-b" id="orb-b" aria-hidden="true"></div>
+  <div class="glow-orb orb-c" id="orb-c" aria-hidden="true"></div>
+
+  <canvas id="canvas" aria-hidden="true"></canvas>
+
+  <!-- ═══════════════════════════════════════════════════════
+       COMPLETION OVERLAY
+  ══════════════════════════════════════════════════════════ -->
+  <div id="completion" role="status" aria-live="assertive" aria-atomic="true">
+    <div class="c-ring"></div>
+    <div class="c-ring"></div>
+
+    <div class="c-check-wrap">
+      <div class="c-check-bg">
+        <svg class="c-check-svg" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path class="c-check-path" d="M10 20 L17 28 L30 13" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="c-brand">على رفوف المساجد</div>
+    <div class="c-line"></div>
+    <div class="c-msg">أهلاً بك<br>في المنصة</div>
+    <div class="c-sub">جارٍ الانتقال إلى صفحة التصفح…</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN STAGE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="stage">
+    <main class="card" id="card" role="main">
+
+      <!-- Gold shimmer top bar -->
+      <div class="card-accent" aria-hidden="true"></div>
+
+      <!-- Corner ornaments -->
+      <svg class="card-ornament" width="130" height="130" viewBox="0 0 120 120" fill="none" aria-hidden="true"
+        focusable="false">
+        <polygon points="60,5 72,40 108,40 80,62 92,97 60,75 28,97 40,62 12,40 48,40" stroke="#C9A84C"
+          stroke-width="1.5" fill="none" />
+        <circle cx="60" cy="60" r="52" stroke="#C9A84C" stroke-width=".7" fill="none" />
+      </svg>
+      <svg class="card-ornament-bl" width="110" height="110" viewBox="0 0 120 120" fill="none" aria-hidden="true"
+        focusable="false">
+        <polygon points="60,5 72,40 108,40 80,62 92,97 60,75 28,97 40,62 12,40 48,40" stroke="#C9A84C"
+          stroke-width="1.5" fill="none" />
+      </svg>
+
+      <!-- ── PROGRESS STEPPER ──────────────────────────────── -->
+      <nav class="stepper" id="stepper" aria-label="مراحل الإعداد" role="navigation">
+        <div class="step-node active" id="node-1" aria-current="step">
+          <div class="step-circle" aria-hidden="true">١</div>
+          <span class="step-label">مرحبًا</span>
+        </div>
+
+        <div class="step-connector" id="connector-1" aria-hidden="true">
+          <div class="step-connector-fill"></div>
+        </div>
+
+        <div class="step-node" id="node-2">
+          <div class="step-circle" aria-hidden="true">٢</div>
+          <span class="step-label">موقعك</span>
+        </div>
+      </nav>
+
+      <!-- ── STEPS CONTAINER ──────────────────────────────── -->
+      <div class="steps-container" id="steps-container">
+
+        <!-- ══ STEP 1: WELCOME ══ -->
+        <section class="step" id="step-1" data-state="active" aria-labelledby="s1-heading">
+          <!-- Brand logo -->
+          <div class="brand-wrap">
+            <div class="brand-icon" role="img" aria-label="شعار على رفوف المساجد">
+              <div class="brand-glow" aria-hidden="true"></div>
+              <span class="brand-letter" aria-hidden="true">ر</span>
+            </div>
+          </div>
+
+          <!-- Badge -->
+          <div class="badge" role="status">
+            <span class="badge-dot" aria-hidden="true"></span>
+            تم إنشاء حسابك بنجاح
+          </div>
+
+          <!-- Heading -->
+          <h1 class="s1-heading" id="s1-heading">
+            أهلاً بك في
+            <em>على رفوف المساجد</em>
+          </h1>
+
+          <!-- Subtext -->
+          <p class="s1-sub">
+            منصة مجتمعية لفهرسة الكتب في مكتبات المساجد —
+            تصفّح، اكتشف، وساهم في نشر المعرفة الإسلامية.
+          </p>
+
+          <!-- Feature pills -->
+          <ul class="pills" aria-label="مميزات المنصة" role="list">
+            <li class="pill" role="listitem">
+              <span class="pill-ico" aria-hidden="true">📚</span>
+              تصفّح الكتب
+            </li>
+            <li class="pill" role="listitem">
+              <span class="pill-ico" aria-hidden="true">🕌</span>
+              اكتشف المساجد
+            </li>
+            <li class="pill" role="listitem">
+              <span class="pill-ico" aria-hidden="true">✍️</span>
+              سجّل كتاباً
+            </li>
+          </ul>
+
+          <!-- CTA -->
+          <button class="btn btn-primary" id="s1-btn" type="button" aria-label="المتابعة إلى تحديد الموقع">
+            التالي — حدّد موقعك
+            <span class="btn-arrow" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M13 9H5M8 5L4 9L8 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </span>
+          </button>
+        </section><!-- /step-1 -->
+
+        <!-- ══ STEP 2: LOCATION ══ -->
+        <section class="step" id="step-2" data-state="hidden-left" aria-labelledby="s2-heading">
+          <!-- Header with back button -->
+          <div class="step-2-header">
+            <button class="back-btn" id="back-btn" type="button" aria-label="العودة إلى الخطوة السابقة">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </button>
+            <div>
+              <h2 class="s2-heading" id="s2-heading">أين تقيم؟</h2>
+            </div>
+          </div>
+
+          <p class="s2-sub">
+            نعرض لك الكتب القريبة منك أولاً — يمكن تغيير موقعك لاحقاً من ملفك الشخصي.
+          </p>
+
+          <!-- Governorate -->
+          <div class="field" id="f-gov">
+            <label class="label" for="gov">
+              <span class="label-req" aria-hidden="true">*</span>
+              المحافظة
+            </label>
+            <div class="sel-wrap">
+              <select class="sel" id="gov" aria-required="true" aria-describedby="gov-hint">
+                <option value="">اختر المحافظة…</option>
+              </select>
+              <span class="sel-arrow" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="sel-check" id="gov-chk" aria-hidden="true">✓</span>
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="field" id="f-city">
+            <label class="label" for="city">
+              <span class="label-req" aria-hidden="true">*</span>
+              المدينة / المركز
+            </label>
+            <div class="sel-wrap">
+              <select class="sel" id="city" disabled aria-required="true" aria-describedby="city-hint">
+                <option value="">اختر المحافظة أولاً…</option>
+              </select>
+              <span class="sel-arrow" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="sel-check" id="city-chk" aria-hidden="true">✓</span>
+            </div>
+          </div>
+
+          <!-- Location confirmed banner -->
+          <div class="loc-banner" id="loc-banner" aria-live="polite" aria-atomic="true">
+            <div class="loc-icon" aria-hidden="true">📍</div>
+            <div>
+              <div class="loc-name" id="loc-name"></div>
+              <div class="loc-hint">موقعك المحدد — يمكن تعديله من صفحة الملف الشخصي</div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button class="btn btn-primary" id="s2-btn" type="button" disabled aria-label="ابدأ التصفح"
+            aria-disabled="true">
+            ابدأ التصفح
+          </button>
+        </section><!-- /step-2 -->
+
+      </div><!-- /steps-container -->
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SCRIPTS
+  ══════════════════════════════════════════════════════════ -->
+  <script>
+    (() => {
+      'use strict';
+
+      /* ── DATA ───────────────────────────────────────────────── */
+      const EG = {
+        'القاهرة': ['القاهرة', 'مصر الجديدة', 'المعادي', 'حلوان', 'شبرا', 'مدينة نصر', 'المقطم', 'عين شمس', 'الزيتون', 'منشية ناصر'],
+        'الجيزة': ['الجيزة', '6 أكتوبر', 'الشيخ زايد', 'الهرم', 'بولاق الدكرور', 'إمبابة', 'العجوزة', 'أوسيم', 'البدرشين', 'الصف'],
+        'الإسكندرية': ['الإسكندرية', 'المنتزه', 'العجمي', 'برج العرب', 'سيدي جابر', 'محرم بك', 'الدخيلة', 'العامرية'],
+        'المنيا': ['المنيا', 'ملوي', 'سمالوط', 'مغاغة', 'بني مزار', 'أبو قرقاص', 'العدوة', 'دير مواس', 'المطعني'],
+        'أسيوط': ['أسيوط', 'ديروط', 'القوصية', 'أبنوب', 'منفلوط', 'الغنائم', 'صدفا', 'ساحل سليم'],
+        'سوهاج': ['سوهاج', 'طهطا', 'جرجا', 'المراغة', 'أخميم', 'البلينا', 'ساقلتة', 'دار السلام', 'جهينة'],
+        'قنا': ['قنا', 'نجع حمادي', 'دشنا', 'قفط', 'الوقف', 'فرشوط', 'أبو تشت', 'قوص', 'نقادة'],
+        'الأقصر': ['الأقصر', 'إسنا', 'أرمنت', 'الطود', 'القرنة'],
+        'أسوان': ['أسوان', 'كوم أمبو', 'إدفو', 'نصر النوبة', 'دراو', 'أبو سمبل السياحية'],
+        'البحيرة': ['دمنهور', 'كفر الدوار', 'إيتاي البارود', 'رشيد', 'المحمودية', 'أبو حمص', 'الدلنجات', 'شبراخيت'],
+        'الدقهلية': ['المنصورة', 'طلخا', 'ميت غمر', 'شربين', 'بلقاس', 'دكرنس', 'منية النصر', 'السنبلاوين', 'أجا'],
+        'الغربية': ['طنطا', 'المحلة الكبرى', 'كفر الزيات', 'زفتى', 'سمنود', 'بسيون', 'السنطة'],
+        'كفر الشيخ': ['كفر الشيخ', 'دسوق', 'فوه', 'بلطيم', 'سيدي سالم', 'مطوبس', 'الرياض', 'قلين'],
+        'الشرقية': ['الزقازيق', 'بلبيس', 'أبو حماد', 'العاشر من رمضان', 'منيا القمح', 'ههيا', 'أبو كبير', 'فاقوس'],
+        'القليوبية': ['بنها', 'شبرا الخيمة', 'قليوب', 'طوخ', 'كفر شكر', 'الخانكة', 'قها', 'العبور'],
+        'المنوفية': ['شبين الكوم', 'أشمون', 'السادات', 'قويسنا', 'بركة السبع', 'منوف', 'الشهداء', 'تلا'],
+        'الفيوم': ['الفيوم', 'طامية', 'سنورس', 'يوسف الصديق', 'إطسا', 'أبشواي'],
+        'بني سويف': ['بني سويف', 'الواسطى', 'ناصر', 'إهناسيا', 'ببا', 'سمسطا', 'الفشن'],
+        'الإسماعيلية': ['الإسماعيلية', 'أبو صوير', 'القنطرة', 'فايد', 'التل الكبير', 'القصاصين'],
+        'بورسعيد': ['بورسعيد', 'بور فؤاد', 'الزهور', 'الشرق', 'المناخ'],
+        'دمياط': ['دمياط', 'رأس البر', 'الزرقا', 'فارسكور', 'عزبة البرج', 'كفر سعد', 'كفر البطيخ'],
+        'السويس': ['السويس', 'الأربعين', 'عتاقة', 'فيصل'],
+        'البحر الأحمر': ['الغردقة', 'سفاجا', 'القصير', 'مرسى علم', 'رأس غارب'],
+        'مطروح': ['مرسى مطروح', 'سيدي براني', 'الضبعة', 'النجيلة', 'السلوم', 'العلمين'],
+        'شمال سيناء': ['العريش', 'رفح', 'الشيخ زويد', 'بئر العبد', 'نخل', 'الحسنة'],
+        'جنوب سيناء': ['الطور', 'شرم الشيخ', 'دهب', 'نويبع', 'سانت كاترين', 'أبو رديس'],
+        'الوادي الجديد': ['الخارجة', 'الداخلة', 'الفرافرة', 'باريس', 'بلاط'],
+      };
+
+      /* ── STATE ──────────────────────────────────────────────── */
+      const state = {
+        step: 1,
+        gov: '',
+        city: '',
+      };
+
+      /* ── DOM REFS ───────────────────────────────────────────── */
+      const $ = id => document.getElementById(id);
+      const card = $('card');
+      const stepper = $('stepper');
+      const node1 = $('node-1');
+      const node2 = $('node-2');
+      const connector1 = $('connector-1');
+      const step1El = $('step-1');
+      const step2El = $('step-2');
+      const govSel = $('gov');
+      const citySel = $('city');
+      const govChk = $('gov-chk');
+      const cityChk = $('city-chk');
+      const locBanner = $('loc-banner');
+      const locName = $('loc-name');
+      const s1Btn = $('s1-btn');
+      const s2Btn = $('s2-btn');
+      const backBtn = $('back-btn');
+      const completion = $('completion');
+      const orbs = [document.querySelector('.orb-a'), document.querySelector('.orb-b'), document.querySelector('.orb-c')];
+      const pills = document.querySelectorAll('.pill');
+
+      /* ── BACKGROUND PATTERN ─────────────────────────────────── */
+      function buildPattern() {
+        const svg = $('bg-svg');
+        const W = window.innerWidth, H = window.innerHeight;
+        const TILE = 110, OR = 30, IR = 12;
+        const cols = Math.ceil(W / TILE) + 1;
+        const rows = Math.ceil(H / TILE) + 1;
+        const ns = 'http://www.w3.org/2000/svg';
+        const frag = document.createDocumentFragment();
+
+        const mkEl = (tag, attrs) => {
+          const el = document.createElementNS(ns, tag);
+          for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+          return el;
+        };
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cx = c * TILE - (r % 2 ? TILE / 2 : 0);
+            const cy = r * TILE;
+
+            // 8-pointed star
+            const pts = Array.from({ length: 16 }, (_, i) => {
+              const angle = (i * Math.PI / 8) - Math.PI / 2;
+              const rad = i % 2 === 0 ? OR : IR;
+              return `${(cx + rad * Math.cos(angle)).toFixed(1)},${(cy + rad * Math.sin(angle)).toFixed(1)}`;
+            }).join(' ');
+
+            frag.appendChild(mkEl('polygon', {
+              points: pts, fill: 'none',
+              stroke: '#C9A84C', 'stroke-width': '.8', class: 'star', opacity: '0'
+            }));
+            frag.appendChild(mkEl('circle', {
+              cx, cy, r: OR * 1.35,
+              fill: 'none', stroke: '#C9A84C', 'stroke-width': '.35', opacity: '0'
+            }));
+
+            if (r < rows - 1 && c < cols - 1) {
+              frag.appendChild(mkEl('line', {
+                x1: cx, y1: cy, x2: cx + TILE, y2: cy + TILE,
+                stroke: '#C9A84C', 'stroke-width': '.25', opacity: '.18'
+              }));
+              frag.appendChild(mkEl('line', {
+                x1: cx + TILE, y1: cy, x2: cx, y2: cy + TILE,
+                stroke: '#C9A84C', 'stroke-width': '.25', opacity: '.18'
+              }));
+            }
+          }
+        }
+        svg.appendChild(frag);
+
+        // Staggered reveal for stars
+        const stars = svg.querySelectorAll('.star, circle');
+        stars.forEach((el, i) => {
+          const delay = Math.random() * 2500;
+          setTimeout(() => {
+            el.style.transition = 'opacity 1s ease';
+            el.setAttribute('opacity', el.tagName === 'polygon' ? '1' : '.35');
+          }, delay);
+        });
+      }
+
+      /* ── PARTICLES ──────────────────────────────────────────── */
+      function initParticles() {
+        const cv = $('canvas');
+        const ctx = cv.getContext('2d');
+        let W, H;
+
+        const resize = () => { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; };
+        resize();
+        window.addEventListener('resize', resize, { passive: true });
+
+        const pts = Array.from({ length: 50 }, () => ({
+          x: Math.random() * 1440,
+          y: Math.random() * 900,
+          r: Math.random() * 1.6 + .3,
+          dx: (Math.random() - .5) * .22,
+          dy: -Math.random() * .32 - .06,
+          a: Math.random() * .3 + .04,
+          gold: Math.random() > .45,
+        }));
+
+        const loop = () => {
+          ctx.clearRect(0, 0, W, H);
+          for (const p of pts) {
+            p.x += p.dx;
+            p.y += p.dy;
+            if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
+            if (p.x < -8) p.x = W + 8;
+            if (p.x > W + 8) p.x = -8;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.gold
+              ? `rgba(201,168,76,${p.a})`
+              : `rgba(255,255,255,${p.a * .65})`;
+            ctx.fill();
+          }
+          requestAnimationFrame(loop);
+        };
+        loop();
+      }
+
+      /* ── PARALLAX (desktop only) ────────────────────────────── */
+      function initParallax() {
+        if (window.matchMedia('(hover: none)').matches) return; // skip on touch
+        document.addEventListener('mousemove', e => {
+          const rx = ((e.clientY / window.innerHeight) - .5) * 4;
+          const ry = ((e.clientX / window.innerWidth) - .5) * -4;
+          card.style.transform = `perspective(1200px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        }, { passive: true });
+        document.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      }
+
+      /* ── RIPPLE ─────────────────────────────────────────────── */
+      function addRipple(btn) {
+        const r = document.createElement('div');
+        r.className = 'btn-ripple';
+        btn.appendChild(r);
+        r.addEventListener('animationend', () => r.remove());
+      }
+
+      /* ── POPULATE GOVERNORATES ──────────────────────────────── */
+      function populateGovs() {
+        const frag = document.createDocumentFragment();
+        Object.keys(EG).sort().forEach(g => {
+          const o = document.createElement('option');
+          o.value = g; o.textContent = g;
+          frag.appendChild(o);
+        });
+        govSel.appendChild(frag);
+      }
+
+      /* ── STEP NAVIGATION ────────────────────────────────────── */
+      function goToStep(targetStep) {
+        const forward = targetStep > state.step;
+        const fromEl = state.step === 1 ? step1El : step2El;
+        const toEl = targetStep === 1 ? step1El : step2El;
+
+        state.step = targetStep;
+
+        // Update stepper UI
+        if (targetStep === 2) {
+          node1.classList.remove('active');
+          node1.classList.add('done');
+          node1.removeAttribute('aria-current');
+          node2.classList.add('active');
+          node2.setAttribute('aria-current', 'step');
+          connector1.classList.add('done');
+        } else {
+          node1.classList.add('active');
+          node1.classList.remove('done');
+          node1.setAttribute('aria-current', 'step');
+          node2.classList.remove('active');
+          node2.removeAttribute('aria-current');
+          connector1.classList.remove('done');
+        }
+
+        // Animate out
+        fromEl.dataset.state = forward ? 'exiting' : 'exiting-back';
+        fromEl.addEventListener('animationend', () => {
+          fromEl.dataset.state = forward ? 'hidden-right' : 'hidden-left';
+
+          // Animate in
+          toEl.dataset.state = forward ? 'entering' : 'entering-back';
+          toEl.addEventListener('animationend', () => {
+            toEl.dataset.state = 'active';
+            if (targetStep === 2) govSel.focus();
+          }, { once: true });
+        }, { once: true });
+      }
+
+      /* ── GOV / CITY HANDLERS ────────────────────────────────── */
+      function onGovChange() {
+        state.gov = govSel.value;
+        state.city = '';
+
+        govChk.classList.toggle('show', !!state.gov);
+        cityChk.classList.remove('show');
+        locBanner.classList.remove('show');
+        updateSubmitBtn();
+
+        citySel.innerHTML = '<option value="">اختر المدينة…</option>';
+
+        if (state.gov && EG[state.gov]) {
+          citySel.disabled = false;
+          citySel.removeAttribute('aria-disabled');
+          const frag = document.createDocumentFragment();
+          EG[state.gov].forEach(c => {
+            const o = document.createElement('option');
+            o.value = c; o.textContent = c;
+            frag.appendChild(o);
+          });
+          citySel.appendChild(frag);
+        } else {
+          citySel.disabled = true;
+          citySel.innerHTML = '<option value="">اختر المحافظة أولاً…</option>';
+        }
+      }
+
+      function onCityChange() {
+        state.city = citySel.value;
+
+        const hasCity = !!state.city;
+        cityChk.classList.toggle('show', hasCity);
+
+        if (hasCity) {
+          locName.textContent = `${state.gov}، ${state.city}`;
+          locBanner.classList.add('show');
+        } else {
+          locBanner.classList.remove('show');
+        }
+        updateSubmitBtn();
+      }
+
+      function updateSubmitBtn() {
+        const ready = !!(state.gov && state.city);
+        s2Btn.disabled = !ready;
+        s2Btn.setAttribute('aria-disabled', String(!ready));
+      }
+
+      /* ── FINISH (completion) ────────────────────────────────── */
+      function finish() {
+        if (!state.gov || !state.city) return;
+        addRipple(s2Btn);
+
+        // Tiny button press feedback
+        s2Btn.style.transform = 'scale(.96)';
+        setTimeout(() => { s2Btn.style.transform = ''; }, 200);
+
+        // Show overlay after brief delay
+        setTimeout(() => {
+          completion.classList.add('show');
+          // Demo: auto-dismiss after 4s
+          setTimeout(demoReset, 4000);
+        }, 280);
+      }
+
+      function demoReset() {
+        completion.classList.remove('show');
+        // Brief delay then reset state
+        setTimeout(() => {
+          state.gov = ''; state.city = '';
+          govSel.value = '';
+          citySel.innerHTML = '<option value="">اختر المحافظة أولاً…</option>';
+          citySel.disabled = true;
+          govChk.classList.remove('show');
+          cityChk.classList.remove('show');
+          locBanner.classList.remove('show');
+          updateSubmitBtn();
+          if (state.step === 2) goToStep(1);
+        }, 600);
+      }
+
+      /* ── ENTRANCE ANIMATION ─────────────────────────────────── */
+      function runEntrance() {
+        // Orbs fade in
+        orbs.forEach((orb, i) => {
+          setTimeout(() => { orb.style.opacity = '1'; }, i * 200);
+        });
+
+        // Card rises
+        setTimeout(() => { card.classList.add('is-visible'); }, 200);
+
+        // Stepper appears
+        setTimeout(() => { stepper.classList.add('is-visible'); }, 600);
+
+        // Pills stagger in
+        pills.forEach((pill, i) => {
+          setTimeout(() => { pill.classList.add('is-visible'); }, 900 + i * 100);
+        });
+
+        // Parallax (delayed so card is stable first)
+        setTimeout(initParallax, 1800);
+      }
+
+      /* ── EVENT LISTENERS ────────────────────────────────────── */
+      s1Btn.addEventListener('click', () => {
+        addRipple(s1Btn);
+        setTimeout(() => goToStep(2), 120);
+      });
+
+      backBtn.addEventListener('click', () => {
+        addRipple(backBtn);
+        setTimeout(() => goToStep(1), 120);
+      });
+
+      govSel.addEventListener('change', onGovChange);
+      citySel.addEventListener('change', onCityChange);
+      s2Btn.addEventListener('click', finish);
+
+      // Keyboard: Escape goes back on step 2
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && state.step === 2) goToStep(1);
+      });
+
+      /* ── BOOT ───────────────────────────────────────────────── */
+      document.addEventListener('DOMContentLoaded', () => {
+        buildPattern();
+        initParticles();
+        populateGovs();
+        runEntrance();
+      });
+
+    })();
+  </script>
+</body>
+
+</html>

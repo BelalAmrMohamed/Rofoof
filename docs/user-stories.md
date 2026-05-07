@@ -49,6 +49,7 @@
 - [ ] After registration, I am taken to the browse page
 - [ ] My session persists — I do not need to log in again on my next visit
 - [ ] My role is set to `visitor` by default (until promoted by an admin)
+- [ ] I am NOT redirected to `/onboarding` — location was already collected in the registration form
 
 ---
 
@@ -62,9 +63,9 @@
 
 - [ ] "تسجيل الدخول بـ Google" and "تسجيل الدخول بـ Facebook" buttons are visible
 - [ ] Clicking either opens the respective OAuth flow
-- [ ] On first OAuth sign-in, I am prompted to set my governorate and city
-- [ ] My profile is created and I am taken to the browse page
-- [ ] On subsequent sign-ins, I go directly to the browse page
+- [ ] On first OAuth sign-in (no location set), I am automatically redirected to `/onboarding` to set my governorate and city
+- [ ] On subsequent sign-ins (location already set), I go directly to the browse page
+- [ ] My profile is created with fullname pulled from the OAuth provider
 
 ---
 
@@ -76,10 +77,29 @@
 
 **Acceptance Criteria:**
 
-- [ ] A location change option is accessible from the browse page and my profile
+- [ ] A location change option is accessible from the browse page and my profile page
+- [ ] Both entry points update the same underlying profile record — there is no distinction between a "temporary" and "permanent" location
 - [ ] I can select any governorate + city combination from dropdowns
-- [ ] The change is saved immediately
+- [ ] The change is saved immediately to my profile
 - [ ] The browse results update to reflect my new location
+
+---
+
+### US-22 — Complete Onboarding After OAuth Sign-In
+
+**As a** new user who signed in with Google or Facebook,
+**I want to** set my location in a simple onboarding step,
+**so that** the browse page immediately shows me books near me.
+
+**Acceptance Criteria:**
+
+- [ ] After first OAuth sign-in, I am redirected to `/onboarding` before I can access anything else
+- [ ] The onboarding page shows a brief, welcoming explanation of the platform (2–3 sentences max)
+- [ ] I must select a governorate (required), then a city (required, filtered by selected governorate)
+- [ ] Clicking "ابدأ التصفح" saves my location to my profile and takes me to `/browse`
+- [ ] If I close the tab or navigate away without completing onboarding, I am redirected back to `/onboarding` on my next visit as long as my location is not set
+- [ ] If I somehow navigate directly to `/submit` or `/browse`, middleware intercepts and sends me to `/onboarding` first
+- [ ] Email-registered users never see this page (location is collected during email registration)
 
 ---
 
@@ -96,7 +116,7 @@
 **Acceptance Criteria:**
 
 - [ ] The default browse view shows books, sorted by mosque proximity
-- [ ] Each book card shows: title, author, category, mosque name (or city), governorate
+- [ ] Each book card shows: title, author, category, mosque name (or "مسجد — [المدينة]" if unnamed), governorate
 - [ ] If I have no location set, I am prompted to enter one before proximity sorting works
 - [ ] Results only include books from `approved` submissions
 
@@ -111,8 +131,8 @@
 **Acceptance Criteria:**
 
 - [ ] A "المساجد" tab/toggle switches to mosque view
-- [ ] Each mosque card shows: name (if any), city, governorate, number of cataloged books
-- [ ] Clicking a mosque card shows all books cataloged in that mosque
+- [ ] Each mosque card shows: name (or "مسجد — [المدينة]" if unnamed), city, governorate, number of cataloged books
+- [ ] Clicking a mosque card shows all books cataloged in that mosque, each with its edition if recorded
 - [ ] Results are sorted by proximity to my location
 
 ---
@@ -137,15 +157,16 @@
 ### US-08 — Change My Browse Location
 
 **As a** user browsing books,
-**I want to** temporarily change the location used for proximity sorting,
-**so that** I can find books near a place I'm planning to visit (not just where I am now).
+**I want to** change the location used for proximity sorting from the browse page,
+**so that** I can find books near a place I'm planning to visit.
 
 **Acceptance Criteria:**
 
 - [ ] A "تغيير الموقع" button is visible on the browse page
-- [ ] I can set any governorate + city without changing my profile location
-- [ ] Proximity sorting updates immediately
-- [ ] My profile location is not permanently changed by this action
+- [ ] I can select any governorate + city combination from dropdowns
+- [ ] Proximity sorting updates immediately after I confirm
+- [ ] The change is saved to my profile — it is the same action as editing location from my profile page
+- [ ] On my next visit, the browse page defaults to my updated location
 
 ---
 
@@ -164,10 +185,10 @@
 - [ ] I can access the "تسجيل كتاب" page
 - [ ] The form has fields: title\*, author, category, edition, publisher, description, image
 - [ ] I can search for an existing mosque on the platform
-- [ ] If the mosque isn't found, I can fill in mosque details inline: governorate*, city*, name, image
+- [ ] If the mosque isn't found, I can fill in mosque details inline: governorate\*, city\*, name, image
 - [ ] After submitting, the entry is immediately `approved` and visible in browse
-- [ ] I see a success confirmation with the book title and mosque name
-- [ ] I can edit or delete my own submissions later
+- [ ] I see a success confirmation with the book title, edition (if entered), and mosque name
+- [ ] I can edit my own approved submissions later via /submit/edit/[id]
 
 ---
 
@@ -179,11 +200,11 @@
 
 **Acceptance Criteria:**
 
-- [ ] The submit form is identical to the volunteer form
+- [ ] The submit form is identical to the volunteer form (including edition and publisher fields)
 - [ ] After submitting, I see a message: "طلبك قيد المراجعة" (Your request is under review)
 - [ ] The submission is stored with status `pending`
 - [ ] The book does NOT appear in public browse until approved
-- [ ] I can view my pending submissions somewhere in my profile
+- [ ] I can view my pending submissions in my profile with their current status
 
 ---
 
@@ -206,16 +227,16 @@
 ### US-12 — Prevent Duplicate Submissions / Handle Multiple Editions
 
 **As a** volunteer or user,
-**I want to** be informed when a book already exists in a mosque — and have the system handle editions correctly —
-**so that** the catalog stays clean without losing edition information.
+**I want to** be informed when a book already exists in a mosque — and have different editions stored correctly —
+**so that** the catalog stays clean and edition information is never lost.
 
 **Acceptance Criteria:**
 
-- [ ] When I select a book title and a mosque, the system checks for an existing approved or pending entry for the same title in that mosque
-- [ ] **Same title + same edition:** A warning is shown — "هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد" — and submission is blocked
-- [ ] **Same title + different edition:** No new mosque_books entry is created. Instead, the existing entry is flagged as `has_multiple_editions = true`, and the user sees: "تمت إضافة طبعة جديدة إلى نفس السجل الموجود"
-- [ ] If no matching title is found in that mosque, submission proceeds normally
-- [ ] The duplicate/edition check happens client-side before the form is submitted
+- [ ] When I select a book title and a mosque, the system checks for an existing approved or pending entry for the same title + same edition in that mosque
+- [ ] **Same title + same edition (or both edition fields are blank):** A warning is shown — "هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد" — and submission is blocked
+- [ ] **Same title + different edition (e.g., existing entry has "الطبعة الثانية", new submission has "الطبعة الثالثة"):** A new `mosque_books` row is created for the new edition. The user sees: "تمت إضافة طبعة جديدة لهذا الكتاب في نفس المسجد ✓" — submission proceeds and is treated as a new entry
+- [ ] On the book detail page, if a mosque holds multiple editions, each is listed as a separate entry with its edition label
+- [ ] The duplicate/edition check happens client-side before the form is submitted (with a server-side re-check on submit)
 
 ---
 
@@ -232,9 +253,9 @@
 **Acceptance Criteria:**
 
 - [ ] The "طلبات التسجيل" page is only accessible to admins
-- [ ] It shows a list of all `pending` submissions with: book title, author, mosque, submitter name, date
+- [ ] It shows a list of all `pending` submissions with: book title, author, edition, mosque, submitter name, date
 - [ ] I can filter by: status, governorate, date range
-- [ ] Each submission has Approve and Reject buttons
+- [ ] Each submission has Approve, Edit & Approve, and Reject buttons
 
 ---
 
@@ -248,8 +269,8 @@
 
 - [ ] Clicking Approve changes the status to `approved`
 - [ ] The book immediately appears in the public browse
-- [ ] The submission shows who approved it and when
-- [ ] The submitter's contribution is credited
+- [ ] The submission shows who approved it and when (reviewed_by, reviewed_at)
+- [ ] The submitter's contribution is credited in their profile history
 
 ---
 
@@ -265,7 +286,7 @@
 - [ ] The rejection reason is optional but recommended
 - [ ] Status changes to `rejected`
 - [ ] The book does NOT appear in public browse
-- [ ] The submitter can see the rejection and reason in their submission history
+- [ ] The rejection reason (rejection_note) is stored and visible to the submitter in their /profile submissions list
 
 ---
 
@@ -277,10 +298,12 @@
 
 **Acceptance Criteria:**
 
-- [ ] An "Edit & Approve" option opens an editable version of the submission form
-- [ ] I can modify any field: title, author, category, mosque info, etc.
-- [ ] After saving, the entry is auto-approved and made public
-- [ ] The edit is logged (who changed it and when)
+- [ ] An "تعديل وموافقة" option on the /requests page takes me to /submit/edit/[id]?context=admin
+- [ ] The form is pre-filled with all existing data including edition and publisher
+- [ ] I can modify any field: title, author, category, edition, publisher, mosque info, etc.
+- [ ] Clicking "حفظ وموافقة" saves the edited data, sets status to 'approved', and records reviewed_by + reviewed_at
+- [ ] I am returned to /requests after saving
+- [ ] The edit is logged (reviewed_by, reviewed_at)
 
 ---
 
@@ -312,10 +335,30 @@
 
 **Acceptance Criteria:**
 
-- [ ] My profile or a "مساهماتي" section shows all my submissions
-- [ ] Each submission shows: book title, mosque, date, and current status (pending / approved / rejected)
-- [ ] Rejected submissions show the rejection reason
-- [ ] I can click a submission to view or edit it (volunteers only)
+- [ ] My profile page shows all my submissions in a "مساهماتي" section
+- [ ] Each submission shows: book title, edition (if any), mosque name, date submitted, and current status (pending / approved / rejected)
+- [ ] Rejected submissions show the rejection reason (rejection_note) inline — no separate notification is needed
+- [ ] Approved submissions show a link to view the book in browse
+- [ ] Volunteer submissions show an "تعديل" (Edit) button that leads to /submit/edit/[id]
+- [ ] Visitor submissions do NOT show an edit button
+
+---
+
+### US-23 — Edit My Own Submission (Volunteer)
+
+**As a** volunteer,
+**I want to** edit a book submission I previously submitted,
+**so that** I can correct mistakes or add missing information like edition or publisher.
+
+**Acceptance Criteria:**
+
+- [ ] I can access the edit form from my profile page via the "تعديل" button
+- [ ] The form at /submit/edit/[id] is pre-filled with all existing data
+- [ ] I can edit any field: title, author, category, edition, publisher, notes, image, mosque info
+- [ ] Saving keeps the entry status as 'approved' (volunteer edits are trusted)
+- [ ] I cannot edit a submission that is currently in 'pending' status — the edit button is disabled with a tooltip explaining why
+- [ ] I am returned to my profile after saving, with a success message
+- [ ] Only I (the original submitter) can edit my submissions — other volunteers cannot edit each other's entries
 
 ---
 
@@ -367,3 +410,4 @@
 - [ ] When a submission is approved or rejected, the counter decrements immediately
 - [ ] When a new submission arrives, the counter increments immediately
 - [ ] If there are zero pending submissions, the badge is hidden (not shown as "0")
+- [ ] The count is fetched via the `admin_get_pending_count()` SECURITY DEFINER function to respect RLS

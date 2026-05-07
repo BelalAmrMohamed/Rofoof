@@ -16,9 +16,11 @@
 3. User is prompted: "أدخل موقعك لعرض الكتب القريبة منك"
 4. User selects governorate + city from dropdowns
 5. Browse page updates — books sorted by proximity
+   (Location is saved to profile if user is authenticated;
+    stored in a session cookie if user is a guest)
 6. User searches/filters (optional)
 7. User clicks a book card
-8. Book detail page shows which mosques hold this book
+8. Book detail page shows which mosques hold this book, grouped by edition
 9. User visits mosque ✓
 ```
 
@@ -41,12 +43,12 @@
 2. System detects no session → redirects to /login
 3. User clicks "إنشاء حساب بالبريد الإلكتروني"
 4. User fills form: name, email, password
-5. User selects governorate + city
+5. User selects governorate + city (required — collected here, not on onboarding)
 6. Account created with role = 'visitor'
 7. User is redirected back to /submit
 8. User fills book form:
    a. Title (required)
-   b. Author, category, edition, notes (optional)
+   b. Author, category, edition, publisher, notes (optional)
    c. Book image (optional)
 9. User searches for mosque
    a. IF found → selects from dropdown → mosque fields auto-fill
@@ -63,8 +65,8 @@
 
 **Failure states:**
 
-- **True duplicate (same title + same edition + same mosque):** Warning shown — "هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد" — submission is blocked
-- **Different edition (same title + different edition + same mosque):** No new entry is created; existing mosque_books record is flagged `has_multiple_editions = true`; user sees "تمت إضافة طبعة جديدة إلى نفس السجل"
+- **True duplicate (same title + same edition + same mosque):** Warning shown — "هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد" — submission is blocked. If no edition was specified by the submitter, and an edition-less entry already exists for that book in that mosque, the same warning is shown.
+- **Different edition (same title + different edition + same mosque):** A NEW `mosque_books` row is created for this edition. The user sees: "تمت إضافة طبعة جديدة لهذا الكتاب في نفس المسجد" — no blocking occurs.
 - Missing required fields → inline validation errors
 - Image too large → error message, image not uploaded
 
@@ -83,7 +85,7 @@
 5. System saves entry with status = 'approved'
 6. Entry immediately appears in public browse
 7. Volunteer sees: "تم تسجيل الكتاب بنجاح ✓"
-   (includes: book title, mosque name, link to view in browse)
+   (includes: book title, edition if entered, mosque name, link to view in browse)
 ```
 
 **Difference from Flow 2:** No pending state — auto-approved.
@@ -97,10 +99,10 @@
 
 ```
 1. Admin logs in → lands on /browse (default)
-2. Admin sees notification or navigates to /requests
+2. Admin sees notification badge or navigates to /requests
 3. Admin views list of pending submissions
 4. Admin clicks on a submission to expand details:
-   - Book info (title, author, category, notes, image)
+   - Book info (title, author, category, edition, publisher, notes, image)
    - Mosque info (name, city, governorate)
    - Submitted by (name, date)
 5. Admin reviews the information
@@ -113,17 +115,20 @@
 
    PATH B — Edit & Approve:
    5b. Admin clicks "تعديل وموافقة" (Edit & Approve)
-   5c. Form opens pre-filled with submission data
-   5d. Admin corrects typos / missing info
-   5e. Admin clicks "حفظ وموافقة"
-   5f. Status → 'approved', edited data saved
+   5c. Admin is taken to /submit/edit/[id]?context=admin
+   5d. Form is pre-filled with submission data
+   5e. Admin corrects typos / missing info (including edition or publisher)
+   5f. Admin clicks "حفظ وموافقة"
+   5g. Status → 'approved', edited data saved, reviewed_by + reviewed_at set
+   5h. Admin is returned to /requests
 
    PATH C — Reject:
    5b. Admin clicks "رفض" (Reject)
    5c. Dialog opens: "سبب الرفض (اختياري)"
    5d. Admin types reason (optional) and confirms
-   5e. Status → 'rejected'
+   5e. Status → 'rejected', rejection_note saved
    5f. Submission moves to "Rejected" tab
+   5g. Submitter can see the reason in their /profile submissions list
 ```
 
 ---
@@ -133,21 +138,25 @@
 **Actor:** Any authenticated user
 **Goal:** Change their governorate/city for more relevant browse results
 
+> **Decision (2026):** The browse-page location picker and the profile location picker are the same thing. Changing location anywhere always saves to the user's profile. There is no "session-only" location mode.
+
 ```
 OPTION A — From Browse page:
 1. User clicks "تغيير الموقع" button on /browse
 2. Dropdown appears: select governorate → select city
 3. User clicks "تحديث" (Update)
 4. Browse results refresh based on new location
-5. Location saved to user profile
+5. Location saved to user profile immediately
 
 OPTION B — From Profile page:
 1. User navigates to /profile
 2. User clicks "تعديل" (Edit) next to current location
 3. Selects new governorate + city
 4. Clicks "حفظ"
-5. Location updated
+5. Location updated — identical result to Option A
 ```
+
+**Guest behavior:** A guest who sets location on the browse page has their selection stored in a session cookie only. It does not persist across sessions and is not linked to any profile.
 
 ---
 
@@ -164,10 +173,12 @@ OPTION B — From Profile page:
 5. User clicks book card
 6. Book detail page shows:
    - Book info (title, author, category, notes)
-   - List of mosques that hold this book:
-     - Mosque name (if any)
+   - List of mosques that hold this book, each entry showing:
+     - Mosque name (or "مسجد — [المدينة]" if unnamed)
      - Governorate + City
+     - Edition held (if recorded)
      - Distance from user (if location is set)
+     - If the same mosque holds multiple editions, each is listed as a separate row
 7. User picks the closest mosque and goes to visit it ✓
 ```
 
@@ -205,10 +216,67 @@ OPTION B — From Profile page:
 1. User visits the platform URL
 2. Supabase detects existing session (cookie)
 3. User is taken directly to /browse
-4. Previous location settings are applied
+4. Previous location settings are applied (from profile)
 5. No login prompt shown
 ```
 
 **Session expiry case:**
 
 - If session expired → user lands on /browse as a guest → if they attempt to submit, they are redirected to /login → sees their email pre-filled → re-authenticates with one click (OAuth) or password
+
+---
+
+## Flow 9: First-Time OAuth User Completes Onboarding
+
+**Actor:** New user who signed in via Google or Facebook
+**Goal:** Set their location so the platform can show relevant results
+
+```
+1. User clicks "تسجيل الدخول بـ Google" (or Facebook) on /login
+2. OAuth flow completes → Supabase Auth creates auth.users row
+3. Database trigger creates users row (fullname from OAuth profile, role = 'visitor')
+4. middleware.ts detects: users.governorate IS NULL OR users.city IS NULL
+5. User is redirected to /onboarding (instead of /browse)
+
+   ON /onboarding:
+6. User sees welcome message + one-paragraph platform explanation
+7. User selects governorate from dropdown
+8. City dropdown populates based on selected governorate
+9. User clicks "ابدأ التصفح" (Start Browsing)
+10. governorate + city saved to users profile
+11. User is redirected to /browse
+12. Browse results immediately reflect their location
+```
+
+**Edge cases:**
+
+- **User skips (closes tab / navigates away):** Profile has NULL location. On next visit, if session is still active, middleware re-checks: location still NULL → redirected to /onboarding again until they complete it.
+- **User tries to navigate directly to /browse or /submit:** middleware intercepts and redirects to /onboarding first.
+- **User who registered by email:** Never reaches /onboarding. Location was collected during registration. Middleware finds location set → no redirect.
+
+---
+
+## Flow 10: Volunteer Edits Their Own Submission
+
+**Actor:** Volunteer
+**Goal:** Correct or update a book or mosque entry they previously submitted
+
+```
+1. Volunteer navigates to /profile
+2. Volunteer sees their submission history list
+3. Volunteer clicks "تعديل" (Edit) next to an approved submission
+4. Volunteer is taken to /submit/edit/[id]
+5. Form is pre-filled with all existing data (book info, edition, publisher, mosque)
+6. Volunteer edits any field
+7. Volunteer clicks "حفظ التعديلات" (Save Changes)
+8. Changes are saved; entry remains 'approved' (volunteer edits are trusted)
+9. updated_at timestamp is refreshed
+10. Volunteer is returned to /profile with a success notice
+```
+
+**Restrictions:**
+
+- Only the volunteer who originally submitted the entry can edit it (enforced by RLS policy).
+- Admins can edit any entry via /submit/edit/[id]?context=admin (see Flow 4, Path B).
+- Visitors (non-volunteers) cannot edit submissions — the edit button is not shown in their profile.
+- A pending submission cannot be edited by the volunteer while it awaits admin review (the button is disabled with tooltip: "في انتظار المراجعة").
