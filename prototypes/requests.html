@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طلبات التسجيل — على رفوف المساجد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-950: #0D3628;
+    --green-900: #1A5C4B;
+    --green-800: #1E6B58;
+    --green-700: #217A64;
+    --green-500: #2DA882;
+    --green-200: #A8DFD0;
+    --green-100: #D4EFE8;
+    --green-50:  #EDF8F4;
+
+    --gold-700:  #8A6A00;
+    --gold-600:  #A07D00;
+    --gold-400:  #C9A32A;
+    --gold-200:  #EDD88A;
+    --gold-100:  #F7EECC;
+    --gold-50:   #FDFAEE;
+
+    --sand-900: #2A2318;
+    --sand-800: #3D3327;
+    --sand-600: #7A6B57;
+    --sand-400: #B5A792;
+    --sand-200: #DDD3C4;
+    --sand-100: #EDE6DA;
+    --sand-50:  #F7F2EA;
+    --sand-25:  #FDFAF6;
+
+    --red-700:  #9B2020;
+    --red-600:  #B52525;
+    --red-100:  #FAEAEA;
+    --red-50:   #FEF4F4;
+
+    --surface:  #FFFDF9;
+    --bg:       #F4EFE6;
+    --border:   #E2D9CB;
+    --border-strong: #C8BBAA;
+
+    --text-primary:   #1C1812;
+    --text-secondary: #6B5E4E;
+    --text-muted:     #9E9080;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
+
+    --font-ui: 'Cairo', sans-serif;
+    --font-display: 'Amiri', serif;
+
+    --shadow-sm: 0 1px 3px rgba(42,35,24,0.08), 0 1px 2px rgba(42,35,24,0.04);
+    --shadow-md: 0 4px 12px rgba(42,35,24,0.10), 0 2px 4px rgba(42,35,24,0.06);
+    --shadow-lg: 0 8px 24px rgba(42,35,24,0.14), 0 4px 8px rgba(42,35,24,0.08);
+  }
+
+  body {
+    font-family: var(--font-ui);
+    background-color: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 28px, rgba(180,160,130,0.04) 28px, rgba(180,160,130,0.04) 29px),
+      repeating-linear-gradient(-45deg, transparent, transparent 28px, rgba(180,160,130,0.04) 28px, rgba(180,160,130,0.04) 29px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--green-900);
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--gold-200);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .brand-text {
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: rgba(255,255,255,0.95);
+    line-height: 1.2;
+    display: none;
+  }
+
+  @media (min-width: 400px) { .brand-text { display: block; } }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.8);
+    font-size: 18px;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .icon-btn:hover { background: rgba(255,255,255,0.10); }
+
+  .notif-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    min-width: 16px;
+    height: 16px;
+    background: var(--gold-400);
+    color: var(--sand-900);
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 1;
+    border: 1.5px solid var(--green-900);
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    position: relative;
+    z-index: 1;
+    padding: 20px 16px 0;
+  }
+
+  .page-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--sand-900);
+    line-height: 1.3;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 10px 8px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-chip-num {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+
+  .stat-chip-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.2;
+  }
+
+  .stat-chip.pending .stat-chip-num { color: var(--gold-600); }
+  .stat-chip.approved .stat-chip-num { color: var(--green-800); }
+  .stat-chip.rejected .stat-chip-num { color: var(--red-600); }
+
+  /* ── TABS ── */
+  .tabs-wrap {
+    position: relative;
+    z-index: 1;
+    padding: 0 16px;
+    margin-bottom: 4px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--sand-100);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 6px;
+    border-radius: 11px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--sand-900);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+  }
+
+  .tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 0 5px;
+    line-height: 1;
+  }
+
+  .tab-btn.active.tab-pending .tab-count { background: var(--gold-100); color: var(--gold-700); }
+  .tab-btn.active.tab-approved .tab-count { background: var(--green-100); color: var(--green-800); }
+  .tab-btn.active.tab-rejected .tab-count { background: var(--red-100); color: var(--red-700); }
+  .tab-btn:not(.active) .tab-count { background: var(--sand-200); color: var(--text-secondary); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    position: relative;
+    z-index: 1;
+    padding: 10px 16px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+
+  .filter-chip:hover { border-color: var(--green-500); color: var(--green-800); }
+  .filter-chip.active { background: var(--green-50); border-color: var(--green-500); color: var(--green-800); font-weight: 600; }
+  .filter-chip svg { flex-shrink: 0; }
+
+  /* ── CONTENT ── */
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 4px 16px 100px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding-right: 2px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .card:hover { box-shadow: var(--shadow-md); }
+
+  .card.removing {
+    animation: card-remove 0.4s ease forwards;
+  }
+
+  @keyframes card-remove {
+    to { opacity: 0; transform: translateX(60px) scale(0.95); max-height: 0; margin-bottom: 0; padding: 0; }
+  }
+
+  .card.approved-flash {
+    animation: approved-flash 0.5s ease;
+  }
+
+  @keyframes approved-flash {
+    0%   { background: var(--green-50); border-color: var(--green-500); }
+    100% { background: var(--surface); border-color: var(--border); }
+  }
+
+  .card-accent {
+    height: 3px;
+    background: var(--gold-400);
+  }
+
+  .card-accent.approved-accent { background: var(--green-500); }
+  .card-accent.rejected-accent { background: var(--red-600); }
+
+  .card-body { padding: 14px 14px 0; }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .book-info { flex: 1; min-width: 0; }
+
+  .book-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--sand-900);
+    line-height: 1.35;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .book-author {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .category-badge {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .cat-fiqh     { background: var(--green-100); color: var(--green-800); }
+  .cat-hadith   { background: var(--gold-100); color: var(--gold-700); }
+  .cat-tafsir   { background: #EEF0FF; color: #3A3FAA; }
+  .cat-sira     { background: #FEF0E6; color: #9B4A10; }
+  .cat-aqida    { background: #F0EFF8; color: #4A3A8A; }
+  .cat-tazkiya  { background: var(--green-50); color: var(--green-700); }
+  .cat-other    { background: var(--sand-100); color: var(--sand-600); }
+
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .meta-row svg { flex-shrink: 0; opacity: 0.7; }
+
+  .meta-highlight {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .edition-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--sand-100);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 10px -14px;
+  }
+
+  .card-footer {
+    padding: 10px 14px 12px;
+  }
+
+  .submitter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .avatar-a { background: var(--green-100); color: var(--green-800); }
+  .avatar-b { background: var(--gold-100); color: var(--gold-700); }
+  .avatar-c { background: #EEF0FF; color: #3A3FAA; }
+  .avatar-d { background: #FEF0E6; color: #9B4A10; }
+
+  .submitter-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .submit-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-right: auto;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .actions.three { grid-template-columns: 1fr 1fr; }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-approve {
+    background: var(--green-900);
+    color: #fff;
+    border-color: var(--green-900);
+  }
+
+  .btn-approve:hover { background: var(--green-800); }
+
+  .btn-edit {
+    background: var(--gold-50);
+    color: var(--gold-700);
+    border-color: var(--gold-200);
+    grid-column: 1 / -1;
+  }
+
+  .btn-edit:hover { background: var(--gold-100); }
+
+  .btn-reject {
+    background: var(--red-50);
+    color: var(--red-600);
+    border-color: #F5C5C5;
+  }
+
+  .btn-reject:hover { background: var(--red-100); }
+
+  /* ── STATUS CARD (approved/rejected view) ── */
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .status-approved { background: var(--green-50); color: var(--green-800); }
+  .status-rejected { background: var(--red-50); color: var(--red-600); }
+
+  .rejection-note {
+    background: var(--red-50);
+    border: 1px solid #F5C5C5;
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--red-700);
+    line-height: 1.5;
+  }
+
+  .rejection-note-label {
+    font-weight: 700;
+    margin-bottom: 3px;
+    font-size: 11px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--sand-100);
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+
+  .empty-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sand-900);
+    margin-bottom: 6px;
+  }
+
+  .empty-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ── REJECT MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,15,8,0.55);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    width: 100%;
+    max-width: 520px;
+    padding: 0 0 32px;
+    box-shadow: 0 -4px 32px rgba(20,15,8,0.2);
+    animation: slide-up 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 2px;
+    margin: 12px auto 20px;
+  }
+
+  .modal-body { padding: 0 20px; }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--sand-900);
+    margin-bottom: 4px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .modal-sub strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    color: var(--text-primary);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    direction: rtl;
+    margin-bottom: 16px;
+  }
+
+  .textarea:focus { border-color: var(--red-600); }
+  .textarea::placeholder { color: var(--text-muted); }
+
+  .modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn-cancel {
+    background: var(--sand-100);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+
+  .btn-cancel:hover { background: var(--sand-200); }
+
+  .btn-confirm-reject {
+    background: var(--red-600);
+    color: #fff;
+    border-color: var(--red-600);
+  }
+
+  .btn-confirm-reject:hover { background: var(--red-700); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    right: 50%;
+    transform: translateX(50%);
+    z-index: 300;
+    background: var(--sand-900);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; }
+  .toast.toast-green { background: var(--green-900); }
+  .toast.toast-red { background: var(--red-600); }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    right: 0; left: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    box-shadow: 0 -2px 12px rgba(42,35,24,0.08);
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    cursor: pointer;
+    gap: 3px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 10px;
+    position: relative;
+  }
+
+  .nav-item.active { color: var(--green-800); }
+  .nav-item svg { transition: transform 0.2s; }
+  .nav-item.active svg { transform: scale(1.1); }
+
+  .nav-dot {
+    position: absolute;
+    top: 7px;
+    left: calc(50% + 6px);
+    width: 7px;
+    height: 7px;
+    background: var(--gold-400);
+    border-radius: 50%;
+    border: 1.5px solid var(--surface);
+  }
+
+  /* ── DESKTOP ── */
+  @media (min-width: 640px) {
+    .page-header { padding: 24px 24px 0; }
+    .tabs-wrap { padding: 0 24px; }
+    .filter-bar { padding: 10px 24px; }
+    .content { padding: 4px 24px 40px; }
+
+    .bottom-nav { display: none; }
+
+    .topbar { height: 60px; padding: 0 24px; }
+    .brand-text { display: block; }
+
+    .stats-row { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .stat-chip { padding: 12px 14px 10px; }
+
+    .modal-overlay { align-items: center; }
+    .modal {
+      border-radius: var(--radius-xl);
+      margin: 20px;
+      max-width: 480px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .cards-grid .card { margin-bottom: 0; }
+  }
+
+  @media (min-width: 960px) {
+    body { max-width: 900px; margin: 0 auto; }
+    .topbar { max-width: 900px; left: 50%; right: auto; transform: translateX(-50%); width: 100%; }
+    .cards-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar" role="banner">
+  <div class="topbar-brand">
+    <div class="brand-icon">رف</div>
+    <span class="brand-text">على رفوف المساجد</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn" aria-label="بحث">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="الإشعارات">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge" aria-label="4 إشعارات جديدة">4</span>
+    </button>
+    <button class="icon-btn" aria-label="الملف الشخصي">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="page-title-row">
+    <h1 class="page-title">طلبات التسجيل</h1>
+  </div>
+  <p class="page-subtitle">مراجعة الكتب المُقدَّمة من المستخدمين والمتطوعين</p>
+
+  <div class="stats-row">
+    <div class="stat-chip pending">
+      <div class="stat-chip-num" id="stat-pending">4</div>
+      <div class="stat-chip-label">في الانتظار</div>
+    </div>
+    <div class="stat-chip approved">
+      <div class="stat-chip-num">28</div>
+      <div class="stat-chip-label">موافق عليه</div>
+    </div>
+    <div class="stat-chip rejected">
+      <div class="stat-chip-num">3</div>
+      <div class="stat-chip-label">مرفوض</div>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active tab-pending" role="tab" aria-selected="true" onclick="switchTab('pending', this)">
+      في الانتظار
+      <span class="tab-count" id="tab-pending-count">4</span>
+    </button>
+    <button class="tab-btn tab-approved" role="tab" aria-selected="false" onclick="switchTab('approved', this)">
+      موافق عليه
+      <span class="tab-count">28</span>
+    </button>
+    <button class="tab-btn tab-rejected" role="tab" aria-selected="false" onclick="switchTab('rejected', this)">
+      مرفوض
+      <span class="tab-count">3</span>
+    </button>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar" role="toolbar" aria-label="تصفية الطلبات">
+  <button class="filter-chip active" onclick="toggleFilter(this)">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    الكل
+  </button>
+  <button class="filter-chip" onclick="toggleFilter(this)">المنيا</button>
+  <button class="filter-chip" onclick="toggleFilter(this)">القاهرة</button>
+  <button class="filter-chip" onclick="toggleFilter(this)">الإسكندرية</button>
+  <button class="filter-chip" onclick="toggleFilter(this)">أسيوط</button>
+  <button class="filter-chip" onclick="toggleFilter(this)">فقه</button>
+  <button class="filter-chip" onclick="toggleFilter(this)">حديث</button>
+</div>
+
+<!-- CONTENT -->
+<main class="content" id="main-content">
+
+  <!-- PENDING TAB -->
+  <div id="tab-pending" class="tab-content" role="tabpanel">
+    <p class="section-label">طلبات تنتظر مراجعتك</p>
+    <div class="cards-grid">
+
+      <!-- CARD 1 -->
+      <article class="card" id="card-1">
+        <div class="card-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">فقه السنة</div>
+              <div class="book-author">سيد سابق</div>
+            </div>
+            <span class="category-badge cat-fiqh">فقه</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد الرحمن</span> — المنيا</span>
+            </div>
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="3 9 21 9"/><polyline points="9 21 9 9"/></svg>
+              <span>الطبعة الثالثة</span>
+              <span class="edition-pill">دار الفتح</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-a">أم</div>
+            <span class="submitter-name">أحمد محمود</span>
+            <span class="submit-date">منذ ساعتين</span>
+          </div>
+          <div class="actions three">
+            <button class="btn btn-approve" onclick="approveCard('card-1')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              موافقة
+            </button>
+            <button class="btn btn-reject" onclick="openReject('card-1', 'فقه السنة')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              رفض
+            </button>
+            <button class="btn btn-edit" onclick="openEdit('card-1')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              تعديل وموافقة
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- CARD 2 -->
+      <article class="card" id="card-2">
+        <div class="card-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">تفسير ابن كثير</div>
+              <div class="book-author">ابن كثير الدمشقي</div>
+            </div>
+            <span class="category-badge cat-tafsir">تفسير</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد النور</span> — القاهرة، عين شمس</span>
+            </div>
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="3 9 21 9"/><polyline points="9 21 9 9"/></svg>
+              <span class="meta-highlight">4 مجلدات</span>
+              <span class="edition-pill">دار طيبة</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-b">فع</div>
+            <span class="submitter-name">فاطمة علي</span>
+            <span class="submit-date">منذ 5 ساعات</span>
+          </div>
+          <div class="actions three">
+            <button class="btn btn-approve" onclick="approveCard('card-2')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              موافقة
+            </button>
+            <button class="btn btn-reject" onclick="openReject('card-2', 'تفسير ابن كثير')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              رفض
+            </button>
+            <button class="btn btn-edit" onclick="openEdit('card-2')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              تعديل وموافقة
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- CARD 3 -->
+      <article class="card" id="card-3">
+        <div class="card-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">رياض الصالحين</div>
+              <div class="book-author">يحيى بن شرف النووي</div>
+            </div>
+            <span class="category-badge cat-tazkiya">تزكية</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد الإخلاص</span> — الإسكندرية</span>
+            </div>
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="3 9 21 9"/><polyline points="9 21 9 9"/></svg>
+              <span style="color:var(--text-muted); font-style:italic">طبعة غير محددة</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-c">مح</div>
+            <span class="submitter-name">محمد حسن</span>
+            <span class="submit-date">أمس</span>
+          </div>
+          <div class="actions three">
+            <button class="btn btn-approve" onclick="approveCard('card-3')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              موافقة
+            </button>
+            <button class="btn btn-reject" onclick="openReject('card-3', 'رياض الصالحين')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              رفض
+            </button>
+            <button class="btn btn-edit" onclick="openEdit('card-3')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              تعديل وموافقة
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- CARD 4 -->
+      <article class="card" id="card-4">
+        <div class="card-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">صحيح البخاري</div>
+              <div class="book-author">محمد بن إسماعيل البخاري</div>
+            </div>
+            <span class="category-badge cat-hadith">حديث</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد عمر بن الخطاب</span> — أسيوط</span>
+            </div>
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="3 9 21 9"/><polyline points="9 21 9 9"/></svg>
+              <span>الطبعة الأولى</span>
+              <span class="edition-pill">دار ابن كثير</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-d">سأ</div>
+            <span class="submitter-name">سارة أحمد</span>
+            <span class="submit-date">منذ يومين</span>
+          </div>
+          <div class="actions three">
+            <button class="btn btn-approve" onclick="approveCard('card-4')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              موافقة
+            </button>
+            <button class="btn btn-reject" onclick="openReject('card-4', 'صحيح البخاري')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              رفض
+            </button>
+            <button class="btn btn-edit" onclick="openEdit('card-4')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              تعديل وموافقة
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div><!-- /cards-grid -->
+
+    <!-- empty state (hidden initially) -->
+    <div class="empty-state" id="pending-empty" style="display:none">
+      <div class="empty-icon">✓</div>
+      <div class="empty-title">لا طلبات معلقة</div>
+      <div class="empty-sub">أحسنت! تمت مراجعة جميع الطلبات.</div>
+    </div>
+  </div>
+
+  <!-- APPROVED TAB -->
+  <div id="tab-approved" class="tab-content" style="display:none" role="tabpanel">
+    <p class="section-label">طلبات تمت الموافقة عليها</p>
+    <div class="cards-grid">
+
+      <article class="card">
+        <div class="card-accent approved-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">الجامع الصغير</div>
+              <div class="book-author">جلال الدين السيوطي</div>
+            </div>
+            <span class="category-badge cat-hadith">حديث</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد السيدة زينب</span> — القاهرة</span>
+            </div>
+          </div>
+          <div class="status-row status-approved">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            تمت الموافقة بواسطة: أنت — منذ 3 أيام
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-a">خم</div>
+            <span class="submitter-name">خالد مصطفى</span>
+            <span class="submit-date">منذ 3 أيام</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-accent approved-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">إحياء علوم الدين</div>
+              <div class="book-author">أبو حامد الغزالي</div>
+            </div>
+            <span class="category-badge cat-tazkiya">تزكية</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد الفتح</span> — المنيا، ملوي</span>
+            </div>
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="3 9 21 9"/><polyline points="9 21 9 9"/></svg>
+              <span>الطبعة الثانية</span>
+              <span class="edition-pill">دار المعرفة</span>
+            </div>
+          </div>
+          <div class="status-row status-approved">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            تمت الموافقة — منذ أسبوع
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-b">نع</div>
+            <span class="submitter-name">نور العمري</span>
+            <span class="submit-date">منذ أسبوع</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- REJECTED TAB -->
+  <div id="tab-rejected" class="tab-content" style="display:none" role="tabpanel">
+    <p class="section-label">طلبات مرفوضة</p>
+    <div class="cards-grid">
+
+      <article class="card">
+        <div class="card-accent rejected-accent"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="book-info">
+              <div class="book-title">مختصر صحيح مسلم</div>
+              <div class="book-author">المنذري</div>
+            </div>
+            <span class="category-badge cat-hadith">حديث</span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span><span class="meta-highlight">مسجد التوحيد</span> — الجيزة</span>
+            </div>
+          </div>
+          <div class="status-row status-rejected">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            مرفوض — منذ 4 أيام
+          </div>
+          <div class="rejection-note">
+            <div class="rejection-note-label">سبب الرفض:</div>
+            هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد — تكرار.
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-footer">
+          <div class="submitter-row">
+            <div class="avatar avatar-c">رب</div>
+            <span class="submitter-name">ريم بكر</span>
+            <span class="submit-date">منذ 4 أيام</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- REJECT MODAL -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-handle" aria-hidden="true"></div>
+    <div class="modal-body">
+      <h2 class="modal-title" id="modal-title">رفض الطلب</h2>
+      <p class="modal-sub">سيتم إخطار المُقدِّم برفض طلبه. الكتاب: <strong id="modal-book-name"></strong></p>
+      <label class="field-label" for="reject-reason">سبب الرفض (اختياري)</label>
+      <textarea class="textarea" id="reject-reason" placeholder="مثال: هذا الكتاب مسجل بالفعل في نفس المسجد..." rows="3"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-confirm-reject" onclick="confirmReject()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          تأكيد الرفض
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" aria-label="التنقل الرئيسي">
+  <button class="nav-item" aria-label="تصفح">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    تصفح
+  </button>
+  <button class="nav-item" aria-label="تسجيل كتاب">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    تسجيل
+  </button>
+  <button class="nav-item active" aria-label="الطلبات" aria-current="page">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span class="nav-dot" aria-hidden="true"></span>
+    الطلبات
+  </button>
+  <button class="nav-item" aria-label="ملفي الشخصي">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    ملفي
+  </button>
+</nav>
+
+<script>
+  let pendingCount = 4;
+  let rejectTargetId = null;
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).style.display = 'block';
+  }
+
+  function toggleFilter(btn) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function approveCard(id) {
+    const card = document.getElementById(id);
+    if (!card) return;
+    card.classList.add('approved-flash');
+    setTimeout(() => {
+      card.classList.add('removing');
+      setTimeout(() => {
+        card.remove();
+        pendingCount = Math.max(0, pendingCount - 1);
+        updatePendingCount();
+        checkEmpty();
+      }, 400);
+    }, 300);
+    showToast('تمت الموافقة على الطلب ✓', 'green');
+  }
+
+  function openReject(id, bookName) {
+    rejectTargetId = id;
+    document.getElementById('modal-book-name').textContent = bookName;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('reject-reason').focus(), 350);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    rejectTargetId = null;
+  }
+
+  function closeModalOnOverlay(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  function confirmReject() {
+    if (!rejectTargetId) return;
+    const card = document.getElementById(rejectTargetId);
+    closeModal();
+    if (!card) return;
+    card.classList.add('removing');
+    setTimeout(() => {
+      card.remove();
+      pendingCount = Math.max(0, pendingCount - 1);
+      updatePendingCount();
+      checkEmpty();
+    }, 400);
+    showToast('تم رفض الطلب', 'red');
+  }
+
+  function openEdit(id) {
+    showToast('جارٍ فتح نموذج التعديل...', '');
+  }
+
+  function updatePendingCount() {
+    document.getElementById('stat-pending').textContent = pendingCount;
+    document.getElementById('tab-pending-count').textContent = pendingCount;
+    const badge = document.querySelector('.notif-badge');
+    if (badge) badge.textContent = Math.max(0, pendingCount);
+  }
+
+  function checkEmpty() {
+    const grid = document.querySelector('#tab-pending .cards-grid');
+    const empty = document.getElementById('pending-empty');
+    if (grid && grid.children.length === 0) {
+      grid.style.display = 'none';
+      empty.style.display = 'block';
+    }
+  }
+
+  let toastTimer;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' toast-' + type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>

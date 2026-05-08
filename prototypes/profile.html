@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#080c18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="الملف الشخصي — على رفوف المساجد">
+<title>الملف الشخصي — على رفوف المساجد</title>
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+@layer reset, tokens, base, components, utilities;
+
+/* ═══════════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --bg-base:      #060a16;
+  --bg-card:      #0c1425;
+  --bg-elevated:  #111d33;
+  --bg-hover:     #152039;
+  --bg-input:     #080d1c;
+  --bg-glass:     rgba(12, 20, 37, 0.72);
+
+  /* Borders */
+  --border:       rgba(30, 48, 82, 0.9);
+  --border-mid:   rgba(48, 74, 120, 0.9);
+  --border-glow:  rgba(200, 146, 42, 0.32);
+
+  /* Brand */
+  --gold:         #c8922a;
+  --gold-light:   #e4ae42;
+  --gold-dim:     rgba(200, 146, 42, 0.12);
+
+  /* Text */
+  --cream:        #ede0c6;
+  --cream-dim:    #9aacc4;
+  --muted:        #7a92b4; /* Updated for WCAG AA contrast */
+  --muted-mid:    #6b84a8;
+
+  /* Status */
+  --ok-bg:        rgba(74, 222, 128, 0.07);
+  --ok-text:      #4ade80;
+  --ok-border:    rgba(74, 222, 128, 0.18);
+  --pend-bg:      rgba(251, 191, 36, 0.07);
+  --pend-text:    #f6b92e;
+  --pend-border:  rgba(251, 191, 36, 0.18);
+  --rej-bg:       rgba(248, 113, 113, 0.07);
+  --rej-text:     #f07070;
+  --rej-border:   rgba(248, 113, 113, 0.18);
+
+  /* Radii */
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  18px;
+  --r-xl:  24px;
+
+  /* Shadows */
+  --shadow-gold:  0 0 32px rgba(200, 146, 42, 0.12);
+  --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-deep:  0 8px 48px rgba(0, 0, 0, 0.55);
+}
+
+@property --gold-opacity {
+  syntax: '<number>';
+  initial-value: 0.15;
+  inherits: false;
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  background: var(--bg-base);
+  color: var(--cream);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Background canvas */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% -10%, rgba(200, 146, 42, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at -10% 80%, rgba(30, 80, 160, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 100% 100%, rgba(200, 146, 42, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Noise grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(200, 146, 42, 0.2); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes toastSlideOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.96); }
+}
+@keyframes shimmer {
+  from { background-position: 200% center; }
+  to   { background-position: -200% center; }
+}
+@keyframes avatarPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 146, 42, 0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(200, 146, 42, 0); }
+}
+
+.a1 { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.a2 { animation: fadeUp 0.45s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.a3 { animation: fadeUp 0.45s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.a4 { animation: fadeUp 0.45s 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.a5 { animation: fadeUp 0.45s 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ═══════════════════════════════════════════
+   SKIP LINK
+═══════════════════════════════════════════ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  right: 0;
+  background: var(--gold);
+  color: rgba(6, 10, 22, 0.95);
+  padding: 10px 18px;
+  font-weight: 800;
+  font-size: 14px;
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 0; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 16px 0 calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+.wrap {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (min-width: 640px) { .wrap { padding: 0 24px; } }
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(6, 10, 22, 0.85);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.nav-logo {
+  font-family: 'Amiri', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cream);
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+.nav-logo em {
+  font-style: normal;
+  color: var(--gold);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-actions { display: flex; gap: 6px; }
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.nav-btn:hover {
+  color: var(--cream);
+  border-color: var(--border-mid);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+.nav-btn:active { transform: translateY(0); }
+.nav-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ═══════════════════════════════════════════
+   DEMO BAR
+═══════════════════════════════════════════ */
+.demo-bar {
+  background: rgba(200, 146, 42, 0.05);
+  border: 1px solid rgba(200, 146, 42, 0.1);
+  border-radius: var(--r-lg);
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.demo-label {
+  font-size: 11px;
+  color: var(--muted-mid);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.demo-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulseDot 2s ease infinite;
+}
+
+.role-toggle {
+  display: flex;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.role-opt {
+  background: transparent;
+  border: none;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.role-opt.on {
+  background: var(--gold);
+  color: rgba(6, 10, 22, 0.95);
+  box-shadow: 0 2px 10px rgba(200, 146, 42, 0.4);
+}
+
+/* ═══════════════════════════════════════════
+   PROFILE HERO
+═══════════════════════════════════════════ */
+.hero {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.3s;
+}
+.hero:hover { border-color: var(--border-mid); }
+
+/* Decorative geometric accent with custom @property glow */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(200, 146, 42, var(--gold-opacity)) 0%, transparent 70%);
+  pointer-events: none;
+  transition: --gold-opacity 0.4s ease;
+}
+.hero:hover::before { --gold-opacity: 0.26; }
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(30, 80, 160, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Gold shimmer gradient border */
+.hero-border-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xl);
+  background: linear-gradient(135deg, rgba(200,146,42,0.18) 0%, transparent 40%, transparent 60%, rgba(200,146,42,0.08) 100%);
+  pointer-events: none;
+}
+
+.avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #c8922a 0%, #7a5614 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Amiri', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: rgba(6, 10, 22, 0.9);
+  border: 2px solid rgba(200, 146, 42, 0.3);
+  box-shadow: 0 4px 24px rgba(200, 146, 42, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  animation: avatarPulse 3s ease infinite;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+
+.hero-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--cream);
+  line-height: 1.2;
+  margin-bottom: 5px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.hero-email {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 12px;
+  direction: ltr;
+  text-align: right;
+}
+.hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.role-volunteer {
+  background: rgba(200, 146, 42, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(200, 146, 42, 0.24);
+  box-shadow: 0 0 12px rgba(200, 146, 42, 0.1);
+}
+.role-visitor {
+  background: rgba(94, 112, 144, 0.1);
+  color: var(--muted-mid);
+  border: 1px solid rgba(94, 112, 144, 0.18);
+}
+.joined-text {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════
+   LOCATION CARD
+═══════════════════════════════════════════ */
+.loc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.loc-card:hover {
+  border-color: var(--border-mid);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+}
+.loc-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.loc-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: rgba(200, 146, 42, 0.08);
+  border: 1px solid rgba(200, 146, 42, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+}
+.loc-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.loc-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.loc-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-loc-edit {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(200, 146, 42, 0.24);
+  color: var(--gold);
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+}
+.btn-loc-edit:hover {
+  background: rgba(200, 146, 42, 0.1);
+  border-color: rgba(200, 146, 42, 0.42);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(200, 146, 42, 0.15);
+}
+.btn-loc-edit:active { transform: translateY(0); }
+.btn-loc-edit svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ═══════════════════════════════════════════
+   STATS GRID
+═══════════════════════════════════════════ */
+.stats-wrap { container-type: inline-size; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@container (max-width: 340px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 360px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 44px;
+}
+.stat-card:hover {
+  border-color: var(--border-mid);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+.stat-card:active { transform: translateY(0); }
+
+/* Hover glow accents */
+.s-ok   .stat-card:hover { box-shadow: 0 6px 24px rgba(74, 222, 128, 0.12); }
+.s-pend .stat-card:hover { box-shadow: 0 6px 24px rgba(251, 191, 36, 0.12); }
+.s-rej  .stat-card:hover { box-shadow: 0 6px 24px rgba(248, 113, 113, 0.12); }
+.s-all  .stat-card:hover { box-shadow: 0 6px 24px rgba(237, 224, 198, 0.08); }
+
+.stat-card.active {
+  border-color: var(--border-glow);
+  background: var(--bg-elevated);
+}
+.stat-card.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.s-all .stat-card.active::after { background: var(--cream); }
+.s-ok  .stat-card.active::after { background: var(--ok-text); }
+.s-pend .stat-card.active::after { background: var(--pend-text); }
+.s-rej  .stat-card.active::after { background: var(--rej-text); }
+
+.stat-inner { position: relative; z-index: 1; }
+.stat-num {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-card:hover .stat-num { transform: scale(1.08); }
+.stat-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.s-all .stat-num { color: var(--cream); }
+.s-ok  .stat-num { color: var(--ok-text); }
+.s-pend .stat-num { color: var(--pend-text); }
+.s-rej  .stat-num { color: var(--rej-text); }
+
+/* ═══════════════════════════════════════════
+   SUBMISSIONS SECTION
+═══════════════════════════════════════════ */
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.sec-head {
+  padding: 15px 18px 13px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sec-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--cream);
+}
+.sec-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted-mid);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 3px 9px;
+  transition: all 0.2s;
+}
+
+/* ═══════════════════════════════════════════
+   TABS — Sliding indicator
+═══════════════════════════════════════════ */
+.tabs-wrap {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: relative;
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, black 48px);
+  mask-image: linear-gradient(to left, transparent 0%, black 48px);
+}
+.tabs-wrap.at-end {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tabs {
+  display: flex;
+  gap: 3px;
+  position: relative;
+}
+.tab {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 7px 13px;
+  border-radius: var(--r-sm);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  min-height: 44px;
+}
+.tab:hover:not(.on) { color: var(--cream-dim); background: rgba(255, 255, 255, 0.03); }
+.tab.on { color: var(--cream); background: var(--bg-elevated); }
+.tab.on .tc { background: rgba(200, 146, 42, 0.18); color: var(--gold); }
+
+.tab .tc {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+/* ═══════════════════════════════════════════
+   SKELETON SCREENS
+═══════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    rgba(255, 255, 255, 0.04) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease infinite;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skeleton-line { height: 14px; border-radius: 4px; }
+.skeleton-line.short  { width: 40%; }
+.skeleton-line.medium { width: 65%; }
+.skeleton-line.full   { width: 100%; }
+
+/* ═══════════════════════════════════════════
+   SUBMISSION CARDS
+═══════════════════════════════════════════ */
+.sub-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.sub-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 15px 16px;
+  transition: border-color 0.25s, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s;
+  animation: fadeUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+.sub-card:hover {
+  border-color: var(--border-mid);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.3);
+}
+
+/* Status left-border accent */
+.sub-card[data-status]::before {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 0 var(--r-lg) var(--r-lg) 0;
+  opacity: 0.65;
+}
+.sub-card[data-status="approved"]::before {
+  background: linear-gradient(to bottom, transparent 0%, var(--ok-text) 30%, var(--ok-text) 70%, transparent 100%);
+}
+.sub-card[data-status="pending"]::before {
+  background: linear-gradient(to bottom, transparent 0%, var(--pend-text) 30%, var(--pend-text) 70%, transparent 100%);
+}
+.sub-card[data-status="rejected"]::before {
+  background: linear-gradient(to bottom, transparent 0%, var(--rej-text) 30%, var(--rej-text) 70%, transparent 100%);
+}
+
+.sub-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.sub-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.35;
+  flex: 1;
+}
+
+/* BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1px solid;
+}
+.badge-ok   { background: var(--ok-bg);   color: var(--ok-text);   border-color: var(--ok-border); }
+.badge-pend { background: var(--pend-bg); color: var(--pend-text); border-color: var(--pend-border); }
+.badge-rej  { background: var(--rej-bg);  color: var(--rej-text);  border-color: var(--rej-border); }
+
+.pdot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  animation: pulseDot 1.6s ease infinite;
+}
+
+.sub-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.sub-author { font-size: 12px; color: var(--muted); font-weight: 500; }
+.mdot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.cat-chip {
+  background: rgba(29, 45, 71, 0.8);
+  color: var(--muted-mid);
+  border: 1px solid rgba(94, 112, 144, 0.14);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sub-mosque {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 7px;
+  color: var(--cream-dim);
+  font-size: 12px;
+  font-weight: 500;
+}
+.sub-mosque svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--gold);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.mosque-unnamed { color: var(--muted); font-style: italic; }
+
+.edition-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(200, 146, 42, 0.07);
+  border: 1px solid rgba(200, 146, 42, 0.14);
+  border-radius: 6px;
+  padding: 2px 9px;
+  margin-bottom: 8px;
+  font-size: 10.5px;
+  color: var(--gold);
+  font-weight: 600;
+}
+.edition-tag svg {
+  width: 10px;
+  height: 10px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sub-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 11px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(29, 45, 71, 0.55);
+}
+.sub-date {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sub-date svg {
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn-edit {
+  background: transparent;
+  border: 1px solid rgba(200, 146, 42, 0.28);
+  color: var(--gold);
+  padding: 7px 14px;
+  border-radius: var(--r-sm);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+}
+.btn-edit:hover {
+  background: rgba(200, 146, 42, 0.1);
+  border-color: rgba(200, 146, 42, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(200, 146, 42, 0.18);
+}
+.btn-edit:active { transform: translateY(0); }
+.btn-edit svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tip-wrap { position: relative; display: inline-flex; }
+.btn-edit.dim { opacity: 0.28; cursor: not-allowed; pointer-events: none; }
+.tip-trigger:hover .tooltip,
+.tip-trigger:focus-within .tooltip { opacity: 1; transform: translateX(-50%) translateY(-3px); }
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: var(--bg-elevated);
+  color: var(--cream-dim);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Cairo', sans-serif;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-mid);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--border-mid);
+}
+
+/* ═══════════════════════════════════════════
+   REJECTION NOTE
+═══════════════════════════════════════════ */
+.rej-wrap { margin-top: 10px; }
+.rej-toggle {
+  background: rgba(248, 113, 113, 0.05);
+  border: 1px solid rgba(248, 113, 113, 0.12);
+  border-radius: 10px;
+  padding: 9px 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: 'Cairo', sans-serif;
+  min-height: 44px;
+}
+.rej-toggle:hover { background: rgba(248, 113, 113, 0.09); border-color: rgba(248, 113, 113, 0.2); }
+.rej-toggle-text {
+  flex: 1;
+  font-size: 11.5px;
+  color: var(--rej-text);
+  font-weight: 600;
+  text-align: right;
+}
+.rej-chevron {
+  color: var(--rej-text);
+  opacity: 0.6;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rej-chevron.open { transform: rotate(180deg); }
+
+.rej-note {
+  background: rgba(248, 113, 113, 0.04);
+  border: 1px solid rgba(248, 113, 113, 0.1);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 0 13px;
+  font-size: 12px;
+  color: var(--cream-dim);
+  font-weight: 500;
+  line-height: 1.75;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1), padding 0.32s ease;
+}
+.rej-note.open { max-height: 200px; padding: 11px 13px; }
+
+/* ═══════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════ */
+.empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.empty-ico {
+  font-size: 32px;
+  opacity: 0.35;
+  filter: grayscale(30%);
+}
+.empty-txt { font-size: 13px; font-weight: 600; }
+.empty-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.22s ease;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@media (min-width: 600px) {
+  .overlay { align-items: center; padding: 24px; }
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 600px) {
+  .modal {
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-deep), 0 0 0 1px rgba(200,146,42,0.06);
+  }
+}
+
+/* Gold top accent line */
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 146, 42, 0.5), transparent);
+}
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border-mid);
+  border-radius: 2px;
+  margin: 12px auto 0;
+  opacity: 0.6;
+}
+@media (min-width: 600px) { .modal-handle { display: none; } }
+
+.modal-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-title-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(200, 146, 42, 0.1);
+  border: 1px solid rgba(200, 146, 42, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+}
+.modal-title-icon svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.18s;
+  min-height: 32px;
+}
+.modal-close:hover { color: var(--cream); border-color: var(--border-mid); background: var(--bg-hover); }
+.modal-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.modal-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.inp-grp { display: flex; flex-direction: column; gap: 6px; }
+.inp-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cream-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.inp-required { color: var(--rej-text); font-size: 13px; }
+
+.sel-wrap { position: relative; }
+.sel-wrap select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  padding-left: 36px;
+  color: var(--cream);
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 48px;
+}
+.sel-wrap select:focus {
+  border-color: rgba(200, 146, 42, 0.5);
+  box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.08);
+}
+.sel-wrap select option { background: #0c1425; }
+.sel-wrap select:invalid, .sel-wrap select option[value=""] { color: var(--muted); }
+
+.sel-arrow {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+.sel-arrow svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Validation state */
+.sel-wrap.error select { border-color: rgba(248, 113, 113, 0.5); }
+.inp-error-msg {
+  font-size: 11px;
+  color: var(--rej-text);
+  font-weight: 600;
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+.inp-grp.has-error .inp-error-msg { display: block; }
+
+.modal-foot { padding: 0 18px 18px; }
+.btn-save {
+  width: 100%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  color: rgba(6, 10, 22, 0.95);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 14px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 2px 16px rgba(200, 146, 42, 0.22);
+  letter-spacing: 0.2px;
+  min-height: 48px;
+}
+.btn-save:hover {
+  opacity: 0.93;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(200, 146, 42, 0.38);
+}
+.btn-save:active { transform: translateY(0); box-shadow: 0 2px 12px rgba(200, 146, 42, 0.2); }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid rgba(200, 146, 42, 0.22);
+  color: var(--cream);
+  padding: 11px 18px;
+  border-radius: var(--r-md);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  z-index: 400;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(200,146,42,0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  animation: toastSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.toast.hide { animation: toastSlideOut 0.26s ease forwards; }
+.toast.gone { display: none; }
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.toast-icon.ok  { background: rgba(74, 222, 128, 0.15); color: var(--ok-text); }
+.toast-icon.warn { background: rgba(251, 191, 36, 0.15); color: var(--pend-text); }
+
+/* ═══════════════════════════════════════════
+   FOCUS STYLES (Accessibility)
+═══════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid rgba(200, 146, 42, 0.6);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════ */
+.hidden { display: none !important; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════
+   PREFERS REDUCED MOTION
+═══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .avatar { box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.25); animation: none !important; }
+  .pdot { animation: none !important; }
+  .demo-dot { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">انتقل إلى المحتوى الرئيسي</a>
+
+<div id="toast" class="toast gone" role="alert" aria-live="polite">
+  <span class="toast-icon ok" id="toast-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </span>
+  <span id="toast-msg">تم الحفظ بنجاح</span>
+</div>
+
+<div class="page">
+
+  <nav class="nav" role="navigation" aria-label="التنقل الرئيسي">
+    <div class="nav-inner">
+      <div class="nav-logo" aria-label="على رفوف المساجد">على <em>رفوف</em> المساجد</div>
+      <div class="nav-actions">
+        <button class="nav-btn" title="تصفح الكتب" aria-label="تصفح الكتب" onclick="alert('→ /browse')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </button>
+        <button class="nav-btn" title="تسجيل الخروج" aria-label="تسجيل الخروج" onclick="alert('→ تسجيل الخروج')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="content" id="main-content">
+    <div class="wrap">
+
+      <div class="demo-bar a1" role="region" aria-label="وضع العرض التوضيحي">
+        <span class="demo-label">
+          <span class="demo-dot" aria-hidden="true"></span>
+          وضع العرض التوضيحي
+        </span>
+        <div class="role-toggle" role="group" aria-label="اختر الدور">
+          <button class="role-opt on" id="btn-vol" onclick="App.setRole('volunteer')" aria-pressed="true">متطوع</button>
+          <button class="role-opt" id="btn-vis" onclick="App.setRole('visitor')" aria-pressed="false">زائر</button>
+        </div>
+      </div>
+
+      <article class="hero a2" aria-label="معلومات الملف الشخصي">
+        <div class="hero-border-ring" aria-hidden="true"></div>
+        <div class="avatar" id="hero-avatar" aria-hidden="true">أ</div>
+        <div class="hero-info">
+          <h1 class="hero-name" id="hero-name">أحمد محمد العمري</h1>
+          <p class="hero-email">ahmed@example.com</p>
+          <div class="hero-badges">
+            <span class="role-badge role-volunteer" id="role-tag" aria-label="الدور: متطوع">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              متطوع
+            </span>
+            <span class="joined-text">• انضم يناير ٢٠٢٥</span>
+          </div>
+        </div>
+      </article>
+
+      <section class="loc-card a3" aria-label="موقعك الحالي">
+        <div class="loc-left">
+          <div class="loc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div class="loc-lbl">موقعك الحالي</div>
+            <div class="loc-val" id="loc-display">القاهرة — مدينة نصر</div>
+          </div>
+        </div>
+        <button class="btn-loc-edit" onclick="App.openModal()" aria-label="تعديل الموقع">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          تعديل
+        </button>
+      </section>
+
+      <div class="stats-wrap">
+        <section class="stats-row a4" aria-label="إحصائيات الطلبات">
+          <div class="s-all">
+            <div class="stat-card active" role="button" tabindex="0" onclick="App.setTab('all')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('all')}" aria-label="عرض كل الطلبات">
+              <div class="stat-inner">
+                <div class="stat-num" id="stat-all">٥</div>
+                <div class="stat-lbl">الكل</div>
+              </div>
+            </div>
+          </div>
+          <div class="s-ok">
+            <div class="stat-card" role="button" tabindex="0" onclick="App.setTab('approved')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('approved')}" aria-label="عرض الطلبات المقبولة">
+              <div class="stat-inner">
+                <div class="stat-num" id="stat-ok">٣</div>
+                <div class="stat-lbl">مقبول</div>
+              </div>
+            </div>
+          </div>
+          <div class="s-pend">
+            <div class="stat-card" role="button" tabindex="0" onclick="App.setTab('pending')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('pending')}" aria-label="عرض الطلبات قيد المراجعة">
+              <div class="stat-inner">
+                <div class="stat-num" id="stat-pend">١</div>
+                <div class="stat-lbl">قيد المراجعة</div>
+              </div>
+            </div>
+          </div>
+          <div class="s-rej">
+            <div class="stat-card" role="button" tabindex="0" onclick="App.setTab('rejected')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('rejected')}" aria-label="عرض الطلبات المرفوضة">
+              <div class="stat-inner">
+                <div class="stat-num" id="stat-rej">١</div>
+                <div class="stat-lbl">مرفوض</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="section-card a5" aria-label="طلباتي">
+        <div class="sec-head">
+          <h2 class="sec-title">طلباتي</h2>
+          <div class="sec-count" id="shown-count" aria-live="polite" aria-atomic="true">٥ طلبات</div>
+        </div>
+
+        <div class="tabs-wrap" role="tablist" aria-label="تصفية الطلبات">
+          <div class="tabs">
+            <button class="tab on" id="tab-all" role="tab" aria-selected="true" aria-controls="sub-list" onclick="App.setTab('all')">
+              الكل <span class="tc" id="tc-all" aria-label="5 طلبات">٥</span>
+            </button>
+            <button class="tab" id="tab-ok" role="tab" aria-selected="false" aria-controls="sub-list" onclick="App.setTab('approved')">
+              مقبول <span class="tc" id="tc-ok" aria-label="3 طلبات مقبولة">٣</span>
+            </button>
+            <button class="tab" id="tab-pend" role="tab" aria-selected="false" aria-controls="sub-list" onclick="App.setTab('pending')">
+              قيد المراجعة <span class="tc" id="tc-pend" aria-label="1 طلب">١</span>
+            </button>
+            <button class="tab" id="tab-rej" role="tab" aria-selected="false" aria-controls="sub-list" onclick="App.setTab('rejected')">
+              مرفوض <span class="tc" id="tc-rej" aria-label="1 طلب مرفوض">١</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sub-list" id="sub-list" role="tabpanel" aria-labelledby="tab-all" tabindex="0" aria-label="قائمة الطلبات"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="App.handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle" aria-hidden="true"></div>
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">
+        <div class="modal-title-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        تغيير الموقع
+      </div>
+      <button class="modal-close" onclick="App.closeModal()" aria-label="إغلاق">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="inp-grp" id="grp-gov">
+        <label class="inp-lbl" for="sel-gov">
+          المحافظة
+          <span class="inp-required" aria-hidden="true">*</span>
+        </label>
+        <div class="sel-wrap" id="wrap-gov">
+          <select id="sel-gov" onchange="App.onGovChange()" aria-required="true" aria-describedby="err-gov">
+            <option value="">اختر المحافظة</option>
+          </select>
+          <span class="sel-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <span class="inp-error-msg" id="err-gov" role="alert">يرجى اختيار المحافظة</span>
+      </div>
+
+      <div class="inp-grp" id="grp-city">
+        <label class="inp-lbl" for="sel-city">
+          المدينة
+          <span class="inp-required" aria-hidden="true">*</span>
+        </label>
+        <div class="sel-wrap" id="wrap-city">
+          <select id="sel-city" aria-required="true" aria-describedby="err-city">
+            <option value="">اختر المدينة</option>
+          </select>
+          <span class="sel-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <span class="inp-error-msg" id="err-city" role="alert">يرجى اختيار المدينة</span>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-save" onclick="App.saveLocation()">حفظ الموقع</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ── DATA ── */
+const DATA = {
+  govs: ["القاهرة","الجيزة","الإسكندرية","أسيوط","المنيا","الأقصر","أسوان","الفيوم","قنا","سوهاج","بني سويف","الإسماعيلية","بورسعيد","السويس","دمياط","الدقهلية","الشرقية","الغربية","المنوفية","القليوبية","البحيرة"],
+
+  cities: {
+    "القاهرة":   ["مدينة نصر","المعادي","الزمالك","مصر الجديدة","عين شمس","المطرية","حلوان","شبرا","الشروق","التجمع الخامس","المقطم","الهليوبوليس"],
+    "الجيزة":    ["الدقي","المهندسين","الهرم","إمبابة","أكتوبر","الشيخ زايد","البدرشين"],
+    "الإسكندرية":["سيدي بشر","العجمي","المنتزه","سموحة","الرمل","العصافرة"],
+    "أسيوط":     ["مدينة أسيوط","ديروط","أبوتيج","منفلوط","القوصية"],
+    "المنيا":    ["مدينة المنيا","ملوي","دير مواس","العدوة","مغاغة","أبو قرقاص","سمالوط"],
+    "الأقصر":    ["مدينة الأقصر","الأقصر الغربية","إسنا","الأرمنت"],
+    "أسوان":     ["مدينة أسوان","كوم أمبو","إدفو","نصر النوبة"],
+    "الفيوم":    ["مدينة الفيوم","سنورس","يوسف الصديق","إطسا"],
+    "الغربية":   ["طنطا","المحلة الكبرى","زفتى","سمنود"],
+    "المنوفية":  ["شبين الكوم","منوف","الشهداء","السادات"],
+    "القليوبية": ["بنها","شبرا الخيمة","قليوب","العاشر من رمضان"],
+    "البحيرة":   ["دمنهور","كفر الدوار","رشيد","إيتاي البارود"],
+    "الدقهلية":  ["المنصورة","طلخا","ميت غمر","بلقاس"],
+    "الشرقية":   ["الزقازيق","العاشر من رمضان","بلبيس","أبو حماد"],
+    "الإسماعيلية":["مدينة الإسماعيلية","فايد","القنطرة"],
+    "بورسعيد":   ["بورسعيد","بور فؤاد"],
+    "السويس":    ["السويس","عتاقة","الجناين"],
+    "دمياط":     ["مدينة دمياط","رأس البر","الزرقا"],
+    "قنا":       ["مدينة قنا","نجع حمادي","دشنا","قوص"],
+    "سوهاج":     ["مدينة سوهاج","أخميم","طهطا","جرجا"],
+    "بني سويف":  ["مدينة بني سويف","الفشن","ببا","نزلة"],
+  },
+
+  submissions: [
+    { id:1, title:"رياض الصالحين",    author:"الإمام النووي",         edition:"الطبعة الثالثة", publisher:"دار ابن كثير",  mosque:"مسجد النور",       city:"مدينة نصر", gov:"القاهرة", cat:"حديث",   date:"٣ مارس ٢٠٢٥",    status:"approved" },
+    { id:2, title:"صحيح البخاري",      author:"الإمام البخاري",        edition:null,             publisher:null,           mosque:null,               city:"المعادي",   gov:"القاهرة", cat:"حديث",   date:"١٥ فبراير ٢٠٢٥", status:"pending"  },
+    { id:3, title:"تفسير ابن كثير",    author:"ابن كثير الدمشقي",     edition:"الطبعة الأولى",  publisher:"مكتبة العلم",  mosque:"مسجد السلام",      city:"القاهرة",   gov:"القاهرة", cat:"تفسير",  date:"٢ يناير ٢٠٢٥",   status:"rejected", note:"الكتاب مسجل بالفعل في هذا المسجد بنفس الطبعة. يرجى التحقق من قائمة الكتب المتاحة قبل إعادة التسجيل." },
+    { id:4, title:"فقه السنة",         author:"السيد سابق",            edition:"الطبعة الثانية", publisher:null,           mosque:"مسجد العزيز بالله",city:"مدينة نصر", gov:"القاهرة", cat:"فقه",    date:"٢٠ ديسمبر ٢٠٢٤", status:"approved" },
+    { id:5, title:"الأذكار النووية",   author:"الإمام النووي",         edition:null,             publisher:"دار الفكر",    mosque:"مسجد الرحمن",      city:"مدينة نصر", gov:"القاهرة", cat:"تزكية",  date:"٥ نوفمبر ٢٠٢٤",  status:"approved" },
+  ]
+};
+
+/* ── STATE ── */
+const state = {
+  role: 'volunteer',
+  tab:  'all',
+  gov:  'القاهرة',
+  city: 'مدينة نصر',
+  openNotes: new Set(),
+};
+
+/* ── HELPERS ── */
+const toAr = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const el   = id => document.getElementById(id);
+const filtered = () => state.tab === 'all' ? DATA.submissions : DATA.submissions.filter(s => s.status === state.tab);
+
+function animateNumber(el, targetStr) {
+  const toWestern = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const target = parseInt(toWestern(targetStr), 10);
+  if (isNaN(target) || target > 99) { el.textContent = targetStr; return; }
+
+  let start = 0;
+  const duration = 400;
+  const startTime = performance.now();
+
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    const current  = Math.round(eased * target);
+    el.textContent = toAr(current);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function observeCards() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  el('sub-list').querySelectorAll('.sub-card').forEach((card, i) => {
+    card.style.animationDelay      = `${i * 0.045}s`;
+    card.style.animationPlayState  = 'paused';
+    observer.observe(card);
+  });
+}
+
+function showSkeletons(count = 3) {
+  el('sub-list').innerHTML = Array.from({ length: count }, () => `
+    <div class="skeleton-card" aria-hidden="true">
+      <div class="skeleton skeleton-line medium"></div>
+      <div class="skeleton skeleton-line short"></div>
+      <div class="skeleton skeleton-line full" style="height:10px"></div>
+    </div>
+  `).join('');
+}
+
+/* ── RENDER HELPERS ── */
+function mosqueDisplay(s) {
+  return s.mosque
+    ? s.mosque
+    : `<span class="mosque-unnamed">مسجد — ${s.city}</span>`;
+}
+
+function statusBadge(s) {
+  const map = {
+    approved: `<span class="badge badge-ok">مقبول</span>`,
+    pending:  `<span class="badge badge-pend"><span class="pdot"></span>قيد المراجعة</span>`,
+    rejected: `<span class="badge badge-rej">مرفوض</span>`,
+  };
+  return map[s.status] || '';
+}
+
+function editBtn(s) {
+  if (state.role === 'visitor') return '';
+  if (s.status === 'approved') {
+    return `<button class="btn-edit" onclick="alert('→ /submit/edit/${s.id}')" aria-label="تعديل ${s.title}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      تعديل
+    </button>`;
+  }
+  if (s.status === 'pending') {
+    return `<div class="tip-wrap tip-trigger">
+      <button class="btn-edit dim" disabled aria-disabled="true" aria-label="التعديل غير متاح — في انتظار المراجعة">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        تعديل
+      </button>
+      <div class="tooltip" role="tooltip">في انتظار المراجعة</div>
+    </div>`;
+  }
+  return '';
+}
+
+function rejNote(s) {
+  if (s.status !== 'rejected' || !s.note) return '';
+  const isOpen = state.openNotes.has(s.id);
+  return `<div class="rej-wrap">
+    <button class="rej-toggle" onclick="App.toggleNote(${s.id})" aria-expanded="${isOpen}" aria-controls="note-${s.id}">
+      <svg class="rej-chevron ${isOpen ? 'open' : ''}" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="rej-toggle-text">${isOpen ? 'إخفاء' : 'عرض'} سبب الرفض</span>
+    </button>
+    <div class="rej-note ${isOpen ? 'open' : ''}" id="note-${s.id}" aria-hidden="${!isOpen}">${s.note}</div>
+  </div>`;
+}
+
+/* ── RENDER CARDS ── */
+function renderCards() {
+  const list  = el('sub-list');
+  const items = filtered();
+  const count = items.length;
+
+  el('shown-count').textContent = toAr(count) + (count === 1 ? ' طلب' : ' طلبات');
+
+  if (count === 0) {
+    list.innerHTML = `<div class="empty" role="status">
+      <div class="empty-ico" aria-hidden="true">📚</div>
+      <div class="empty-txt">لا توجد طلبات في هذا القسم</div>
+      <div class="empty-sub">جرب تصفية مختلفة</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = items.map((s, i) => `
+    <article class="sub-card" data-status="${s.status}" data-id="${s.id}" style="animation-delay:${i * 0.045}s" aria-label="طلب: ${s.title}">
+      <div class="sub-top">
+        <h3 class="sub-title">${s.title}</h3>
+        ${statusBadge(s)}
+      </div>
+      <div class="sub-meta">
+        <span class="sub-author">${s.author}</span>
+        <span class="mdot" aria-hidden="true"></span>
+        <span class="cat-chip">${s.cat}</span>
+      </div>
+      <div class="sub-mosque" aria-label="المسجد">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>${mosqueDisplay(s)} · ${s.city}</span>
+      </div>
+      ${s.edition ? `<div class="edition-tag" aria-label="الطبعة: ${s.edition}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        ${s.edition}
+      </div>` : ''}
+      ${rejNote(s)}
+      <div class="sub-foot">
+        <div class="sub-date" aria-label="تاريخ الطلب: ${s.date}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${s.date}
+        </div>
+        ${editBtn(s)}
+      </div>
+    </article>
+  `).join('');
+
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    observeCards();
+  }
+}
+
+/* ── TAB SYNC ── */
+function syncTabs(activeTab) {
+  const tabMap = { all: 'all', approved: 'ok', pending: 'pend', rejected: 'rej' };
+  ['all', 'ok', 'pend', 'rej'].forEach(k => {
+    const btn = el('tab-' + k);
+    if (!btn) return;
+    const isActive = tabMap[activeTab] === k;
+    btn.classList.toggle('on', isActive);
+    btn.setAttribute('aria-selected', isActive);
+  });
+  
+  const activeTabId = 'tab-' + (tabMap[activeTab] || 'all');
+  el('sub-list').setAttribute('aria-labelledby', activeTabId);
+}
+
+/* ── STATS SYNC ── */
+function syncStats(activeTab) {
+  const statMap = { all: 'all', approved: 'ok', pending: 'pend', rejected: 'rej' };
+  document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
+  const key = statMap[activeTab] || 'all';
+  const parent = document.querySelector('.s-' + key + ' .stat-card');
+  if (parent) parent.classList.add('active');
+}
+
+/* ── APP MODULE ── */
+const App = {
+
+  setTab(t) {
+    state.tab = t;
+    syncTabs(t);
+    syncStats(t);
+    showSkeletons(filtered().length || 1);
+    setTimeout(() => {
+      renderCards();
+    }, 300);
+  },
+
+  setRole(r) {
+    state.role = r;
+    const isVol = r === 'volunteer';
+    el('btn-vol').classList.toggle('on', isVol);
+    el('btn-vis').classList.toggle('on', !isVol);
+    el('btn-vol').setAttribute('aria-pressed', isVol);
+    el('btn-vis').setAttribute('aria-pressed', !isVol);
+
+    const tag = el('role-tag');
+    if (isVol) {
+      tag.className = 'role-badge role-volunteer';
+      tag.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>متطوع`;
+    } else {
+      tag.className = 'role-badge role-visitor';
+      tag.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>زائر`;
+    }
+    renderCards();
+  },
+
+  toggleNote(id) {
+    if (state.openNotes.has(id)) {
+      state.openNotes.delete(id);
+    } else {
+      state.openNotes.add(id);
+    }
+
+    const isOpen  = state.openNotes.has(id);
+    const card    = el('sub-list').querySelector(`[data-id="${id}"]`);
+    if (!card) return;
+
+    const toggle  = card.querySelector('.rej-toggle');
+    const note    = card.querySelector('.rej-note');
+    const chevron = card.querySelector('.rej-chevron');
+    const txt     = card.querySelector('.rej-toggle-text');
+
+    if (!toggle || !note) return;
+
+    toggle.setAttribute('aria-expanded', isOpen);
+    note.setAttribute('aria-hidden', !isOpen);
+    note.classList.toggle('open', isOpen);
+    chevron.classList.toggle('open', isOpen);
+    txt.textContent = isOpen ? 'إخفاء سبب الرفض' : 'عرض سبب الرفض';
+  },
+
+  /* ── MODAL ── */
+  openModal() {
+    const overlay = el('overlay');
+    overlay.classList.remove('hidden');
+    overlay.removeAttribute('aria-hidden');
+
+    const gov = el('sel-gov');
+    gov.innerHTML = '<option value="">اختر المحافظة</option>' +
+      DATA.govs.map(g => `<option value="${g}"${g === state.gov ? ' selected' : ''}>${g}</option>`).join('');
+    this._populateCities(state.gov, state.city);
+
+    // Focus first interactive element
+    setTimeout(() => el('sel-gov').focus(), 80);
+    document.addEventListener('keydown', this._trapFocus);
+  },
+
+  closeModal() {
+    const overlay = el('overlay');
+    overlay.classList.add('hidden');
+    overlay.setAttribute('aria-hidden', 'true');
+
+    // Clear validation
+    ['grp-gov', 'grp-city'].forEach(id => el(id)?.classList.remove('has-error'));
+    ['wrap-gov', 'wrap-city'].forEach(id => el(id)?.classList.remove('error'));
+
+    document.removeEventListener('keydown', this._trapFocus);
+  },
+
+  handleOverlayClick(e) {
+    if (e.target === el('overlay')) this.closeModal();
+  },
+
+  _trapFocus(e) {
+    if (e.key === 'Escape') { App.closeModal(); return; }
+    if (e.key !== 'Tab') return;
+
+    const modal     = el('modal');
+    const focusable = [...modal.querySelectorAll(
+      'button:not([disabled]), select, [tabindex]:not([tabindex="-1"])'
+    )].filter(el => !el.closest('[aria-hidden="true"]'));
+
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last  = focusable[focusable.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    }
+  },
+
+  onGovChange() {
+    const g = el('sel-gov').value;
+    this._populateCities(g, '');
+    el('grp-gov').classList.remove('has-error');
+    el('wrap-gov').classList.remove('error');
+  },
+
+  _populateCities(gov, selectedCity) {
+    const sel    = el('sel-city');
+    const cities = DATA.cities[gov] || [];
+    sel.innerHTML = '<option value="">اختر المدينة</option>' +
+      cities.map(c => `<option value="${c}"${c === selectedCity ? ' selected' : ''}>${c}</option>`).join('');
+    sel.disabled = !gov;
+  },
+
+  saveLocation() {
+    const g = el('sel-gov').value;
+    const c = el('sel-city').value;
+    let valid = true;
+
+    if (!g) {
+      el('grp-gov').classList.add('has-error');
+      el('wrap-gov').classList.add('error');
+      valid = false;
+    } else {
+      el('grp-gov').classList.remove('has-error');
+      el('wrap-gov').classList.remove('error');
+    }
+    if (!c) {
+      el('grp-city').classList.add('has-error');
+      el('wrap-city').classList.add('error');
+      valid = false;
+    } else {
+      el('grp-city').classList.remove('has-error');
+      el('wrap-city').classList.remove('error');
+    }
+
+    if (!valid) {
+      this._showToast('يرجى اختيار المحافظة والمدينة', 'warn');
+      return;
+    }
+
+    state.gov  = g;
+    state.city = c;
+    el('loc-display').textContent = g + ' — ' + c;
+    this.closeModal();
+    this._showToast('تم تحديث موقعك بنجاح');
+  },
+
+  /* ── TOAST ── */
+  _toastTimer: null,
+  _showToast(msg, type = 'ok') {
+    const toast    = el('toast');
+    const icon     = el('toast-icon');
+    const msgEl    = el('toast-msg');
+
+    msgEl.textContent = msg;
+    icon.className    = `toast-icon ${type}`;
+    
+    const icons = {
+      ok:   `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`,
+      warn: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    };
+    icon.innerHTML = icons[type] || icons.ok;
+    
+    icon.setAttribute('aria-label', type === 'warn' ? 'تحذير' : 'نجاح');
+
+    // Reset
+    toast.classList.remove('gone', 'hide');
+    toast.style.animation = 'none';
+    toast.offsetHeight; // force reflow
+    toast.style.animation = '';
+
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.classList.add('hide');
+      setTimeout(() => toast.classList.add('gone'), 280);
+    }, 2800);
+  },
+};
+
+/* ── INIT ── */
+(function init() {
+  renderCards();
+  syncStats('all');
+  
+  // Animate stat numbers on load
+  animateNumber(el('stat-all'), '٥');
+  animateNumber(el('stat-ok'), '٣');
+  animateNumber(el('stat-pend'), '١');
+  animateNumber(el('stat-rej'), '١');
+
+  // Tabs scroll indicator
+  const tabsWrap = document.querySelector('.tabs-wrap');
+  if (tabsWrap) {
+    tabsWrap.addEventListener('scroll', () => {
+      const atEnd = tabsWrap.scrollLeft <= 8; // RTL
+      tabsWrap.classList.toggle('at-end', atEnd);
+    });
+    tabsWrap.classList.toggle('at-end', tabsWrap.scrollLeft <= 8);
+  }
+})();
+</script>
+</body>
+</html>
