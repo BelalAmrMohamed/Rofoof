@@ -250,6 +250,11 @@
         display: none;
       }
 
+      .nav-actions {
+        display: none;
+      }
+
+      /* hide user button; only brand + hamburger on mobile */
       .nav-mobile-toggle {
         display: flex;
         align-items: center;
@@ -1097,22 +1102,6 @@
       margin-top: 2px;
     }
 
-    .btn-cancel-new {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 18px;
-      padding: 2px 4px;
-      border-radius: var(--r-xs);
-      transition: color 0.18s, transform 0.18s;
-    }
-
-    .btn-cancel-new:hover {
-      color: var(--danger);
-      transform: rotate(90deg);
-    }
-
     /* ╔═══════════════════════════════════════════╗
    ║  DUPLICATE WARNING                        ║
    ╚═══════════════════════════════════════════╝ */
@@ -1603,16 +1592,27 @@
     }
 
     /* Stagger form cards on load */
+    /* backdrop-filter creates an independent stacking context per card.
+   Without explicit z-index, later DOM elements (submit-area) paint on top,
+   swallowing the mosque dropdown. Fix: mosque card (2) > submit-area (2) > book card (1). */
+    .form-card {
+      position: relative;
+    }
+
     .form-card:nth-child(1) {
       animation: fadeUp 0.5s var(--ease-out) 0.1s both;
+      z-index: 1;
     }
 
     .form-card:nth-child(2) {
       animation: fadeUp 0.5s var(--ease-out) 0.18s both;
+      z-index: 3;
     }
 
     .submit-area {
       animation: fadeUp 0.5s var(--ease-out) 0.26s both;
+      position: relative;
+      z-index: 2;
     }
 
     /* Category colors */
@@ -1919,19 +1919,13 @@
             </div>
           </div>
 
-          <!-- New mosque form -->
-          <section class="new-mosque-section hidden" id="new-mosque-section" aria-labelledby="nm-title">
+          <!-- New mosque form — always visible as the fallback path -->
+          <section class="new-mosque-section" id="new-mosque-section" aria-labelledby="nm-title">
             <div class="new-mosque-header">
               <div>
-                <p class="new-mosque-title" id="nm-title">🕌 إضافة مسجد جديد</p>
-                <p class="new-mosque-sub">لم يُسجَّل هذا المسجد بعد في المنصة</p>
+                <p class="new-mosque-title" id="nm-title">🕌 أو سجّل مسجداً جديداً</p>
+                <p class="new-mosque-sub">إذا لم تجد المسجد في نتائج البحث، أدخل بياناته هنا</p>
               </div>
-              <button type="button" class="btn-cancel-new" id="btn-cancel-new" aria-label="إلغاء إضافة مسجد جديد">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"
-                  aria-hidden="true">
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
-              </button>
             </div>
 
             <div class="form-grid-2" style="margin-bottom:16px;">
@@ -2123,8 +2117,8 @@
     const state = {
       role: 'volunteer',  // 'volunteer' | 'visitor'
       selectedMosque: null,         // mosque object or null
-      addingNewMosque: false,
-      dupOverridden: false,        // legacy: kept for soft-warn path; hard blocks cannot be overridden
+      addingNewMosque: true,        // new mosque section is always visible
+      dupOverridden: false,
       submissionType: 'normal',     // 'normal' | 'new-edition'
     };
 
@@ -2267,12 +2261,6 @@
         html = `<div class="mosque-no-results">لا توجد نتائج لـ «${escapeHtml(q)}»</div>`;
       }
 
-      html += `
-    <div class="mosque-add-new-row" role="option" tabindex="0" id="add-new-row">
-      <span class="mosque-add-new-row-icon" aria-hidden="true">+</span>
-      إضافة مسجد جديد غير موجود في القائمة
-    </div>`;
-
       mosqueDropdown.innerHTML = html;
       mosqueDropdown.classList.add('open');
       mosqueSearchInput.setAttribute('aria-expanded', 'true');
@@ -2289,14 +2277,12 @@
     mosqueDropdown.addEventListener('click', e => {
       const item = e.target.closest('[data-id]');
       if (item) { selectMosque(parseInt(item.dataset.id, 10)); return; }
-      if (e.target.closest('#add-new-row')) showNewMosqueForm();
     });
 
     mosqueDropdown.addEventListener('keydown', e => {
       if (e.key !== 'Enter') return;
       const item = e.target.closest('[data-id]');
       if (item) { selectMosque(parseInt(item.dataset.id, 10)); return; }
-      if (e.target.closest('#add-new-row')) showNewMosqueForm();
     });
 
     document.addEventListener('click', e => {
@@ -2454,25 +2440,21 @@
         setFieldError('f-title', 'err-title', false);
       }
 
-      // Mosque required
+      // Mosque: either an existing mosque was selected OR new mosque gov+city must be filled
       const hasMosque = state.selectedMosque !== null;
-      const hasNewMosque = state.addingNewMosque;
-      const errMosque = document.getElementById('err-mosque');
-      if (!hasMosque && !hasNewMosque) {
-        errMosque.classList.add('show');
-        ok = false;
-      } else {
-        errMosque.classList.remove('show');
-      }
 
-      // New mosque sub-fields
-      if (hasNewMosque) {
+      if (!hasMosque) {
+        // No existing mosque selected — require new mosque gov + city
         const gov = document.getElementById('nm-gov').value;
         const city = document.getElementById('nm-city').value;
         if (!gov) { setFieldError('nm-gov', 'err-nm-gov', true); ok = false; }
         else setFieldError('nm-gov', 'err-nm-gov', false);
         if (!city) { setFieldError('nm-city', 'err-nm-city', true); ok = false; }
         else setFieldError('nm-city', 'err-nm-city', false);
+      } else {
+        // Existing mosque selected — clear any new mosque validation errors
+        setFieldError('nm-gov', 'err-nm-gov', false);
+        setFieldError('nm-city', 'err-nm-city', false);
       }
 
       return ok;
@@ -2605,14 +2587,14 @@
 
       // Reset state
       state.selectedMosque = null;
-      state.addingNewMosque = false;
+      state.addingNewMosque = true;   // new mosque section is always visible
       state.dupOverridden = false;
       state.submissionType = 'normal';
 
       // Reset UI
       document.getElementById('selected-mosque-card').classList.add('hidden');
       document.getElementById('mosque-search-field').classList.remove('hidden');
-      document.getElementById('new-mosque-section').classList.add('hidden');
+      // new-mosque-section stays visible — do not add 'hidden'
       hideDupWarning();
 
       // Re-enable submit button (hideDupWarning does this, but be explicit)
@@ -2655,9 +2637,6 @@
 
       // Deselect mosque
       document.getElementById('btn-deselect').addEventListener('click', deselectMosque);
-
-      // Cancel new mosque
-      document.getElementById('btn-cancel-new').addEventListener('click', cancelNewMosque);
 
       // Success action buttons
       document.getElementById('btn-register-another').addEventListener('click', resetForm);
