@@ -1,2018 +1,2084 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#080c18">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="الملف الشخصي — على رفوف المساجد">
-<title>الملف الشخصي — على رفوف المساجد</title>
-
-<link rel="manifest" href="/manifest.json">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
-
-<style>
-@layer reset, tokens, base, components, utilities;
-
-/* ═══════════════════════════════════════════
-   RESET & TOKENS
-═══════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  color-scheme: dark;
-
-  /* Backgrounds */
-  --bg-base:      #060a16;
-  --bg-card:      #0c1425;
-  --bg-elevated:  #111d33;
-  --bg-hover:     #152039;
-  --bg-input:     #080d1c;
-  --bg-glass:     rgba(12, 20, 37, 0.72);
-
-  /* Borders */
-  --border:       rgba(30, 48, 82, 0.9);
-  --border-mid:   rgba(48, 74, 120, 0.9);
-  --border-glow:  rgba(200, 146, 42, 0.32);
-
-  /* Brand */
-  --gold:         #c8922a;
-  --gold-light:   #e4ae42;
-  --gold-dim:     rgba(200, 146, 42, 0.12);
-
-  /* Text */
-  --cream:        #ede0c6;
-  --cream-dim:    #9aacc4;
-  --muted:        #7a92b4; /* Updated for WCAG AA contrast */
-  --muted-mid:    #6b84a8;
-
-  /* Status */
-  --ok-bg:        rgba(74, 222, 128, 0.07);
-  --ok-text:      #4ade80;
-  --ok-border:    rgba(74, 222, 128, 0.18);
-  --pend-bg:      rgba(251, 191, 36, 0.07);
-  --pend-text:    #f6b92e;
-  --pend-border:  rgba(251, 191, 36, 0.18);
-  --rej-bg:       rgba(248, 113, 113, 0.07);
-  --rej-text:     #f07070;
-  --rej-border:   rgba(248, 113, 113, 0.18);
-
-  /* Radii */
-  --r-sm:  8px;
-  --r-md:  12px;
-  --r-lg:  18px;
-  --r-xl:  24px;
-
-  /* Shadows */
-  --shadow-gold:  0 0 32px rgba(200, 146, 42, 0.12);
-  --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.35);
-  --shadow-deep:  0 8px 48px rgba(0, 0, 0, 0.55);
-}
-
-@property --gold-opacity {
-  syntax: '<number>';
-  initial-value: 0.15;
-  inherits: false;
-}
-
-/* ═══════════════════════════════════════════
-   BASE
-═══════════════════════════════════════════ */
-html {
-  scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent;
-}
-body {
-  font-family: 'Cairo', sans-serif;
-  direction: rtl;
-  background: var(--bg-base);
-  color: var(--cream);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-}
-
-/* Background canvas */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 70% -10%, rgba(200, 146, 42, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at -10% 80%, rgba(30, 80, 160, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 100% 100%, rgba(200, 146, 42, 0.04) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Noise grain overlay */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.6;
-}
-
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(200, 146, 42, 0.2); border-radius: 2px; }
-
-/* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.8); }
-}
-@keyframes toastSlideIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.96); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-}
-@keyframes toastSlideOut {
-  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-  to   { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.96); }
-}
-@keyframes shimmer {
-  from { background-position: 200% center; }
-  to   { background-position: -200% center; }
-}
-@keyframes avatarPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 146, 42, 0.3); }
-  50%       { box-shadow: 0 0 0 6px rgba(200, 146, 42, 0); }
-}
-
-.a1 { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.a2 { animation: fadeUp 0.45s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.a3 { animation: fadeUp 0.45s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.a4 { animation: fadeUp 0.45s 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.a5 { animation: fadeUp 0.45s 0.24s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-/* ═══════════════════════════════════════════
-   SKIP LINK
-═══════════════════════════════════════════ */
-.skip-link {
-  position: absolute;
-  top: -100%;
-  right: 0;
-  background: var(--gold);
-  color: rgba(6, 10, 22, 0.95);
-  padding: 10px 18px;
-  font-weight: 800;
-  font-size: 14px;
-  border-radius: 0 0 var(--r-md) var(--r-md);
-  z-index: 9999;
-  text-decoration: none;
-  transition: top 0.2s;
-}
-.skip-link:focus { top: 0; }
-
-/* ═══════════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════════ */
-.page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-}
-
-.content {
-  flex: 1;
-  padding: 16px 0 calc(64px + env(safe-area-inset-bottom, 0px));
-}
-
-.wrap {
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-@media (min-width: 640px) { .wrap { padding: 0 24px; } }
-
-/* ═══════════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════════ */
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(6, 10, 22, 0.85);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-bottom: 1px solid var(--border);
-}
-.nav-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  padding: 0 16px;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.nav-logo {
-  font-family: 'Amiri', serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--cream);
-  letter-spacing: 0.2px;
-  line-height: 1;
-}
-.nav-logo em {
-  font-style: normal;
-  color: var(--gold);
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.nav-actions { display: flex; gap: 6px; }
-.nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-sm);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--muted);
-  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
-}
-.nav-btn:hover {
-  color: var(--cream);
-  border-color: var(--border-mid);
-  background: var(--bg-hover);
-  transform: translateY(-1px);
-}
-.nav-btn:active { transform: translateY(0); }
-.nav-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ═══════════════════════════════════════════
-   DEMO BAR
-═══════════════════════════════════════════ */
-.demo-bar {
-  background: rgba(200, 146, 42, 0.05);
-  border: 1px solid rgba(200, 146, 42, 0.1);
-  border-radius: var(--r-lg);
-  padding: 9px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.demo-label {
-  font-size: 11px;
-  color: var(--muted-mid);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.demo-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--gold);
-  animation: pulseDot 2s ease infinite;
-}
-
-.role-toggle {
-  display: flex;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 3px;
-  gap: 2px;
-}
-.role-opt {
-  background: transparent;
-  border: none;
-  padding: 5px 14px;
-  border-radius: 6px;
-  font-family: 'Cairo', sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  color: var(--muted);
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.role-opt.on {
-  background: var(--gold);
-  color: rgba(6, 10, 22, 0.95);
-  box-shadow: 0 2px 10px rgba(200, 146, 42, 0.4);
-}
-
-/* ═══════════════════════════════════════════
-   PROFILE HERO
-═══════════════════════════════════════════ */
-.hero {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 20px;
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.3s;
-}
-.hero:hover { border-color: var(--border-mid); }
-
-/* Decorative geometric accent with custom @property glow */
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle, rgba(200, 146, 42, var(--gold-opacity)) 0%, transparent 70%);
-  pointer-events: none;
-  transition: --gold-opacity 0.4s ease;
-}
-.hero:hover::before { --gold-opacity: 0.26; }
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -30px;
-  left: -30px;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(30, 80, 160, 0.1) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-/* Gold shimmer gradient border */
-.hero-border-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--r-xl);
-  background: linear-gradient(135deg, rgba(200,146,42,0.18) 0%, transparent 40%, transparent 60%, rgba(200,146,42,0.08) 100%);
-  pointer-events: none;
-}
-
-.avatar {
-  width: 76px;
-  height: 76px;
-  border-radius: 20px;
-  flex-shrink: 0;
-  background: linear-gradient(145deg, #c8922a 0%, #7a5614 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Amiri', serif;
-  font-size: 32px;
-  font-weight: 700;
-  color: rgba(6, 10, 22, 0.9);
-  border: 2px solid rgba(200, 146, 42, 0.3);
-  box-shadow: 0 4px 24px rgba(200, 146, 42, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-  animation: avatarPulse 3s ease infinite;
-  position: relative;
-  z-index: 1;
-}
-
-.hero-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
-
-.hero-name {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--cream);
-  line-height: 1.2;
-  margin-bottom: 5px;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-.hero-email {
-  font-size: 12.5px;
-  color: var(--muted);
-  font-weight: 500;
-  margin-bottom: 12px;
-  direction: ltr;
-  text-align: right;
-}
-.hero-badges {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: var(--r-sm);
-  font-size: 11px;
-  font-weight: 700;
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.role-volunteer {
-  background: rgba(200, 146, 42, 0.12);
-  color: var(--gold);
-  border: 1px solid rgba(200, 146, 42, 0.24);
-  box-shadow: 0 0 12px rgba(200, 146, 42, 0.1);
-}
-.role-visitor {
-  background: rgba(94, 112, 144, 0.1);
-  color: var(--muted-mid);
-  border: 1px solid rgba(94, 112, 144, 0.18);
-}
-.joined-text {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-/* ═══════════════════════════════════════════
-   LOCATION CARD
-═══════════════════════════════════════════ */
-.loc-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.loc-card:hover {
-  border-color: var(--border-mid);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
-}
-.loc-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.loc-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  flex-shrink: 0;
-  background: rgba(200, 146, 42, 0.08);
-  border: 1px solid rgba(200, 146, 42, 0.16);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gold);
-}
-.loc-icon svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.loc-lbl {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 600;
-  margin-bottom: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.loc-val {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--cream);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.btn-loc-edit {
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid rgba(200, 146, 42, 0.24);
-  color: var(--gold);
-  padding: 8px 14px;
-  border-radius: var(--r-sm);
-  font-family: 'Cairo', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 44px;
-}
-.btn-loc-edit:hover {
-  background: rgba(200, 146, 42, 0.1);
-  border-color: rgba(200, 146, 42, 0.42);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(200, 146, 42, 0.15);
-}
-.btn-loc-edit:active { transform: translateY(0); }
-.btn-loc-edit svg {
-  width: 13px;
-  height: 13px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ═══════════════════════════════════════════
-   STATS GRID
-═══════════════════════════════════════════ */
-.stats-wrap { container-type: inline-size; }
-
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-@container (max-width: 340px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 360px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-}
-
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 14px 6px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-  position: relative;
-  overflow: hidden;
-  min-height: 44px;
-}
-.stat-card:hover {
-  border-color: var(--border-mid);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-}
-.stat-card:active { transform: translateY(0); }
-
-/* Hover glow accents */
-.s-ok   .stat-card:hover { box-shadow: 0 6px 24px rgba(74, 222, 128, 0.12); }
-.s-pend .stat-card:hover { box-shadow: 0 6px 24px rgba(251, 191, 36, 0.12); }
-.s-rej  .stat-card:hover { box-shadow: 0 6px 24px rgba(248, 113, 113, 0.12); }
-.s-all  .stat-card:hover { box-shadow: 0 6px 24px rgba(237, 224, 198, 0.08); }
-
-.stat-card.active {
-  border-color: var(--border-glow);
-  background: var(--bg-elevated);
-}
-.stat-card.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: currentColor;
-  opacity: 0.5;
-}
-
-.s-all .stat-card.active::after { background: var(--cream); }
-.s-ok  .stat-card.active::after { background: var(--ok-text); }
-.s-pend .stat-card.active::after { background: var(--pend-text); }
-.s-rej  .stat-card.active::after { background: var(--rej-text); }
-
-.stat-inner { position: relative; z-index: 1; }
-.stat-num {
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1;
-  margin-bottom: 4px;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.stat-card:hover .stat-num { transform: scale(1.08); }
-.stat-lbl {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  line-height: 1.3;
-}
-.s-all .stat-num { color: var(--cream); }
-.s-ok  .stat-num { color: var(--ok-text); }
-.s-pend .stat-num { color: var(--pend-text); }
-.s-rej  .stat-num { color: var(--rej-text); }
-
-/* ═══════════════════════════════════════════
-   SUBMISSIONS SECTION
-═══════════════════════════════════════════ */
-.section-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-}
-
-.sec-head {
-  padding: 15px 18px 13px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.sec-title {
-  font-size: 14.5px;
-  font-weight: 800;
-  color: var(--cream);
-}
-.sec-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted-mid);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 3px 9px;
-  transition: all 0.2s;
-}
-
-/* ═══════════════════════════════════════════
-   TABS — Sliding indicator
-═══════════════════════════════════════════ */
-.tabs-wrap {
-  padding: 8px;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-  position: relative;
-  -webkit-mask-image: linear-gradient(to left, transparent 0%, black 48px);
-  mask-image: linear-gradient(to left, transparent 0%, black 48px);
-}
-.tabs-wrap.at-end {
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-.tabs-wrap::-webkit-scrollbar { display: none; }
-.tabs {
-  display: flex;
-  gap: 3px;
-  position: relative;
-}
-.tab {
-  flex-shrink: 0;
-  background: transparent;
-  border: none;
-  padding: 7px 13px;
-  border-radius: var(--r-sm);
-  font-family: 'Cairo', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  position: relative;
-  min-height: 44px;
-}
-.tab:hover:not(.on) { color: var(--cream-dim); background: rgba(255, 255, 255, 0.03); }
-.tab.on { color: var(--cream); background: var(--bg-elevated); }
-.tab.on .tc { background: rgba(200, 146, 42, 0.18); color: var(--gold); }
-
-.tab .tc {
-  background: var(--bg-elevated);
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-size: 11px;
-  font-weight: 700;
-  transition: all 0.2s;
-}
-
-/* ═══════════════════════════════════════════
-   SKELETON SCREENS
-═══════════════════════════════════════════ */
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-elevated) 25%,
-    rgba(255, 255, 255, 0.04) 50%,
-    var(--bg-elevated) 75%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.6s ease infinite;
-  border-radius: var(--r-sm);
-}
-
-.skeleton-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 15px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.skeleton-line { height: 14px; border-radius: 4px; }
-.skeleton-line.short  { width: 40%; }
-.skeleton-line.medium { width: 65%; }
-.skeleton-line.full   { width: 100%; }
-
-/* ═══════════════════════════════════════════
-   SUBMISSION CARDS
-═══════════════════════════════════════════ */
-.sub-list {
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.sub-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 15px 16px;
-  transition: border-color 0.25s, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s;
-  animation: fadeUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
-  position: relative;
-  overflow: hidden;
-}
-.sub-card:hover {
-  border-color: var(--border-mid);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.3);
-}
-
-/* Status left-border accent */
-.sub-card[data-status]::before {
-  content: '';
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  width: 3px;
-  border-radius: 0 var(--r-lg) var(--r-lg) 0;
-  opacity: 0.65;
-}
-.sub-card[data-status="approved"]::before {
-  background: linear-gradient(to bottom, transparent 0%, var(--ok-text) 30%, var(--ok-text) 70%, transparent 100%);
-}
-.sub-card[data-status="pending"]::before {
-  background: linear-gradient(to bottom, transparent 0%, var(--pend-text) 30%, var(--pend-text) 70%, transparent 100%);
-}
-.sub-card[data-status="rejected"]::before {
-  background: linear-gradient(to bottom, transparent 0%, var(--rej-text) 30%, var(--rej-text) 70%, transparent 100%);
-}
-
-.sub-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.sub-title {
-  font-size: 14.5px;
-  font-weight: 700;
-  color: var(--cream);
-  line-height: 1.35;
-  flex: 1;
-}
-
-/* BADGES */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 7px;
-  font-size: 10.5px;
-  font-weight: 700;
-  flex-shrink: 0;
-  border: 1px solid;
-}
-.badge-ok   { background: var(--ok-bg);   color: var(--ok-text);   border-color: var(--ok-border); }
-.badge-pend { background: var(--pend-bg); color: var(--pend-text); border-color: var(--pend-border); }
-.badge-rej  { background: var(--rej-bg);  color: var(--rej-text);  border-color: var(--rej-border); }
-
-.pdot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  display: inline-block;
-  animation: pulseDot 1.6s ease infinite;
-}
-
-.sub-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-.sub-author { font-size: 12px; color: var(--muted); font-weight: 500; }
-.mdot {
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: var(--muted);
-  flex-shrink: 0;
-}
-.cat-chip {
-  background: rgba(29, 45, 71, 0.8);
-  color: var(--muted-mid);
-  border: 1px solid rgba(94, 112, 144, 0.14);
-  border-radius: 5px;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.sub-mosque {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 7px;
-  color: var(--cream-dim);
-  font-size: 12px;
-  font-weight: 500;
-}
-.sub-mosque svg {
-  width: 12px;
-  height: 12px;
-  stroke: var(--gold);
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  flex-shrink: 0;
-  opacity: 0.8;
-}
-.mosque-unnamed { color: var(--muted); font-style: italic; }
-
-.edition-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(200, 146, 42, 0.07);
-  border: 1px solid rgba(200, 146, 42, 0.14);
-  border-radius: 6px;
-  padding: 2px 9px;
-  margin-bottom: 8px;
-  font-size: 10.5px;
-  color: var(--gold);
-  font-weight: 600;
-}
-.edition-tag svg {
-  width: 10px;
-  height: 10px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.sub-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 11px;
-  padding-top: 11px;
-  border-top: 1px solid rgba(29, 45, 71, 0.55);
-}
-.sub-date {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.sub-date svg {
-  width: 11px;
-  height: 11px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
-.btn-edit {
-  background: transparent;
-  border: 1px solid rgba(200, 146, 42, 0.28);
-  color: var(--gold);
-  padding: 7px 14px;
-  border-radius: var(--r-sm);
-  font-family: 'Cairo', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 36px;
-}
-.btn-edit:hover {
-  background: rgba(200, 146, 42, 0.1);
-  border-color: rgba(200, 146, 42, 0.5);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 12px rgba(200, 146, 42, 0.18);
-}
-.btn-edit:active { transform: translateY(0); }
-.btn-edit svg {
-  width: 12px;
-  height: 12px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.tip-wrap { position: relative; display: inline-flex; }
-.btn-edit.dim { opacity: 0.28; cursor: not-allowed; pointer-events: none; }
-.tip-trigger:hover .tooltip,
-.tip-trigger:focus-within .tooltip { opacity: 1; transform: translateX(-50%) translateY(-3px); }
-
-.tooltip {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) translateY(0);
-  background: var(--bg-elevated);
-  color: var(--cream-dim);
-  font-size: 11px;
-  font-weight: 600;
-  font-family: 'Cairo', sans-serif;
-  padding: 6px 12px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border-mid);
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
-  z-index: 10;
-}
-.tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: var(--border-mid);
-}
-
-/* ═══════════════════════════════════════════
-   REJECTION NOTE
-═══════════════════════════════════════════ */
-.rej-wrap { margin-top: 10px; }
-.rej-toggle {
-  background: rgba(248, 113, 113, 0.05);
-  border: 1px solid rgba(248, 113, 113, 0.12);
-  border-radius: 10px;
-  padding: 9px 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  width: 100%;
-  transition: background 0.2s, border-color 0.2s;
-  font-family: 'Cairo', sans-serif;
-  min-height: 44px;
-}
-.rej-toggle:hover { background: rgba(248, 113, 113, 0.09); border-color: rgba(248, 113, 113, 0.2); }
-.rej-toggle-text {
-  flex: 1;
-  font-size: 11.5px;
-  color: var(--rej-text);
-  font-weight: 600;
-  text-align: right;
-}
-.rej-chevron {
-  color: var(--rej-text);
-  opacity: 0.6;
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.rej-chevron.open { transform: rotate(180deg); }
-
-.rej-note {
-  background: rgba(248, 113, 113, 0.04);
-  border: 1px solid rgba(248, 113, 113, 0.1);
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  padding: 0 13px;
-  font-size: 12px;
-  color: var(--cream-dim);
-  font-weight: 500;
-  line-height: 1.75;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1), padding 0.32s ease;
-}
-.rej-note.open { max-height: 200px; padding: 11px 13px; }
-
-/* ═══════════════════════════════════════════
-   EMPTY STATE
-═══════════════════════════════════════════ */
-.empty {
-  padding: 48px 16px;
-  text-align: center;
-  color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.empty-ico {
-  font-size: 32px;
-  opacity: 0.35;
-  filter: grayscale(30%);
-}
-.empty-txt { font-size: 13px; font-weight: 600; }
-.empty-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
-
-/* ═══════════════════════════════════════════
-   MODAL
-═══════════════════════════════════════════ */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-  z-index: 200;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  animation: fadeIn 0.22s ease;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-@media (min-width: 600px) {
-  .overlay { align-items: center; padding: 24px; }
-}
-
-.modal {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  width: 100%;
-  max-width: 480px;
-  animation: slideUp 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  position: relative;
-  overflow: hidden;
-}
-@media (min-width: 600px) {
-  .modal {
-    border-radius: var(--r-xl);
-    box-shadow: var(--shadow-deep), 0 0 0 1px rgba(200,146,42,0.06);
-  }
-}
-
-/* Gold top accent line */
-.modal::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 15%;
-  right: 15%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200, 146, 42, 0.5), transparent);
-}
-
-.modal-handle {
-  width: 36px;
-  height: 4px;
-  background: var(--border-mid);
-  border-radius: 2px;
-  margin: 12px auto 0;
-  opacity: 0.6;
-}
-@media (min-width: 600px) { .modal-handle { display: none; } }
-
-.modal-head {
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.modal-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--cream);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.modal-title-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: rgba(200, 146, 42, 0.1);
-  border: 1px solid rgba(200, 146, 42, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gold);
-}
-.modal-title-icon svg {
-  width: 13px;
-  height: 13px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-sm);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--muted);
-  transition: all 0.18s;
-  min-height: 32px;
-}
-.modal-close:hover { color: var(--cream); border-color: var(--border-mid); background: var(--bg-hover); }
-.modal-close svg {
-  width: 14px;
-  height: 14px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.modal-body {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.inp-grp { display: flex; flex-direction: column; gap: 6px; }
-.inp-lbl {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--cream-dim);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.inp-required { color: var(--rej-text); font-size: 13px; }
-
-.sel-wrap { position: relative; }
-.sel-wrap select {
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 12px 14px;
-  padding-left: 36px;
-  color: var(--cream);
-  font-family: 'Cairo', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  width: 100%;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  min-height: 48px;
-}
-.sel-wrap select:focus {
-  border-color: rgba(200, 146, 42, 0.5);
-  box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.08);
-}
-.sel-wrap select option { background: #0c1425; }
-.sel-wrap select:invalid, .sel-wrap select option[value=""] { color: var(--muted); }
-
-.sel-arrow {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted);
-  pointer-events: none;
-}
-.sel-arrow svg {
-  width: 13px;
-  height: 13px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Validation state */
-.sel-wrap.error select { border-color: rgba(248, 113, 113, 0.5); }
-.inp-error-msg {
-  font-size: 11px;
-  color: var(--rej-text);
-  font-weight: 600;
-  display: none;
-  animation: fadeIn 0.2s ease;
-}
-.inp-grp.has-error .inp-error-msg { display: block; }
-
-.modal-foot { padding: 0 18px 18px; }
-.btn-save {
-  width: 100%;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-  color: rgba(6, 10, 22, 0.95);
-  border: none;
-  border-radius: var(--r-md);
-  padding: 14px;
-  font-family: 'Cairo', sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 2px 16px rgba(200, 146, 42, 0.22);
-  letter-spacing: 0.2px;
-  min-height: 48px;
-}
-.btn-save:hover {
-  opacity: 0.93;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(200, 146, 42, 0.38);
-}
-.btn-save:active { transform: translateY(0); box-shadow: 0 2px 12px rgba(200, 146, 42, 0.2); }
-
-/* ═══════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════ */
-.toast {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-elevated);
-  border: 1px solid rgba(200, 146, 42, 0.22);
-  color: var(--cream);
-  padding: 11px 18px;
-  border-radius: var(--r-md);
-  font-family: 'Cairo', sans-serif;
-  font-size: 12.5px;
-  font-weight: 700;
-  z-index: 400;
-  white-space: nowrap;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(200,146,42,0.06);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  pointer-events: none;
-  animation: toastSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.toast.hide { animation: toastSlideOut 0.26s ease forwards; }
-.toast.gone { display: none; }
-.toast-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.toast-icon.ok  { background: rgba(74, 222, 128, 0.15); color: var(--ok-text); }
-.toast-icon.warn { background: rgba(251, 191, 36, 0.15); color: var(--pend-text); }
-
-/* ═══════════════════════════════════════════
-   FOCUS STYLES (Accessibility)
-═══════════════════════════════════════════ */
-:focus-visible {
-  outline: 2px solid rgba(200, 146, 42, 0.6);
-  outline-offset: 2px;
-}
-
-/* ═══════════════════════════════════════════
-   UTILITY
-═══════════════════════════════════════════ */
-.hidden { display: none !important; }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  border: 0;
-}
-
-/* ═══════════════════════════════════════════
-   PREFERS REDUCED MOTION
-═══════════════════════════════════════════ */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .avatar { box-shadow: 0 0 0 3px rgba(200, 146, 42, 0.25); animation: none !important; }
-  .pdot { animation: none !important; }
-  .demo-dot { animation: none !important; }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1f17" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="الملف الشخصي وسجل الكتب — على رفوف المساجد" />
+  <title>الملف الشخصي — على رفوف المساجد</title>
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --bg-soft: #f8f4ec;
+      --card: rgba(255, 255, 255, .74);
+      --card-strong: rgba(255, 255, 255, .92);
+      --text: #1b241f;
+      --muted: #6f746f;
+      --line: rgba(25, 45, 36, .10);
+      --green-950: #07180f;
+      --green-900: #0b1f17;
+      --green-850: #103222;
+      --green-800: #134128;
+      --green-700: #1a5c39;
+      --green-600: #2c7d4f;
+      --green-100: #dfece4;
+      --gold: #b08d3d;
+      --gold-100: #f3e8c6;
+      --gold-200: #e3d09b;
+      --rose: #b75c5c;
+      --shadow: 0 20px 50px rgba(14, 28, 20, .12);
+      --shadow-soft: 0 10px 28px rgba(14, 28, 20, .08);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max: 1280px;
+      --nav-h: 74px;
+      --bottom-nav-h: 80px;
+      --trans: 220ms cubic-bezier(.2, .8, .2, 1);
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      font-family: "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 85% -10%, rgba(176, 141, 61, .14), transparent 55%),
+        radial-gradient(900px 700px at 0% 20%, rgba(19, 65, 40, .10), transparent 52%),
+        linear-gradient(180deg, #f7f3eb 0%, #f1eadf 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(transparent 0 0),
+        radial-gradient(circle at 18% 16%, rgba(176, 141, 61, .10), transparent 18%),
+        radial-gradient(circle at 82% 24%, rgba(19, 65, 40, .08), transparent 20%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    button,
+    input {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -48px;
+      right: 16px;
+      z-index: 999;
+      padding: .7rem 1rem;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      transition: top var(--trans);
+    }
+
+    .skip-link:focus {
+      top: 16px;
+      outline: none
+    }
+
+    .page {
+      min-height: 100vh;
+      padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: saturate(180%) blur(18px);
+      background: linear-gradient(180deg, rgba(245, 239, 229, .92), rgba(245, 239, 229, .72));
+      border-bottom: 1px solid rgba(25, 45, 36, .08);
+    }
+
+    .topbar-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      min-height: var(--nav-h);
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .02)),
+        linear-gradient(135deg, #0d2619, #173f2c);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 14px 24px rgba(11, 31, 23, .2);
+      display: grid;
+      place-items: center;
+      color: #f5ead1;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .brand-mark svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .brand-text {
+      min-width: 0
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.03rem;
+      line-height: 1.2;
+      font-weight: 800;
+      color: var(--green-950);
+      letter-spacing: .01em;
+    }
+
+    .brand-sub {
+      margin: .15rem 0 0;
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.35;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(25, 45, 36, .08);
+      background: rgba(255, 255, 255, .64);
+      color: var(--green-850);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 18px rgba(14, 28, 20, .06);
+      transition: transform var(--trans), background var(--trans), border-color var(--trans), box-shadow var(--trans);
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-1px);
+      background: #fff;
+      box-shadow: 0 12px 22px rgba(14, 28, 20, .10)
+    }
+
+    .icon-btn:focus-visible {
+      outline: 3px solid rgba(176, 141, 61, .28);
+      outline-offset: 2px
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 1.35rem 1.25rem 1.75rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid rgba(25, 45, 36, .08);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .hero-left {
+      position: relative;
+      background:
+        radial-gradient(circle at 32% 24%, rgba(255, 255, 255, .11), transparent 22%),
+        linear-gradient(180deg, #0d291a 0%, #09160f 100%);
+      color: #f5edd7;
+      padding: 2rem 1.75rem;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      isolation: isolate;
+    }
+
+    .hero-left::after {
+      content: "";
+      position: absolute;
+      inset: auto -50px -55px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(176, 141, 61, .30) 0%, rgba(176, 141, 61, .08) 42%, transparent 68%);
+      filter: blur(2px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .brand-stack {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .04)),
+        linear-gradient(135deg, rgba(176, 141, 61, .28), rgba(9, 22, 15, .0));
+      border: 1px solid rgba(255, 255, 255, .12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+      display: grid;
+      place-items: center;
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #f4e9c5;
+      flex: 0 0 auto;
+    }
+
+    .hero-copy {
+      margin-top: 1.7rem;
+      max-width: 26ch;
+    }
+
+    .hero-copy h2 {
+      margin: 0;
+      font-family: "Amiri", "Cairo", serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: .01em;
+      color: #f3e8c8;
+    }
+
+    .hero-copy p {
+      margin: .85rem 0 0;
+      color: rgba(245, 237, 215, .82);
+      line-height: 1.9;
+      font-size: .95rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .44rem .78rem;
+      border-radius: 999px;
+      font-size: .83rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-role {
+      background: rgba(255, 255, 255, .08);
+      color: #f4e9c5;
+      border-color: rgba(255, 255, 255, .10);
+    }
+
+    .badge-role svg {
+      width: 11px;
+      height: 11px;
+      fill: currentColor
+    }
+
+    .badge-ghost {
+      background: rgba(255, 255, 255, .06);
+      color: #d7e4d9;
+      border-color: rgba(255, 255, 255, .06);
+      font-weight: 600;
+    }
+
+    .hero-right {
+      padding: 1.6rem 1.6rem 1.55rem;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .90), rgba(255, 255, 255, .80)),
+        linear-gradient(180deg, #fff8ee 0%, #f7efe1 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .section-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      margin: 0;
+      font-family: "Amiri", "Cairo", serif;
+      font-size: clamp(1.65rem, 3.4vw, 2.4rem);
+      line-height: 1.1;
+      color: var(--green-900);
+    }
+
+    .section-sub {
+      margin: .35rem 0 0;
+      color: var(--muted);
+      line-height: 1.85;
+      font-size: .95rem;
+      max-width: 54ch;
+    }
+
+    .profile-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      justify-content: flex-start;
+    }
+
+    .pill-btn {
+      border: 1px solid rgba(25, 45, 36, .09);
+      background: #fff;
+      color: var(--green-850);
+      padding: .72rem 1rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(14, 28, 20, .06);
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans), background var(--trans);
+    }
+
+    .pill-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 24px rgba(14, 28, 20, .09);
+      border-color: rgba(176, 141, 61, .22)
+    }
+
+    .pill-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .9rem;
+      margin-top: .25rem;
+    }
+
+    .stat-card,
+    .info-card,
+    .history-shell,
+    .location-card {
+      background: var(--card-strong);
+      border: 1px solid rgba(25, 45, 36, .08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-card {
+      padding: 1rem 1rem .95rem;
+      min-height: 104px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -24px -24px auto;
+      width: 94px;
+      height: 94px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(176, 141, 61, .15) 0%, rgba(176, 141, 61, 0) 65%);
+      pointer-events: none;
+    }
+
+    .stat-label {
+      font-size: .88rem;
+      color: var(--muted);
+      margin: 0 0 .35rem;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      line-height: 1;
+      font-weight: 800;
+      color: var(--green-900);
+      margin: 0;
+      letter-spacing: -.02em;
+    }
+
+    .stat-note {
+      margin: .45rem 0 0;
+      font-size: .82rem;
+      color: #7f857b;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .95fr) minmax(0, 1.35fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .profile-side {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-card {
+      padding: 1rem;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .info-lbl {
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 700;
+      margin-bottom: .25rem;
+    }
+
+    .info-val {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green-900);
+      line-height: 1.55;
+    }
+
+    .location-card {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .loc-left {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      min-width: 0;
+    }
+
+    .loc-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(19, 65, 40, .1), rgba(176, 141, 61, .10));
+      color: var(--green-800);
+      flex: 0 0 auto;
+    }
+
+    .loc-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .loc-lbl {
+      color: var(--muted);
+      font-size: .83rem;
+      font-weight: 700;
+    }
+
+    .loc-val {
+      margin-top: .15rem;
+      font-weight: 800;
+      color: var(--green-900);
+      line-height: 1.4;
+    }
+
+    .edit-btn {
+      border: 1px solid rgba(25, 45, 36, .10);
+      background: linear-gradient(180deg, #fff, #f7f7f2);
+      color: var(--green-850);
+      border-radius: 14px;
+      padding: .78rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      font-weight: 800;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+      box-shadow: 0 10px 18px rgba(14, 28, 20, .06);
+      white-space: nowrap;
+    }
+
+    .edit-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(176, 141, 61, .24);
+      box-shadow: 0 14px 24px rgba(14, 28, 20, .10)
+    }
+
+    .edit-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .history-shell {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 100%;
+    }
+
+    .history-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .history-head h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--green-900);
+    }
+
+    .history-head p {
+      margin: .22rem 0 0;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.65;
+    }
+
+    .history-count {
+      padding: .55rem .8rem;
+      border-radius: 999px;
+      background: rgba(19, 65, 40, .06);
+      border: 1px solid rgba(19, 65, 40, .08);
+      color: var(--green-850);
+      font-weight: 800;
+      font-size: .84rem;
+      white-space: nowrap;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: .8rem;
+      align-items: center;
+    }
+
+    .search {
+      position: relative;
+    }
+
+    .search input {
+      width: 100%;
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid rgba(25, 45, 36, .10);
+      background: #fff;
+      color: var(--text);
+      padding: 0 3rem 0 1rem;
+      outline: none;
+      transition: border-color var(--trans), box-shadow var(--trans), transform var(--trans);
+      box-shadow: 0 8px 18px rgba(14, 28, 20, .04);
+    }
+
+    .search input::placeholder {
+      color: #9aa096
+    }
+
+    .search input:focus {
+      border-color: rgba(176, 141, 61, .35);
+      box-shadow: 0 0 0 4px rgba(176, 141, 61, .12);
+    }
+
+    .search svg {
+      position: absolute;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      stroke: #708076;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .filters {
+      display: flex;
+      gap: .55rem;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .filter-btn {
+      border: 1px solid rgba(25, 45, 36, .10);
+      background: #fff;
+      color: var(--green-850);
+      border-radius: 999px;
+      padding: .64rem .9rem;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 800;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans), background var(--trans), color var(--trans);
+      box-shadow: 0 8px 16px rgba(14, 28, 20, .04);
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(176, 141, 61, .28)
+    }
+
+    .filter-btn.on {
+      background: linear-gradient(180deg, #184b31, #123525);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 14px 26px rgba(19, 65, 40, .20);
+    }
+
+    .filter-badge {
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding: 0 .35rem;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: rgba(176, 141, 61, .12);
+      color: var(--gold);
+      font-size: .8rem;
+      font-weight: 800;
+    }
+
+    .filter-btn.on .filter-badge {
+      background: rgba(255, 255, 255, .16);
+      color: #fff;
+    }
+
+    .history-list {
+      display: grid;
+      gap: .9rem;
+    }
+
+    .history-card {
+      border-radius: 22px;
+      border: 1px solid rgba(25, 45, 36, .08);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(249, 246, 239, .98));
+      box-shadow: 0 14px 26px rgba(14, 28, 20, .06);
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+    }
+
+    .history-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(14, 28, 20, .08);
+      border-color: rgba(176, 141, 61, .22);
+    }
+
+    .history-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #b08d3d, #d8be7a, #b08d3d);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: .15rem;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--green-900);
+      line-height: 1.45;
+    }
+
+    .action-chip {
+      flex: 0 0 auto;
+      padding: .42rem .72rem;
+      border-radius: 999px;
+      font-size: .79rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      white-space: nowrap;
+    }
+
+    .chip-view {
+      background: rgba(19, 65, 40, .08);
+      color: var(--green-800);
+      border-color: rgba(19, 65, 40, .08);
+    }
+
+    .chip-search {
+      background: rgba(176, 141, 61, .10);
+      color: #85652a;
+      border-color: rgba(176, 141, 61, .12);
+    }
+
+    .chip-heart {
+      background: rgba(183, 92, 92, .10);
+      color: #8d4747;
+      border-color: rgba(183, 92, 92, .14);
+    }
+
+    .card-meta {
+      margin-top: .7rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem .85rem;
+      color: var(--muted);
+      font-size: .89rem;
+      line-height: 1.65;
+    }
+
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+    }
+
+    .meta-item svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .card-foot {
+      margin-top: .95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .small {
+      color: #7a807a;
+      font-size: .84rem;
+      line-height: 1.65;
+    }
+
+    .secondary-btn {
+      border: 1px solid rgba(25, 45, 36, .10);
+      background: #fff;
+      color: var(--green-850);
+      border-radius: 14px;
+      padding: .62rem .9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      font-weight: 800;
+      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+      box-shadow: 0 10px 18px rgba(14, 28, 20, .05);
+    }
+
+    .secondary-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(176, 141, 61, .24)
+    }
+
+    .secondary-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .empty {
+      padding: 2rem 1rem;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .86), rgba(247, 243, 236, .96));
+      border: 1px dashed rgba(25, 45, 36, .12);
+      text-align: center;
+    }
+
+    .empty-ico {
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
+      margin: 0 auto .75rem;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(19, 65, 40, .08), rgba(176, 141, 61, .10));
+      color: var(--green-800);
+      font-size: 1.5rem;
+    }
+
+    .empty-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--green-900);
+    }
+
+    .empty-sub {
+      margin: .35rem 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: .92rem;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--bottom-nav-h) + 18px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .8rem .95rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .96);
+      border: 1px solid rgba(25, 45, 36, .08);
+      box-shadow: 0 18px 30px rgba(14, 28, 20, .12);
+      color: var(--green-900);
+      min-width: min(92vw, 420px);
+      justify-content: flex-start;
+      transition: opacity .22s ease, transform .22s ease;
+    }
+
+    .toast.hide {
+      opacity: 0;
+      transform: translateX(-50%) translateY(8px)
+    }
+
+    .toast.gone {
+      display: none
+    }
+
+    .toast-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: #fff;
+    }
+
+    .toast-icon.ok {
+      background: linear-gradient(180deg, #1a5c39, #124128)
+    }
+
+    .toast-icon.warn {
+      background: linear-gradient(180deg, #b08d3d, #907030)
+    }
+
+    .toast-icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .toast-msg {
+      font-weight: 700
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 12, 8, .52);
+      backdrop-filter: blur(8px);
+      z-index: 70;
+      display: grid;
+      place-items: end center;
+      padding: 1rem;
+    }
+
+    .overlay.hidden {
+      display: none
+    }
+
+    .modal {
+      width: min(100%, 560px);
+      background: rgba(255, 250, 244, .98);
+      border: 1px solid rgba(255, 255, 255, .26);
+      border-radius: 28px;
+      box-shadow: 0 28px 60px rgba(6, 17, 11, .35);
+      overflow: hidden;
+    }
+
+    .modal-handle {
+      width: 72px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(25, 45, 36, .16);
+      margin: .7rem auto 0;
+    }
+
+    .modal-head {
+      padding: 1rem 1rem .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid rgba(25, 45, 36, .08);
+    }
+
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--green-900);
+    }
+
+    .modal-title-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(19, 65, 40, .10), rgba(176, 141, 61, .10));
+      color: var(--green-800);
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .modal-title-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .modal-close {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid rgba(25, 45, 36, .08);
+      background: #fff;
+      color: var(--green-850);
+      display: grid;
+      place-items: center;
+    }
+
+    .modal-close svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .modal-body {
+      padding: 1rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .inp-grp {
+      display: grid;
+      gap: .5rem;
+    }
+
+    .inp-lbl {
+      font-size: .9rem;
+      font-weight: 800;
+      color: var(--green-900);
+    }
+
+    .inp-required {
+      color: var(--gold);
+      margin-right: .25rem
+    }
+
+    .sel-wrap {
+      position: relative;
+    }
+
+    .sel-wrap select {
+      width: 100%;
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid rgba(25, 45, 36, .10);
+      background: #fff;
+      color: var(--text);
+      padding: 0 1rem 0 3rem;
+      outline: none;
+      appearance: none;
+      transition: border-color var(--trans), box-shadow var(--trans);
+    }
+
+    .sel-wrap select:focus {
+      border-color: rgba(176, 141, 61, .35);
+      box-shadow: 0 0 0 4px rgba(176, 141, 61, .10);
+    }
+
+    .sel-arrow {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #708076;
+      pointer-events: none;
+    }
+
+    .sel-arrow svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .inp-error-msg {
+      display: none;
+      color: #9e5252;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .has-error .inp-error-msg {
+      display: block
+    }
+
+    .error select,
+    .error {
+      border-color: #c78c8c !important;
+      box-shadow: 0 0 0 4px rgba(183, 92, 92, .10) !important;
+    }
+
+    .modal-foot {
+      padding: 1rem;
+      border-top: 1px solid rgba(25, 45, 36, .08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .58), rgba(247, 243, 236, .84));
+    }
+
+    .save-btn {
+      width: 100%;
+      min-height: 52px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #184b31, #102f21);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 16px 28px rgba(19, 65, 40, .22);
+      transition: transform var(--trans), box-shadow var(--trans), filter var(--trans);
+    }
+
+    .save-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 32px rgba(19, 65, 40, .26)
+    }
+
+    .save-btn:focus-visible {
+      outline: 3px solid rgba(176, 141, 61, .28);
+      outline-offset: 2px
+    }
+
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      padding: .55rem .7rem calc(.55rem + env(safe-area-inset-bottom, 0px));
+      background: rgba(247, 242, 233, .86);
+      border-top: 1px solid rgba(25, 45, 36, .08);
+      backdrop-filter: blur(18px) saturate(180%);
+    }
+
+    .bottom-nav-inner {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .45rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .bottom-item {
+      min-height: 58px;
+      border: none;
+      border-radius: 18px;
+      background: transparent;
+      color: #718076;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .22rem;
+      font-weight: 700;
+      font-size: .77rem;
+      transition: background var(--trans), color var(--trans), transform var(--trans), box-shadow var(--trans);
+      position: relative;
+    }
+
+    .bottom-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .bottom-item.active {
+      color: var(--green-850);
+      background: rgba(255, 255, 255, .88);
+      box-shadow: 0 10px 16px rgba(14, 28, 20, .08);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1120px) {
+      .hero {
+        grid-template-columns: 300px minmax(0, 1fr);
+      }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .wrap {
+        padding-inline: 1rem
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-left {
+        padding: 1.5rem 1.25rem;
+      }
+
+      .hero-right {
+        padding: 1.25rem;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 740px) {
+      :root {
+        --nav-h: 68px;
+        --bottom-nav-h: 76px
+      }
+
+      .topbar-inner {
+        padding-inline: .9rem
+      }
+
+      .brand-sub {
+        display: none
+      }
+
+      .top-actions .icon-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+      }
+
+      .section-title {
+        font-size: 1.85rem
+      }
+
+      .hero-copy h2 {
+        font-size: 1.9rem
+      }
+
+      .hero-copy p {
+        font-size: .92rem
+      }
+
+      .location-card {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .edit-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .history-shell {
+        padding: .9rem
+      }
+
+      .history-card {
+        padding: .92rem
+      }
+
+      .card-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .action-chip {
+        align-self: flex-start
+      }
+
+      .card-foot {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .secondary-btn {
+        justify-content: center;
+        width: 100%
+      }
+
+      .bottom-nav {
+        display: block
+      }
+    }
+
+    @media (max-width: 480px) {
+      .wrap {
+        padding-top: 1rem
+      }
+
+      .hero-left {
+        padding: 1.25rem 1rem
+      }
+
+      .hero-right {
+        padding: 1rem
+      }
+
+      .avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 20px
+      }
+
+      .hero-copy {
+        margin-top: 1.3rem
+      }
+
+      .hero-copy p {
+        line-height: 1.85
+      }
+
+      .pill-btn,
+      .filter-btn,
+      .secondary-btn {
+        min-height: 44px
+      }
+
+      .toast {
+        min-width: calc(100vw - 1rem)
+      }
+
+      .bottom-item {
+        font-size: .72rem
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <a href="#main-content" class="skip-link">انتقل إلى المحتوى الرئيسي</a>
 
-<a href="#main-content" class="skip-link">انتقل إلى المحتوى الرئيسي</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="على رفوف المساجد">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 18V8l7-4 7 4v10" />
+            <path d="M12 4v14" />
+            <path d="M8 9h8" />
+            <path d="M7 18h10" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <h1 class="brand-title">على رفوف المساجد</h1>
+          <p class="brand-sub">الملف الشخصي وسجل الكتب</p>
+        </span>
+      </a>
 
-<div id="toast" class="toast gone" role="alert" aria-live="polite">
-  <span class="toast-icon ok" id="toast-icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-  </span>
-  <span id="toast-msg">تم الحفظ بنجاح</span>
-</div>
-
-<div class="page">
-
-  <nav class="nav" role="navigation" aria-label="التنقل الرئيسي">
-    <div class="nav-inner">
-      <div class="nav-logo" aria-label="على رفوف المساجد">على <em>رفوف</em> المساجد</div>
-      <div class="nav-actions">
-        <button class="nav-btn" title="تصفح الكتب" aria-label="تصفح الكتب" onclick="alert('→ /browse')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <div class="top-actions" aria-label="إجراءات سريعة">
+        <button class="icon-btn" type="button" title="الإشعارات" aria-label="الإشعارات"
+          onclick="App.toast('لا توجد إشعارات جديدة', 'ok')">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M15 17H5a2 2 0 0 1-2-2v-1a4 4 0 0 1 3-3.87V9a6 6 0 1 1 12 0v1.13A4 4 0 0 1 21 14v1a2 2 0 0 1-2 2h-1" />
+            <path d="M9 20a3 3 0 0 0 6 0" />
+          </svg>
         </button>
-        <button class="nav-btn" title="تسجيل الخروج" aria-label="تسجيل الخروج" onclick="alert('→ تسجيل الخروج')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <button class="icon-btn" type="button" title="تحديث الموقع" aria-label="تحديث الموقع" onclick="App.openModal()">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 12a9 9 0 0 1 15.5-6.36L21 8" />
+            <path d="M21 3v5h-5" />
+            <path d="M21 12a9 9 0 0 1-15.5 6.36L3 16" />
+            <path d="M8 19H3v5" />
+          </svg>
         </button>
       </div>
+    </div>
+  </header>
+
+  <div class="page">
+    <main class="wrap" id="main-content">
+      <section class="hero" aria-label="معلومات الملف الشخصي">
+        <div class="hero-left">
+          <div>
+            <div class="brand-stack">
+              <div class="avatar" id="avatar" aria-hidden="true">أ</div>
+              <div>
+                <div class="badge badge-role" id="role-badge" aria-label="الدور: متطوع">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  متطوع
+                </div>
+                <div class="badge badge-ghost" style="margin-top:.55rem">عضو منذ يناير ٢٠٢٥</div>
+              </div>
+            </div>
+
+            <div class="hero-copy">
+              <h2 id="profile-name">أحمد محمد العمري</h2>
+              <p id="profile-bio">
+                صفحة شخصية نظيفة وسريعة تعرض بياناتك الأساسية وسجل الكتب التي بحثت عنها أو شاهدت مسجدها وموقعها.
+              </p>
+            </div>
+            <span class="badge badge-ghost" id="profile-email">ahmed@example.com</span>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="section-top">
+            <div>
+              <h2 class="section-title">أهلاً بعودتك</h2>
+              <p class="section-sub">
+                هنا يمكنك مراجعة موقعك الحالي، الوصول السريع إلى إعداداتك، والاطلاع على سجل الكتب التي تفاعلت معها داخل
+                المنصة.
+              </p>
+            </div>
+
+            <div class="profile-actions">
+              <button class="pill-btn" type="button" onclick="App.openModal()">
+                <svg viewBox="0 0 24 24">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                تعديل الموقع
+              </button>
+              <button class="pill-btn" type="button" onclick="App.toast('تم حفظ الإعدادات الافتراضية', 'ok')">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 2v4" />
+                  <path d="M12 18v4" />
+                  <path d="M4.93 4.93l2.83 2.83" />
+                  <path d="M16.24 16.24l2.83 2.83" />
+                  <path d="M2 12h4" />
+                  <path d="M18 12h4" />
+                  <path d="M4.93 19.07l2.83-2.83" />
+                  <path d="M16.24 7.76l2.83-2.83" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                إعدادات سريعة
+              </button>
+            </div>
+          </div>
+
+          <div class="grid-3" aria-label="إحصاءات سريعة">
+            <article class="stat-card">
+              <p class="stat-label">كتب في السجل</p>
+              <p class="stat-value" id="stat-total">0</p>
+              <p class="stat-note">كل العناصر المتاحة في هذا العرض</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-label">تمت المشاهدة</p>
+              <p class="stat-value" id="stat-viewed">0</p>
+              <p class="stat-note">كتب شاهدت مسجدها أو تفاصيلها</p>
+            </article>
+            <article class="stat-card">
+              <p class="stat-label">عمليات البحث</p>
+              <p class="stat-value" id="stat-searched">0</p>
+              <p class="stat-note">سجلات البحث السابقة داخل المنصة</p>
+            </article>
+          </div>
+
+          <div class="profile-grid">
+            <aside class="profile-side">
+              <section class="info-card" aria-label="بيانات الحساب">
+                <div class="info-row">
+                  <div>
+                    <div class="info-lbl">اسم العرض</div>
+                    <div class="info-val" id="display-name">أحمد محمد العمري</div>
+                  </div>
+                  <div class="badge badge-ghost"
+                    style="color:var(--green-850); background:rgba(19,65,40,.06); border-color:rgba(19,65,40,.08)">نشط
+                  </div>
+                </div>
+              </section>
+
+              <section class="location-card" aria-label="الموقع الحالي">
+                <div class="loc-left">
+                  <div class="loc-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="loc-lbl">الموقع الحالي</div>
+                    <div class="loc-val" id="current-location">القاهرة — مدينة نصر</div>
+                  </div>
+                </div>
+                <button class="edit-btn" type="button" onclick="App.openModal()">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  تغيير
+                </button>
+              </section>
+            </aside>
+
+            <section class="history-shell" aria-label="سجل الكتب">
+              <div class="history-head">
+                <div>
+                  <h3>سجل الكتب</h3>
+                  <p>يعرض آخر الكتب التي بحثت عنها أو شاهدت المسجد المرتبط بها وموقعها.</p>
+                </div>
+                <div class="history-count" id="history-count" aria-live="polite">٠ سجل</div>
+              </div>
+
+              <div class="controls">
+                <label class="search" for="history-search">
+                  <span class="sr-only">ابحث في سجل الكتب</span>
+                  <input id="history-search" type="search" inputmode="search"
+                    placeholder="ابحث عن كتاب، مسجد، مدينة، أو نوع..." autocomplete="off" />
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-3.5-3.5" />
+                  </svg>
+                </label>
+
+                <div class="filters" role="tablist" aria-label="تصفية سجل الكتب">
+                  <button class="filter-btn on" type="button" data-filter="all" aria-pressed="true">الكل <span
+                      class="filter-badge" id="count-all">0</span></button>
+                  <button class="filter-btn" type="button" data-filter="viewed" aria-pressed="false">المشاهدة <span
+                      class="filter-badge" id="count-viewed">0</span></button>
+                  <button class="filter-btn" type="button" data-filter="searched" aria-pressed="false">البحث <span
+                      class="filter-badge" id="count-searched">0</span></button>
+                </div>
+              </div>
+
+              <div class="history-list" id="history-list" role="list" aria-label="قائمة سجل الكتب"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="التنقل السفلي">
+    <div class="bottom-nav-inner">
+      <a class="bottom-item" href="/" aria-label="الرئيسية">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 11.5 12 4l9 7.5" />
+          <path d="M5 10.5V20h14v-9.5" />
+          <path d="M9 20v-6h6v6" />
+        </svg>
+        <span>الرئيسية</span>
+      </a>
+      <a class="bottom-item" href="/books" aria-label="الكتب">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z" />
+          <path d="M7 3v18" />
+          <path d="M9 7h7" />
+          <path d="M9 11h7" />
+        </svg>
+        <span>الكتب</span>
+      </a>
+      <a class="bottom-item" href="/history" aria-label="السجل">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h10" />
+          <path d="M19 17v-5" />
+          <path d="M17 17l2 2 3-3" />
+        </svg>
+        <span>السجل</span>
+      </a>
+      <a class="bottom-item active" href="/profile" aria-current="page" aria-label="الملف">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span>ملفي</span>
+      </a>
     </div>
   </nav>
 
-  <main class="content" id="main-content">
-    <div class="wrap">
+  <div id="toast" class="toast gone" role="status" aria-live="polite">
+    <span class="toast-icon ok" id="toast-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </span>
+    <span id="toast-msg" class="toast-msg">تم الحفظ بنجاح</span>
+  </div>
 
-      <div class="demo-bar a1" role="region" aria-label="وضع العرض التوضيحي">
-        <span class="demo-label">
-          <span class="demo-dot" aria-hidden="true"></span>
-          وضع العرض التوضيحي
-        </span>
-        <div class="role-toggle" role="group" aria-label="اختر الدور">
-          <button class="role-opt on" id="btn-vol" onclick="App.setRole('volunteer')" aria-pressed="true">متطوع</button>
-          <button class="role-opt" id="btn-vis" onclick="App.setRole('visitor')" aria-pressed="false">زائر</button>
-        </div>
-      </div>
-
-      <article class="hero a2" aria-label="معلومات الملف الشخصي">
-        <div class="hero-border-ring" aria-hidden="true"></div>
-        <div class="avatar" id="hero-avatar" aria-hidden="true">أ</div>
-        <div class="hero-info">
-          <h1 class="hero-name" id="hero-name">أحمد محمد العمري</h1>
-          <p class="hero-email">ahmed@example.com</p>
-          <div class="hero-badges">
-            <span class="role-badge role-volunteer" id="role-tag" aria-label="الدور: متطوع">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              متطوع
-            </span>
-            <span class="joined-text">• انضم يناير ٢٠٢٥</span>
+  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+    aria-hidden="true" onclick="App.handleOverlayClick(event)">
+    <div class="modal" id="modal">
+      <div class="modal-handle" aria-hidden="true"></div>
+      <div class="modal-head">
+        <div class="modal-title" id="modal-title">
+          <div class="modal-title-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
           </div>
+          تعديل الموقع
         </div>
-      </article>
-
-      <section class="loc-card a3" aria-label="موقعك الحالي">
-        <div class="loc-left">
-          <div class="loc-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          </div>
-          <div>
-            <div class="loc-lbl">موقعك الحالي</div>
-            <div class="loc-val" id="loc-display">القاهرة — مدينة نصر</div>
-          </div>
-        </div>
-        <button class="btn-loc-edit" onclick="App.openModal()" aria-label="تعديل الموقع">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          تعديل
+        <button class="modal-close" type="button" onclick="App.closeModal()" aria-label="إغلاق">
+          <svg viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
-      </section>
-
-      <div class="stats-wrap">
-        <section class="stats-row a4" aria-label="إحصائيات الطلبات">
-          <div class="s-all">
-            <div class="stat-card active" role="button" tabindex="0" onclick="App.setTab('all')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('all')}" aria-label="عرض كل الطلبات">
-              <div class="stat-inner">
-                <div class="stat-num" id="stat-all">٥</div>
-                <div class="stat-lbl">الكل</div>
-              </div>
-            </div>
-          </div>
-          <div class="s-ok">
-            <div class="stat-card" role="button" tabindex="0" onclick="App.setTab('approved')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('approved')}" aria-label="عرض الطلبات المقبولة">
-              <div class="stat-inner">
-                <div class="stat-num" id="stat-ok">٣</div>
-                <div class="stat-lbl">مقبول</div>
-              </div>
-            </div>
-          </div>
-          <div class="s-pend">
-            <div class="stat-card" role="button" tabindex="0" onclick="App.setTab('pending')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('pending')}" aria-label="عرض الطلبات قيد المراجعة">
-              <div class="stat-inner">
-                <div class="stat-num" id="stat-pend">١</div>
-                <div class="stat-lbl">قيد المراجعة</div>
-              </div>
-            </div>
-          </div>
-          <div class="s-rej">
-            <div class="stat-card" role="button" tabindex="0" onclick="App.setTab('rejected')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.setTab('rejected')}" aria-label="عرض الطلبات المرفوضة">
-              <div class="stat-inner">
-                <div class="stat-num" id="stat-rej">١</div>
-                <div class="stat-lbl">مرفوض</div>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
 
-      <section class="section-card a5" aria-label="طلباتي">
-        <div class="sec-head">
-          <h2 class="sec-title">طلباتي</h2>
-          <div class="sec-count" id="shown-count" aria-live="polite" aria-atomic="true">٥ طلبات</div>
-        </div>
-
-        <div class="tabs-wrap" role="tablist" aria-label="تصفية الطلبات">
-          <div class="tabs">
-            <button class="tab on" id="tab-all" role="tab" aria-selected="true" aria-controls="sub-list" onclick="App.setTab('all')">
-              الكل <span class="tc" id="tc-all" aria-label="5 طلبات">٥</span>
-            </button>
-            <button class="tab" id="tab-ok" role="tab" aria-selected="false" aria-controls="sub-list" onclick="App.setTab('approved')">
-              مقبول <span class="tc" id="tc-ok" aria-label="3 طلبات مقبولة">٣</span>
-            </button>
-            <button class="tab" id="tab-pend" role="tab" aria-selected="false" aria-controls="sub-list" onclick="App.setTab('pending')">
-              قيد المراجعة <span class="tc" id="tc-pend" aria-label="1 طلب">١</span>
-            </button>
-            <button class="tab" id="tab-rej" role="tab" aria-selected="false" aria-controls="sub-list" onclick="App.setTab('rejected')">
-              مرفوض <span class="tc" id="tc-rej" aria-label="1 طلب مرفوض">١</span>
-            </button>
+      <div class="modal-body">
+        <div class="inp-grp" id="grp-gov">
+          <label class="inp-lbl" for="sel-gov">المحافظة <span class="inp-required" aria-hidden="true">*</span></label>
+          <div class="sel-wrap" id="wrap-gov">
+            <select id="sel-gov" onchange="App.onGovChange()" aria-required="true" aria-describedby="err-gov">
+              <option value="">اختر المحافظة</option>
+            </select>
+            <span class="sel-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </span>
           </div>
+          <span class="inp-error-msg" id="err-gov" role="alert">يرجى اختيار المحافظة</span>
         </div>
 
-        <div class="sub-list" id="sub-list" role="tabpanel" aria-labelledby="tab-all" tabindex="0" aria-label="قائمة الطلبات"></div>
-      </section>
-
-    </div>
-  </main>
-</div>
-
-<div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="App.handleOverlayClick(event)">
-  <div class="modal" id="modal">
-    <div class="modal-handle" aria-hidden="true"></div>
-    <div class="modal-head">
-      <div class="modal-title" id="modal-title">
-        <div class="modal-title-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div class="inp-grp" id="grp-city">
+          <label class="inp-lbl" for="sel-city">المدينة <span class="inp-required" aria-hidden="true">*</span></label>
+          <div class="sel-wrap" id="wrap-city">
+            <select id="sel-city" aria-required="true" aria-describedby="err-city">
+              <option value="">اختر المدينة</option>
+            </select>
+            <span class="sel-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </span>
+          </div>
+          <span class="inp-error-msg" id="err-city" role="alert">يرجى اختيار المدينة</span>
         </div>
-        تغيير الموقع
-      </div>
-      <button class="modal-close" onclick="App.closeModal()" aria-label="إغلاق">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <div class="inp-grp" id="grp-gov">
-        <label class="inp-lbl" for="sel-gov">
-          المحافظة
-          <span class="inp-required" aria-hidden="true">*</span>
-        </label>
-        <div class="sel-wrap" id="wrap-gov">
-          <select id="sel-gov" onchange="App.onGovChange()" aria-required="true" aria-describedby="err-gov">
-            <option value="">اختر المحافظة</option>
-          </select>
-          <span class="sel-arrow" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </span>
-        </div>
-        <span class="inp-error-msg" id="err-gov" role="alert">يرجى اختيار المحافظة</span>
       </div>
 
-      <div class="inp-grp" id="grp-city">
-        <label class="inp-lbl" for="sel-city">
-          المدينة
-          <span class="inp-required" aria-hidden="true">*</span>
-        </label>
-        <div class="sel-wrap" id="wrap-city">
-          <select id="sel-city" aria-required="true" aria-describedby="err-city">
-            <option value="">اختر المدينة</option>
-          </select>
-          <span class="sel-arrow" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </span>
-        </div>
-        <span class="inp-error-msg" id="err-city" role="alert">يرجى اختيار المدينة</span>
+      <div class="modal-foot">
+        <button class="save-btn" type="button" onclick="App.saveLocation()">حفظ الموقع</button>
       </div>
-    </div>
-
-    <div class="modal-foot">
-      <button class="btn-save" onclick="App.saveLocation()">حفظ الموقع</button>
     </div>
   </div>
-</div>
 
-<script>
-'use strict';
+  <script>
+    'use strict';
 
-/* ── DATA ── */
-const DATA = {
-  govs: ["القاهرة","الجيزة","الإسكندرية","أسيوط","المنيا","الأقصر","أسوان","الفيوم","قنا","سوهاج","بني سويف","الإسماعيلية","بورسعيد","السويس","دمياط","الدقهلية","الشرقية","الغربية","المنوفية","القليوبية","البحيرة"],
-
-  cities: {
-    "القاهرة":   ["مدينة نصر","المعادي","الزمالك","مصر الجديدة","عين شمس","المطرية","حلوان","شبرا","الشروق","التجمع الخامس","المقطم","الهليوبوليس"],
-    "الجيزة":    ["الدقي","المهندسين","الهرم","إمبابة","أكتوبر","الشيخ زايد","البدرشين"],
-    "الإسكندرية":["سيدي بشر","العجمي","المنتزه","سموحة","الرمل","العصافرة"],
-    "أسيوط":     ["مدينة أسيوط","ديروط","أبوتيج","منفلوط","القوصية"],
-    "المنيا":    ["مدينة المنيا","ملوي","دير مواس","العدوة","مغاغة","أبو قرقاص","سمالوط"],
-    "الأقصر":    ["مدينة الأقصر","الأقصر الغربية","إسنا","الأرمنت"],
-    "أسوان":     ["مدينة أسوان","كوم أمبو","إدفو","نصر النوبة"],
-    "الفيوم":    ["مدينة الفيوم","سنورس","يوسف الصديق","إطسا"],
-    "الغربية":   ["طنطا","المحلة الكبرى","زفتى","سمنود"],
-    "المنوفية":  ["شبين الكوم","منوف","الشهداء","السادات"],
-    "القليوبية": ["بنها","شبرا الخيمة","قليوب","العاشر من رمضان"],
-    "البحيرة":   ["دمنهور","كفر الدوار","رشيد","إيتاي البارود"],
-    "الدقهلية":  ["المنصورة","طلخا","ميت غمر","بلقاس"],
-    "الشرقية":   ["الزقازيق","العاشر من رمضان","بلبيس","أبو حماد"],
-    "الإسماعيلية":["مدينة الإسماعيلية","فايد","القنطرة"],
-    "بورسعيد":   ["بورسعيد","بور فؤاد"],
-    "السويس":    ["السويس","عتاقة","الجناين"],
-    "دمياط":     ["مدينة دمياط","رأس البر","الزرقا"],
-    "قنا":       ["مدينة قنا","نجع حمادي","دشنا","قوص"],
-    "سوهاج":     ["مدينة سوهاج","أخميم","طهطا","جرجا"],
-    "بني سويف":  ["مدينة بني سويف","الفشن","ببا","نزلة"],
-  },
-
-  submissions: [
-    { id:1, title:"رياض الصالحين",    author:"الإمام النووي",         edition:"الطبعة الثالثة", publisher:"دار ابن كثير",  mosque:"مسجد النور",       city:"مدينة نصر", gov:"القاهرة", cat:"حديث",   date:"٣ مارس ٢٠٢٥",    status:"approved" },
-    { id:2, title:"صحيح البخاري",      author:"الإمام البخاري",        edition:null,             publisher:null,           mosque:null,               city:"المعادي",   gov:"القاهرة", cat:"حديث",   date:"١٥ فبراير ٢٠٢٥", status:"pending"  },
-    { id:3, title:"تفسير ابن كثير",    author:"ابن كثير الدمشقي",     edition:"الطبعة الأولى",  publisher:"مكتبة العلم",  mosque:"مسجد السلام",      city:"القاهرة",   gov:"القاهرة", cat:"تفسير",  date:"٢ يناير ٢٠٢٥",   status:"rejected", note:"الكتاب مسجل بالفعل في هذا المسجد بنفس الطبعة. يرجى التحقق من قائمة الكتب المتاحة قبل إعادة التسجيل." },
-    { id:4, title:"فقه السنة",         author:"السيد سابق",            edition:"الطبعة الثانية", publisher:null,           mosque:"مسجد العزيز بالله",city:"مدينة نصر", gov:"القاهرة", cat:"فقه",    date:"٢٠ ديسمبر ٢٠٢٤", status:"approved" },
-    { id:5, title:"الأذكار النووية",   author:"الإمام النووي",         edition:null,             publisher:"دار الفكر",    mosque:"مسجد الرحمن",      city:"مدينة نصر", gov:"القاهرة", cat:"تزكية",  date:"٥ نوفمبر ٢٠٢٤",  status:"approved" },
-  ]
-};
-
-/* ── STATE ── */
-const state = {
-  role: 'volunteer',
-  tab:  'all',
-  gov:  'القاهرة',
-  city: 'مدينة نصر',
-  openNotes: new Set(),
-};
-
-/* ── HELPERS ── */
-const toAr = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-const el   = id => document.getElementById(id);
-const filtered = () => state.tab === 'all' ? DATA.submissions : DATA.submissions.filter(s => s.status === state.tab);
-
-function animateNumber(el, targetStr) {
-  const toWestern = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-  const target = parseInt(toWestern(targetStr), 10);
-  if (isNaN(target) || target > 99) { el.textContent = targetStr; return; }
-
-  let start = 0;
-  const duration = 400;
-  const startTime = performance.now();
-
-  function step(now) {
-    const progress = Math.min((now - startTime) / duration, 1);
-    const eased    = 1 - Math.pow(1 - progress, 3);
-    const current  = Math.round(eased * target);
-    el.textContent = toAr(current);
-    if (progress < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-function observeCards() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.animationPlayState = 'running';
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  el('sub-list').querySelectorAll('.sub-card').forEach((card, i) => {
-    card.style.animationDelay      = `${i * 0.045}s`;
-    card.style.animationPlayState  = 'paused';
-    observer.observe(card);
-  });
-}
-
-function showSkeletons(count = 3) {
-  el('sub-list').innerHTML = Array.from({ length: count }, () => `
-    <div class="skeleton-card" aria-hidden="true">
-      <div class="skeleton skeleton-line medium"></div>
-      <div class="skeleton skeleton-line short"></div>
-      <div class="skeleton skeleton-line full" style="height:10px"></div>
-    </div>
-  `).join('');
-}
-
-/* ── RENDER HELPERS ── */
-function mosqueDisplay(s) {
-  return s.mosque
-    ? s.mosque
-    : `<span class="mosque-unnamed">مسجد — ${s.city}</span>`;
-}
-
-function statusBadge(s) {
-  const map = {
-    approved: `<span class="badge badge-ok">مقبول</span>`,
-    pending:  `<span class="badge badge-pend"><span class="pdot"></span>قيد المراجعة</span>`,
-    rejected: `<span class="badge badge-rej">مرفوض</span>`,
-  };
-  return map[s.status] || '';
-}
-
-function editBtn(s) {
-  if (state.role === 'visitor') return '';
-  if (s.status === 'approved') {
-    return `<button class="btn-edit" onclick="alert('→ /submit/edit/${s.id}')" aria-label="تعديل ${s.title}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      تعديل
-    </button>`;
-  }
-  if (s.status === 'pending') {
-    return `<div class="tip-wrap tip-trigger">
-      <button class="btn-edit dim" disabled aria-disabled="true" aria-label="التعديل غير متاح — في انتظار المراجعة">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        تعديل
-      </button>
-      <div class="tooltip" role="tooltip">في انتظار المراجعة</div>
-    </div>`;
-  }
-  return '';
-}
-
-function rejNote(s) {
-  if (s.status !== 'rejected' || !s.note) return '';
-  const isOpen = state.openNotes.has(s.id);
-  return `<div class="rej-wrap">
-    <button class="rej-toggle" onclick="App.toggleNote(${s.id})" aria-expanded="${isOpen}" aria-controls="note-${s.id}">
-      <svg class="rej-chevron ${isOpen ? 'open' : ''}" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-      <span class="rej-toggle-text">${isOpen ? 'إخفاء' : 'عرض'} سبب الرفض</span>
-    </button>
-    <div class="rej-note ${isOpen ? 'open' : ''}" id="note-${s.id}" aria-hidden="${!isOpen}">${s.note}</div>
-  </div>`;
-}
-
-/* ── RENDER CARDS ── */
-function renderCards() {
-  const list  = el('sub-list');
-  const items = filtered();
-  const count = items.length;
-
-  el('shown-count').textContent = toAr(count) + (count === 1 ? ' طلب' : ' طلبات');
-
-  if (count === 0) {
-    list.innerHTML = `<div class="empty" role="status">
-      <div class="empty-ico" aria-hidden="true">📚</div>
-      <div class="empty-txt">لا توجد طلبات في هذا القسم</div>
-      <div class="empty-sub">جرب تصفية مختلفة</div>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = items.map((s, i) => `
-    <article class="sub-card" data-status="${s.status}" data-id="${s.id}" style="animation-delay:${i * 0.045}s" aria-label="طلب: ${s.title}">
-      <div class="sub-top">
-        <h3 class="sub-title">${s.title}</h3>
-        ${statusBadge(s)}
-      </div>
-      <div class="sub-meta">
-        <span class="sub-author">${s.author}</span>
-        <span class="mdot" aria-hidden="true"></span>
-        <span class="cat-chip">${s.cat}</span>
-      </div>
-      <div class="sub-mosque" aria-label="المسجد">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>${mosqueDisplay(s)} · ${s.city}</span>
-      </div>
-      ${s.edition ? `<div class="edition-tag" aria-label="الطبعة: ${s.edition}">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        ${s.edition}
-      </div>` : ''}
-      ${rejNote(s)}
-      <div class="sub-foot">
-        <div class="sub-date" aria-label="تاريخ الطلب: ${s.date}">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          ${s.date}
-        </div>
-        ${editBtn(s)}
-      </div>
-    </article>
-  `).join('');
-
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    observeCards();
-  }
-}
-
-/* ── TAB SYNC ── */
-function syncTabs(activeTab) {
-  const tabMap = { all: 'all', approved: 'ok', pending: 'pend', rejected: 'rej' };
-  ['all', 'ok', 'pend', 'rej'].forEach(k => {
-    const btn = el('tab-' + k);
-    if (!btn) return;
-    const isActive = tabMap[activeTab] === k;
-    btn.classList.toggle('on', isActive);
-    btn.setAttribute('aria-selected', isActive);
-  });
-  
-  const activeTabId = 'tab-' + (tabMap[activeTab] || 'all');
-  el('sub-list').setAttribute('aria-labelledby', activeTabId);
-}
-
-/* ── STATS SYNC ── */
-function syncStats(activeTab) {
-  const statMap = { all: 'all', approved: 'ok', pending: 'pend', rejected: 'rej' };
-  document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
-  const key = statMap[activeTab] || 'all';
-  const parent = document.querySelector('.s-' + key + ' .stat-card');
-  if (parent) parent.classList.add('active');
-}
-
-/* ── APP MODULE ── */
-const App = {
-
-  setTab(t) {
-    state.tab = t;
-    syncTabs(t);
-    syncStats(t);
-    showSkeletons(filtered().length || 1);
-    setTimeout(() => {
-      renderCards();
-    }, 300);
-  },
-
-  setRole(r) {
-    state.role = r;
-    const isVol = r === 'volunteer';
-    el('btn-vol').classList.toggle('on', isVol);
-    el('btn-vis').classList.toggle('on', !isVol);
-    el('btn-vol').setAttribute('aria-pressed', isVol);
-    el('btn-vis').setAttribute('aria-pressed', !isVol);
-
-    const tag = el('role-tag');
-    if (isVol) {
-      tag.className = 'role-badge role-volunteer';
-      tag.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>متطوع`;
-    } else {
-      tag.className = 'role-badge role-visitor';
-      tag.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>زائر`;
-    }
-    renderCards();
-  },
-
-  toggleNote(id) {
-    if (state.openNotes.has(id)) {
-      state.openNotes.delete(id);
-    } else {
-      state.openNotes.add(id);
-    }
-
-    const isOpen  = state.openNotes.has(id);
-    const card    = el('sub-list').querySelector(`[data-id="${id}"]`);
-    if (!card) return;
-
-    const toggle  = card.querySelector('.rej-toggle');
-    const note    = card.querySelector('.rej-note');
-    const chevron = card.querySelector('.rej-chevron');
-    const txt     = card.querySelector('.rej-toggle-text');
-
-    if (!toggle || !note) return;
-
-    toggle.setAttribute('aria-expanded', isOpen);
-    note.setAttribute('aria-hidden', !isOpen);
-    note.classList.toggle('open', isOpen);
-    chevron.classList.toggle('open', isOpen);
-    txt.textContent = isOpen ? 'إخفاء سبب الرفض' : 'عرض سبب الرفض';
-  },
-
-  /* ── MODAL ── */
-  openModal() {
-    const overlay = el('overlay');
-    overlay.classList.remove('hidden');
-    overlay.removeAttribute('aria-hidden');
-
-    const gov = el('sel-gov');
-    gov.innerHTML = '<option value="">اختر المحافظة</option>' +
-      DATA.govs.map(g => `<option value="${g}"${g === state.gov ? ' selected' : ''}>${g}</option>`).join('');
-    this._populateCities(state.gov, state.city);
-
-    // Focus first interactive element
-    setTimeout(() => el('sel-gov').focus(), 80);
-    document.addEventListener('keydown', this._trapFocus);
-  },
-
-  closeModal() {
-    const overlay = el('overlay');
-    overlay.classList.add('hidden');
-    overlay.setAttribute('aria-hidden', 'true');
-
-    // Clear validation
-    ['grp-gov', 'grp-city'].forEach(id => el(id)?.classList.remove('has-error'));
-    ['wrap-gov', 'wrap-city'].forEach(id => el(id)?.classList.remove('error'));
-
-    document.removeEventListener('keydown', this._trapFocus);
-  },
-
-  handleOverlayClick(e) {
-    if (e.target === el('overlay')) this.closeModal();
-  },
-
-  _trapFocus(e) {
-    if (e.key === 'Escape') { App.closeModal(); return; }
-    if (e.key !== 'Tab') return;
-
-    const modal     = el('modal');
-    const focusable = [...modal.querySelectorAll(
-      'button:not([disabled]), select, [tabindex]:not([tabindex="-1"])'
-    )].filter(el => !el.closest('[aria-hidden="true"]'));
-
-    if (focusable.length === 0) return;
-
-    const first = focusable[0];
-    const last  = focusable[focusable.length - 1];
-
-    if (e.shiftKey) {
-      if (document.activeElement === first) {
-        e.preventDefault(); last.focus();
-      }
-    } else {
-      if (document.activeElement === last) {
-        e.preventDefault(); first.focus();
-      }
-    }
-  },
-
-  onGovChange() {
-    const g = el('sel-gov').value;
-    this._populateCities(g, '');
-    el('grp-gov').classList.remove('has-error');
-    el('wrap-gov').classList.remove('error');
-  },
-
-  _populateCities(gov, selectedCity) {
-    const sel    = el('sel-city');
-    const cities = DATA.cities[gov] || [];
-    sel.innerHTML = '<option value="">اختر المدينة</option>' +
-      cities.map(c => `<option value="${c}"${c === selectedCity ? ' selected' : ''}>${c}</option>`).join('');
-    sel.disabled = !gov;
-  },
-
-  saveLocation() {
-    const g = el('sel-gov').value;
-    const c = el('sel-city').value;
-    let valid = true;
-
-    if (!g) {
-      el('grp-gov').classList.add('has-error');
-      el('wrap-gov').classList.add('error');
-      valid = false;
-    } else {
-      el('grp-gov').classList.remove('has-error');
-      el('wrap-gov').classList.remove('error');
-    }
-    if (!c) {
-      el('grp-city').classList.add('has-error');
-      el('wrap-city').classList.add('error');
-      valid = false;
-    } else {
-      el('grp-city').classList.remove('has-error');
-      el('wrap-city').classList.remove('error');
-    }
-
-    if (!valid) {
-      this._showToast('يرجى اختيار المحافظة والمدينة', 'warn');
-      return;
-    }
-
-    state.gov  = g;
-    state.city = c;
-    el('loc-display').textContent = g + ' — ' + c;
-    this.closeModal();
-    this._showToast('تم تحديث موقعك بنجاح');
-  },
-
-  /* ── TOAST ── */
-  _toastTimer: null,
-  _showToast(msg, type = 'ok') {
-    const toast    = el('toast');
-    const icon     = el('toast-icon');
-    const msgEl    = el('toast-msg');
-
-    msgEl.textContent = msg;
-    icon.className    = `toast-icon ${type}`;
-    
-    const icons = {
-      ok:   `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`,
-      warn: `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    const DATA = {
+      profile: {
+        name: 'أحمد محمد العمري',
+        email: 'ahmed@example.com',
+        role: 'متطوع',
+        joined: 'يناير ٢٠٢٥',
+        bio: 'صفحة شخصية نظيفة وسريعة تعرض بياناتك الأساسية وسجل الكتب التي بحثت عنها أو شاهدت مسجدها وموقعها.',
+        gov: 'القاهرة',
+        city: 'مدينة نصر',
+      },
+      govs: [
+        'القاهرة', 'الجيزة', 'الإسكندرية', 'أسيوط', 'المنيا', 'الأقصر', 'أسوان', 'الفيوم', 'قنا', 'سوهاج', 'بني سويف',
+        'الإسماعيلية', 'بورسعيد', 'السويس', 'دمياط', 'الدقهلية', 'الشرقية', 'الغربية', 'المنوفية', 'القليوبية', 'البحيرة'
+      ],
+      cities: {
+        'القاهرة': ['مدينة نصر', 'المعادي', 'الزمالك', 'مصر الجديدة', 'عين شمس', 'المطرية', 'حلوان', 'شبرا', 'الشروق', 'التجمع الخامس', 'المقطم', 'الهليوبوليس'],
+        'الجيزة': ['الدقي', 'المهندسين', 'الهرم', 'إمبابة', 'أكتوبر', 'الشيخ زايد', 'البدرشين'],
+        'الإسكندرية': ['سيدي بشر', 'العجمي', 'المنتزه', 'سموحة', 'الرمل', 'العصافرة'],
+        'أسيوط': ['مدينة أسيوط', 'ديروط', 'أبوتيج', 'منفلوط', 'القوصية'],
+        'المنيا': ['مدينة المنيا', 'ملوي', 'دير مواس', 'العدوة', 'مغاغة', 'أبو قرقاص', 'سمالوط'],
+        'الأقصر': ['مدينة الأقصر', 'الأقصر الغربية', 'إسنا', 'الأرمنت'],
+        'أسوان': ['مدينة أسوان', 'كوم أمبو', 'إدفو', 'نصر النوبة'],
+        'الفيوم': ['مدينة الفيوم', 'سنورس', 'يوسف الصديق', 'إطسا'],
+        'الغربية': ['طنطا', 'المحلة الكبرى', 'زفتى', 'سمنود'],
+        'المنوفية': ['شبين الكوم', 'منوف', 'الشهداء', 'السادات'],
+        'القليوبية': ['بنها', 'شبرا الخيمة', 'قليوب', 'العاشر من رمضان'],
+        'البحيرة': ['دمنهور', 'كفر الدوار', 'رشيد', 'إيتاي البارود'],
+        'الدقهلية': ['المنصورة', 'طلخا', 'ميت غمر', 'بلقاس'],
+        'الشرقية': ['الزقازيق', 'العاشر من رمضان', 'بلبيس', 'أبو حماد'],
+        'الإسماعيلية': ['مدينة الإسماعيلية', 'فايد', 'القنطرة'],
+        'بورسعيد': ['بورسعيد', 'بور فؤاد'],
+        'السويس': ['السويس', 'عتاقة', 'الجناين'],
+        'دمياط': ['مدينة دمياط', 'رأس البر', 'الزرقا'],
+        'قنا': ['مدينة قنا', 'نجع حمادي', 'دشنا', 'قوص'],
+        'سوهاج': ['مدينة سوهاج', 'أخميم', 'طهطا', 'جرجا'],
+        'بني سويف': ['مدينة بني سويف', 'الفشن', 'ببا', 'نزلة']
+      },
+      history: [
+        { id: 1, title: 'رياض الصالحين', author: 'الإمام النووي', category: 'حديث', mosque: 'مسجد النور', city: 'مدينة نصر', gov: 'القاهرة', action: 'viewed', date: '٣ مارس ٢٠٢٥', time: '١١:٢٥ ص' },
+        { id: 2, title: 'صحيح البخاري', author: 'الإمام البخاري', category: 'حديث', mosque: 'مسجد الهدى', city: 'المعادي', gov: 'القاهرة', action: 'searched', date: '١٥ فبراير ٢٠٢٥', time: '٠٩:٤١ م' },
+        { id: 3, title: 'تفسير ابن كثير', author: 'ابن كثير الدمشقي', category: 'تفسير', mosque: 'مسجد السلام', city: 'القاهرة', gov: 'القاهرة', action: 'viewed', date: '٢ يناير ٢٠٢٥', time: '٠٨:١٢ ص' },
+        { id: 4, title: 'فقه السنة', author: 'السيد سابق', category: 'فقه', mosque: 'مسجد العزيز بالله', city: 'مدينة نصر', gov: 'القاهرة', action: 'searched', date: '٢٠ ديسمبر ٢٠٢٤', time: '٠٦:٠٧ م' },
+        { id: 5, title: 'الأذكار النووية', author: 'الإمام النووي', category: 'تزكية', mosque: 'مسجد الرحمن', city: 'مدينة نصر', gov: 'القاهرة', action: 'viewed', date: '٥ نوفمبر ٢٠٢٤', time: '٠٢:٣٣ م' },
+        { id: 6, title: 'الشمائل المحمدية', author: 'الإمام الترمذي', category: 'سيرة', mosque: 'مسجد الفتح', city: 'القاهرة', gov: 'القاهرة', action: 'searched', date: '٢٣ أكتوبر ٢٠٢٤', time: '١٠:١٥ ص' }
+      ]
     };
-    icon.innerHTML = icons[type] || icons.ok;
-    
-    icon.setAttribute('aria-label', type === 'warn' ? 'تحذير' : 'نجاح');
 
-    // Reset
-    toast.classList.remove('gone', 'hide');
-    toast.style.animation = 'none';
-    toast.offsetHeight; // force reflow
-    toast.style.animation = '';
+    const state = {
+      filter: 'all',
+      query: '',
+      gov: DATA.profile.gov,
+      city: DATA.profile.city,
+    };
 
-    clearTimeout(this._toastTimer);
-    this._toastTimer = setTimeout(() => {
-      toast.classList.add('hide');
-      setTimeout(() => toast.classList.add('gone'), 280);
-    }, 2800);
-  },
-};
+    const $ = (id) => document.getElementById(id);
 
-/* ── INIT ── */
-(function init() {
-  renderCards();
-  syncStats('all');
-  
-  // Animate stat numbers on load
-  animateNumber(el('stat-all'), '٥');
-  animateNumber(el('stat-ok'), '٣');
-  animateNumber(el('stat-pend'), '١');
-  animateNumber(el('stat-rej'), '١');
+    function toAr(input) {
+      const map = '٠١٢٣٤٥٦٧٨٩';
+      return String(input).replace(/\d/g, d => map[d]);
+    }
 
-  // Tabs scroll indicator
-  const tabsWrap = document.querySelector('.tabs-wrap');
-  if (tabsWrap) {
-    tabsWrap.addEventListener('scroll', () => {
-      const atEnd = tabsWrap.scrollLeft <= 8; // RTL
-      tabsWrap.classList.toggle('at-end', atEnd);
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function actionMeta(item) {
+      if (item.action === 'viewed') {
+        return {
+          label: 'تمت المشاهدة',
+          cls: 'chip-view',
+          icon: '<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>'
+        };
+      }
+      return {
+        label: 'تم البحث',
+        cls: 'chip-search',
+        icon: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
+      };
+    }
+
+    function renderCounts() {
+      const total = DATA.history.length;
+      const viewed = DATA.history.filter(i => i.action === 'viewed').length;
+      const searched = DATA.history.filter(i => i.action === 'searched').length;
+
+      $('stat-total').textContent = toAr(total);
+      $('stat-viewed').textContent = toAr(viewed);
+      $('stat-searched').textContent = toAr(searched);
+
+      $('count-all').textContent = toAr(total);
+      $('count-viewed').textContent = toAr(viewed);
+      $('count-searched').textContent = toAr(searched);
+    }
+
+    function getVisibleItems() {
+      const query = state.query.trim().toLowerCase();
+      return DATA.history.filter(item => {
+        const matchesFilter = state.filter === 'all' || item.action === state.filter;
+        if (!matchesFilter) return false;
+        if (!query) return true;
+
+        const haystack = [
+          item.title, item.author, item.category, item.mosque, item.city, item.gov, item.date, item.time, item.action
+        ].join(' ').toLowerCase();
+
+        return haystack.includes(query);
+      });
+    }
+
+    function renderHistory() {
+      const items = getVisibleItems();
+      const list = $('history-list');
+      $('history-count').textContent = toAr(items.length) + (items.length === 1 ? ' سجل' : ' سجل');
+
+      if (!items.length) {
+        list.innerHTML = `
+          <div class="empty" role="status">
+            <div class="empty-ico" aria-hidden="true">📚</div>
+            <p class="empty-title">لا توجد نتائج مطابقة</p>
+            <p class="empty-sub">جرّب البحث باسم كتاب مختلف أو غيّر عامل التصفية الحالي.</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = items.map(item => {
+        const meta = actionMeta(item);
+        const title = escapeHtml(item.title);
+        const author = escapeHtml(item.author);
+        const category = escapeHtml(item.category);
+        const mosque = escapeHtml(item.mosque);
+        const city = escapeHtml(item.city);
+        const gov = escapeHtml(item.gov);
+        const date = escapeHtml(item.date);
+        const time = escapeHtml(item.time);
+
+        return `
+          <article class="history-card" role="listitem" data-id="${item.id}">
+            <div class="card-top">
+              <h4 class="card-title">${title}</h4>
+              <span class="action-chip ${meta.cls}">${meta.icon}<span>${meta.label}</span></span>
+            </div>
+
+            <div class="card-meta">
+              <span class="meta-item">
+                <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M7 3v18"/><path d="M9 7h7"/><path d="M9 11h7"/></svg>
+                ${author}
+              </span>
+              <span class="meta-item">
+                <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+                ${category}
+              </span>
+              <span class="meta-item">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                ${mosque} — ${city}
+              </span>
+              <span class="meta-item">
+                <svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
+                ${gov}
+              </span>
+            </div>
+
+            <div class="card-foot">
+              <div class="small">آخر نشاط: ${date} · ${time}</div>
+              <button class="secondary-btn" type="button" onclick="App.toast('عرض تفاصيل: ${title} · ${mosque} — ${city}', 'ok')">
+                <svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                عرض التفاصيل
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function setFilter(filter) {
+      state.filter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const active = btn.dataset.filter === filter;
+        btn.classList.toggle('on', active);
+        btn.setAttribute('aria-pressed', String(active));
+      });
+      renderHistory();
+    }
+
+    function animateNumber(targetId, endValue) {
+      const node = $(targetId);
+      if (!node) return;
+      const duration = 520;
+      const start = performance.now();
+      const from = 0;
+
+      function frame(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const value = Math.round(from + (endValue - from) * eased);
+        node.textContent = toAr(value);
+        if (p < 1) requestAnimationFrame(frame);
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    function populateGovs() {
+      const sel = $('sel-gov');
+      sel.innerHTML = '<option value="">اختر المحافظة</option>' + DATA.govs.map(g => `<option value="${g}">${g}</option>`).join('');
+      sel.value = state.gov;
+    }
+
+    function populateCities(gov, selectedCity) {
+      const sel = $('sel-city');
+      const cities = DATA.cities[gov] || [];
+      sel.innerHTML = '<option value="">اختر المدينة</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
+      sel.disabled = !gov;
+      sel.value = selectedCity || '';
+    }
+
+    const App = {
+      toast(message, type = 'ok') {
+        const toast = $('toast');
+        const icon = $('toast-icon');
+        const msg = $('toast-msg');
+
+        msg.textContent = message;
+        icon.className = 'toast-icon ' + type;
+        icon.innerHTML = type === 'warn'
+          ? '<svg viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+          : '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+        toast.classList.remove('gone', 'hide');
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => toast.classList.add('gone'), 220);
+        }, 2600);
+      },
+
+      openModal() {
+        $('overlay').classList.remove('hidden');
+        $('overlay').setAttribute('aria-hidden', 'false');
+        populateGovs();
+        populateCities(state.gov, state.city);
+        setTimeout(() => $('sel-gov').focus(), 50);
+      },
+
+      closeModal() {
+        $('overlay').classList.add('hidden');
+        $('overlay').setAttribute('aria-hidden', 'true');
+        ['grp-gov', 'grp-city'].forEach(id => $(id).classList.remove('has-error'));
+        ['wrap-gov', 'wrap-city'].forEach(id => $(id).classList.remove('error'));
+      },
+
+      handleOverlayClick(event) {
+        if (event.target === $('overlay')) this.closeModal();
+      },
+
+      onGovChange() {
+        const gov = $('sel-gov').value;
+        populateCities(gov, '');
+        $('grp-gov').classList.remove('has-error');
+        $('wrap-gov').classList.remove('error');
+      },
+
+      saveLocation() {
+        const gov = $('sel-gov').value;
+        const city = $('sel-city').value;
+        let valid = true;
+
+        if (!gov) {
+          $('grp-gov').classList.add('has-error');
+          $('wrap-gov').classList.add('error');
+          valid = false;
+        }
+
+        if (!city) {
+          $('grp-city').classList.add('has-error');
+          $('wrap-city').classList.add('error');
+          valid = false;
+        }
+
+        if (!valid) {
+          this.toast('يرجى اختيار المحافظة والمدينة', 'warn');
+          return;
+        }
+
+        state.gov = gov;
+        state.city = city;
+
+        const locationText = `${gov} — ${city}`;
+        $('current-location').textContent = locationText;
+
+        this.closeModal();
+        this.toast('تم تحديث موقعك بنجاح', 'ok');
+      }
+    };
+
+    function bindBottomNavActive() {
+      const active = Array.from(document.querySelectorAll('.bottom-item')).find(a => a.getAttribute('href') === '/profile');
+      if (active) active.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      $('profile-name').textContent = DATA.profile.name;
+      $('display-name').textContent = DATA.profile.name;
+      $('profile-email').textContent = DATA.profile.email;
+      $('current-location').textContent = `${DATA.profile.gov} — ${DATA.profile.city}`;
+      $('profile-bio').textContent = DATA.profile.bio;
+
+      renderCounts();
+      renderHistory();
+      animateNumber('stat-total', DATA.history.length);
+      animateNumber('stat-viewed', DATA.history.filter(i => i.action === 'viewed').length);
+      animateNumber('stat-searched', DATA.history.filter(i => i.action === 'searched').length);
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+      });
+
+      $('history-search').addEventListener('input', (e) => {
+        state.query = e.target.value || '';
+        renderHistory();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !$('overlay').classList.contains('hidden')) {
+          App.closeModal();
+        }
+      });
+
+      bindBottomNavActive();
+
+      document.querySelectorAll('.bottom-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (item.getAttribute('href') === '/profile') {
+            e.preventDefault();
+          }
+        });
+      });
     });
-    tabsWrap.classList.toggle('at-end', tabsWrap.scrollLeft <= 8);
-  }
-})();
-</script>
+  </script>
 </body>
+
 </html>
