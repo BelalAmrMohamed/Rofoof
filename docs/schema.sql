@@ -5,6 +5,9 @@
 -- ============================================================
 --
 -- CHANGE LOG (2026 decisions):
+--   • feedback table added for the About page feedback form.
+--     Stores message, optional email (for guest replies), optional rating (1–5),
+--     and optional user_id (NULL for guests). No login required to submit.
 --   • edition + publisher moved from books → mosque_books
 --     Rationale: the same bibliographic title (same author, same book)
 --     can be held by different mosques in different editions. Storing
@@ -365,6 +368,33 @@ JOIN books   b     ON b.book_id   = mb.book_id
 JOIN mosques m     ON m.mosque_id = mb.mosque_id
 LEFT JOIN users u_sub ON u_sub.user_id = mb.submitted_by
 LEFT JOIN users u_rev ON u_rev.user_id = mb.reviewed_by;
+
+
+-- ============================================================
+-- FEEDBACK
+-- Stores feedback submitted from the About page.
+-- No authentication required — user_id is NULL for guest submissions.
+-- email is optional: provided by guests who want a reply.
+-- rating is optional: 1–5 integer scale.
+-- ============================================================
+
+CREATE TABLE feedback (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(user_id) ON DELETE SET NULL,  -- NULL for guests
+  message     TEXT NOT NULL,
+  email       VARCHAR,                                             -- optional; for guest reply
+  rating      SMALLINT CHECK (rating BETWEEN 1 AND 5),            -- optional; 1–5 scale
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- RLS: anyone can insert; only admins can read (via service role or future admin view)
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can submit feedback"
+  ON feedback FOR INSERT WITH CHECK (true);
+
+-- Admins read feedback via service role or a future SECURITY DEFINER function.
+-- No public SELECT policy — feedback is not exposed to regular users.
 
 
 -- ============================================================

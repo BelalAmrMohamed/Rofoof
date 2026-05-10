@@ -21,12 +21,51 @@ Anyone can browse. Volunteers catalog. Admins moderate.
 |-------|-------------|--------|
 | 1 | Planning & Requirements | ✅ Complete |
 | 2 | Database Design | ✅ Complete |
-| 3 | Wireframes | ❌ Not started |
-| 4 | UI Design (Figma) | 🔄 In progress |
+| 3 | Wireframes | ✅ Skipped — merged into Phase 4 |
+| 4 | UI Design & Prototyping | 🔄 In progress |
 | 5 | Dev Environment Setup | ❌ Not started |
 | 6 | Implementation | ❌ Not started |
 | 7 | Testing | ❌ Not started |
 | 8 | Deployment | ❌ Not started |
+
+---
+
+## Prototyping Progress (Phase 4)
+
+| Page | Status | Notes |
+|------|--------|-------|
+| Login / Register | ✅ Production-ready | Desktop + mobile. Serves as the design language reference. |
+| Submit a Book | ✅ Production-ready | Desktop + mobile + tablet. Missing nav. |
+| Browse (Books & Mosques) | ✅ Production-ready | Missing nav. |
+| Onboarding | 🔄 Needs fix | Responsiveness incomplete on tablet and phone. |
+| Profile | 🔄 Needs fix | Style language inconsistent with rest of platform; duplicate UI elements present. |
+| Requests (Admin) | 🔄 Needs fix | Multiple UI/flow bugs; misplaced top bar. |
+| **Navigation (Side Menu + Bottom Tabs)** | ❌ Not started | **Current priority — blocker for all other pages.** |
+| Book Detail | ❌ Not started | After nav is complete. |
+| Mosque Detail | ❌ Not started | After nav is complete. |
+| About | ❌ Not started | After nav is complete. |
+
+### Prototyping Priority Order
+1. **Build the unified navigation component** (side menu on desktop, bottom tabs on mobile)
+2. Fix the Requests page
+3. Fix the Profile page
+4. Fix the Onboarding page responsiveness
+5. Prototype Book Detail, Mosque Detail, and About pages
+
+---
+
+## Key Design Decisions
+
+| Decision | Detail |
+|----------|--------|
+| **Home page** | `/browse` is the platform entry point for all users. No separate home page in V1. |
+| **Navigation — Desktop** | Side menu (dark green, RTL-aware) |
+| **Navigation — Mobile** | Bottom tab bar (Browse, Submit, Profile) |
+| **Requests page access** | Accessed from the Profile page (admin only) — not in the main nav |
+| **Guest location** | Stored in session cookie only — does not persist across sessions |
+| **Auth user location** | Saved to the `users` table profile record |
+| **Feedback form** | Stored in a `feedback` table in the database (see `schema.sql`) |
+| **Design language** | Forest green `#1B3A2D`, Cream `#F5EFE0`, Gold `#C9A84C`, Cairo font |
 
 ---
 

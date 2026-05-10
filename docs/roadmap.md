@@ -4,16 +4,16 @@
 
 ## Overview
 
-| Phase | Name                    | Status         | Goal                                |
-| ----- | ----------------------- | -------------- | ----------------------------------- |
-| 1     | Planning & Requirements | ✅ Complete    | Define what we're building          |
-| 2     | Database & Architecture | ✅ Complete    | Define how it's structured          |
-| 3     | Wireframes              | ❌ Not started | Sketch page layouts                 |
-| 4     | UI Design (Figma)       | 🔄 In progress | Create high-fidelity mockups        |
-| 5     | Dev Environment         | ❌ Not started | Set up all tools and infrastructure |
-| 6     | Implementation          | ❌ Not started | Build the platform                  |
-| 7     | Testing                 | ❌ Not started | Verify everything works             |
-| 8     | Launch                  | ❌ Not started | Deploy and seed initial data        |
+| Phase | Name                    | Status             | Goal                                |
+| ----- | ----------------------- | ------------------ | ----------------------------------- |
+| 1     | Planning & Requirements | ✅ Complete        | Define what we're building          |
+| 2     | Database & Architecture | ✅ Complete        | Define how it's structured          |
+| 3     | Wireframes              | ✅ Skipped         | Merged into Phase 4 (prototyped directly) |
+| 4     | UI Design & Prototyping | 🔄 In progress     | Create and refine high-fidelity prototypes |
+| 5     | Dev Environment         | ❌ Not started     | Set up all tools and infrastructure |
+| 6     | Implementation          | ❌ Not started     | Build the platform                  |
+| 7     | Testing                 | ❌ Not started     | Verify everything works             |
+| 8     | Launch                  | ❌ Not started     | Deploy and seed initial data        |
 
 ---
 
@@ -56,71 +56,91 @@
 - [x] Define `/onboarding` page and middleware redirect logic
 - [x] Define `/submit/edit/[id]` route for volunteer/admin edit flow
 
----
+**Post-Prototyping Schema Decisions:**
 
-## Phase 3 — Wireframes ❌
-
-**Goal:** Sketch the layout of every page before adding color or detail.
-Rules: No colors. No images. Boxes and labels only.
-
-- [ ] Login page wireframe
-- [ ] **Onboarding page wireframe** ← new
-- [ ] Browse page — Books view wireframe
-- [ ] Browse page — Mosques view wireframe
-- [ ] Book detail page wireframe
-- [ ] Mosque detail page wireframe
-- [ ] Submit book form wireframe
-- [ ] Edit submission form wireframe (`/submit/edit/[id]`) ← new
-- [ ] Admin requests page wireframe
-- [ ] Profile page wireframe (with rejection reason in submission history) ← updated
-- [ ] About page wireframe
-- [ ] Mobile versions of all above
-- [ ] Team review + sign-off on wireframes
-
-**Tool:** Figma (low-fidelity) or pen + paper → photo
+- [x] Add `feedback` table for the About page feedback form (see schema.sql)
+- [x] `/browse` confirmed as the platform entry point (root `/`); no separate home page in V1
 
 ---
 
-## Phase 4 — UI Design (Figma) 🔄
+## Phase 3 — Wireframes ✅ Skipped
 
-**Goal:** Create high-fidelity, production-ready designs for all pages.
+**Decision:** Wireframing was merged into Phase 4. The team moved directly to mid-fidelity HTML prototypes. No standalone wireframe phase is needed.
 
-**Prototyping status (mid-fidelity):**
+---
 
-- [x] Browse page prototype
-- [x] Submit a Book page prototype
-- [x] Login / Register page prototype
-- [ ] **Onboarding page prototype** ← next
-- [ ] Edit Submission page prototype
+## Phase 4 — UI Design & Prototyping 🔄
 
-- [ ] Finalize brand identity:
-  - [ ] Logo / logotype for "على رفوف المساجد"
-  - [ ] Color palette (primary, secondary, neutral, error, success)
-  - [ ] Typography (Arabic font — Cairo or Noto Sans Arabic recommended)
-  - [ ] Spacing and grid system
-  - [ ] RTL layout conventions
-- [ ] Design component library in Figma:
-  - [ ] Buttons (primary, secondary, ghost)
-  - [ ] Input fields
-  - [ ] Book card
-  - [ ] Mosque card
-  - [ ] Filter dropdowns
-  - [ ] Navigation bar
-  - [ ] Forms (submit book, login, feedback)
-  - [ ] Status badges (pending, approved, rejected)
-- [ ] Full page designs (desktop + mobile):
-  - [ ] Login / register
-  - [ ] Onboarding
-  - [ ] Browse — books view
-  - [ ] Browse — mosques view
-  - [ ] Book detail
-  - [ ] Mosque detail
-  - [ ] Submit form
-  - [ ] Edit submission form
-  - [ ] Admin requests
-  - [ ] Profile (with submission history + rejection reasons)
-  - [ ] About
-- [ ] Team review + sign-off on designs
+**Goal:** Produce complete, responsive, production-ready prototypes for all pages with a unified design language and navigation system.
+
+### Design Language (Established — Reference for all new pages)
+
+The Login page prototype is the canonical design reference. All new pages must match:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| Forest Green | `#1B3A2D` | Side nav, primary buttons, panel backgrounds |
+| Cream | `#F5EFE0` | Page background, form panels, cards |
+| Gold / Amber | `#C9A84C` | Logo, brand mark, accent |
+| Teal / Mint | `#D4EDE8` | Expandable sections, highlighted states |
+| Font | Cairo (Arabic) | All text — ExtraBold for headings, Medium for body |
+
+### Navigation Decisions (Finalized)
+
+| Breakpoint | Pattern | Contents |
+|---|---|---|
+| **Desktop** | **Side menu** (dark green, fixed, RTL-aware) | Logo, Browse, Submit, About, Profile, [Admin: Requests badge] |
+| **Tablet** | Side menu (collapsible / icon-only) | Same links, collapsed by default |
+| **Mobile** | Bottom tab bar | Browse, Submit, Profile (3 tabs max) |
+
+- **Requests page** is accessed from the Profile page for admins only — it is NOT a top-level nav item.
+- The pending submissions badge (realtime) appears next to "طلبات التسجيل" inside the Profile page admin section, and optionally as a small indicator on the Profile tab in the bottom nav.
+
+### Prototyped Pages
+
+| Page | Status | Notes |
+|------|--------|-------|
+| Login / Register | ✅ Production-ready | Desktop + mobile. Design language reference. |
+| Submit a Book | ✅ Production-ready | Desktop + mobile + tablet. Missing nav component. |
+| Browse | ✅ Production-ready | Missing nav component. |
+| Onboarding | 🔄 Needs fix | Tablet + phone responsiveness incomplete. |
+| Profile | 🔄 Needs fix | Style inconsistency; duplicate UI elements. |
+| Requests (Admin) | 🔄 Needs fix | Multiple UI/flow bugs; misplaced top bar. |
+
+### Remaining Work — Priority Order
+
+**Step 1 — Navigation component (current priority — blocker)**
+- [ ] Desktop: side menu (all 4 role states: guest / visitor / volunteer / admin)
+- [ ] Tablet: collapsible side menu
+- [ ] Mobile: bottom tab bar (Browse, Submit, Profile)
+- [ ] Integrate into all existing prototype pages
+
+**Step 2 — Fix Requests page**
+- [ ] Correct misplaced top bar → replace with side nav
+- [ ] Fix Approve / Edit & Approve / Reject flow bugs
+- [ ] Make the three action paths visually distinct
+- [ ] Verify admin-only access state
+
+**Step 3 — Fix Profile page**
+- [ ] Align style language with Login/Submit reference
+- [ ] Remove duplicate UI elements
+- [ ] Add admin section with link to Requests (visible to admin role only)
+- [ ] Verify submission history layout (pending / approved / rejected + rejection note)
+
+**Step 4 — Fix Onboarding page**
+- [ ] Fix tablet responsiveness
+- [ ] Fix mobile responsiveness
+- [ ] Verify middleware logic is reflected in prototype flow
+
+**Step 5 — New pages**
+- [ ] Book Detail page (`/browse/book/:id`)
+- [ ] Mosque Detail page (`/browse/mosque/:id`)
+- [ ] About page (with feedback form)
+
+**Step 6 — Team review and sign-off**
+- [ ] Full design review across all pages
+- [ ] RTL layout QA on all breakpoints
+- [ ] Accessibility check (contrast, tap targets ≥ 44px)
 
 **Figma link:** [current designs](https://www.figma.com/design/idcOa4g4eqkEEAVvnpzdFT)
 
@@ -136,7 +156,7 @@ Rules: No colors. No images. Boxes and labels only.
 - [ ] Initialize Next.js project with TypeScript
 - [ ] Configure ESLint + Prettier with RTL/Arabic-aware rules
 - [ ] Create Supabase project
-- [ ] Run `schema.sql` to create all tables, views, indexes, RLS policies, and SECURITY DEFINER functions
+- [ ] Run `schema.sql` to create all tables, views, indexes, RLS policies, SECURITY DEFINER functions, and `feedback` table
 - [ ] Enable Supabase Auth (email + Google + Facebook OAuth)
 - [ ] Enable Supabase Realtime for `mosque_books` table
 - [ ] Set up Supabase Storage buckets (book-images, mosque-images, profile-images)
@@ -149,23 +169,24 @@ Rules: No colors. No images. Boxes and labels only.
 
 ## Phase 6 — Implementation ❌
 
-### Sprint 1 — Foundation (Auth + Layout)
+### Sprint 1 — Foundation (Auth + Layout + Navigation)
 
 **Duration:** ~1 week
-**Goal:** Users can log in; skeleton layout exists.
+**Goal:** Users can log in; unified navigation exists; skeleton layout is in place.
 
-- [ ] Root layout (`layout.tsx`) — RTL, Arabic font, nav
-- [ ] Navigation bar (with role-based links)
+- [ ] Root layout (`layout.tsx`) — RTL, Cairo font, side nav shell
+- [ ] **Side navigation component** — desktop (fixed), tablet (collapsible), mobile (bottom tabs)
+- [ ] Role-based nav rendering (guest / visitor / volunteer / admin states)
+- [ ] Admin realtime pending badge in nav (via `admin_get_pending_count()` RPC)
 - [ ] Auth middleware (route guards + onboarding redirect)
 - [ ] Login page — email registration form (with location fields)
 - [ ] Login page — Google OAuth
 - [ ] Login page — Facebook OAuth
-- [ ] Login page — Skip login
-- [ ] **Onboarding page** — governorate + city picker for OAuth users ← new
+- [ ] **Onboarding page** — governorate + city picker for OAuth users
 - [ ] Location picker component (governorate + city dropdowns; shared across onboarding, browse, profile)
 - [ ] Supabase client setup (`lib/supabase/`)
 - [ ] User creation trigger on first OAuth sign-in
-- [ ] Profile page — view info + edit location
+- [ ] Profile page — view info + edit location + admin Requests link
 
 ---
 
@@ -179,11 +200,11 @@ Rules: No colors. No images. Boxes and labels only.
 - [ ] Browse page — Books view (list + cards)
 - [ ] Browse page — Mosques view (list + cards)
 - [ ] Book card component
-- [ ] Mosque card component (with unnamed mosque fallback)
+- [ ] Mosque card component (with unnamed mosque fallback: "مسجد — [المدينة]")
 - [ ] Search bar (title / author / mosque name)
 - [ ] Category filter dropdown
 - [ ] Governorate + city filter dropdowns
-- [ ] Location picker on browse page (saves to profile)
+- [ ] Location picker on browse page (saves to profile for auth users; session cookie for guests)
 - [ ] Proximity sorting (governorate/city match — V1)
 - [ ] Book detail page (`/browse/book/:id`) — mosques listed by edition
 - [ ] Mosque detail page (`/browse/mosque/:id`) — books with edition per entry
@@ -195,7 +216,7 @@ Rules: No colors. No images. Boxes and labels only.
 **Duration:** ~1 week
 **Goal:** Volunteers and users can submit books.
 
-- [ ] `submitBook()` query function (edition + publisher now on mosque_books)
+- [ ] `submitBook()` query function (edition + publisher on mosque_books)
 - [ ] `searchMosques()` query function
 - [ ] `checkDuplicate()` query — checks (book_id, mosque_id, edition) with NULLS NOT DISTINCT logic
 - [ ] Submit page — book info form (including edition and publisher fields)
@@ -224,15 +245,16 @@ Rules: No colors. No images. Boxes and labels only.
 - [ ] Edit & Approve flow → /submit/edit/[id]?context=admin
 - [ ] Filter by status, date, governorate
 - [ ] Admin-only route protection
-- [ ] User management: promote role
-- [ ] Realtime pending badge (uses `admin_get_pending_count()` RPC)
+- [ ] Requests page accessible from Profile page only (not nav)
+- [ ] User management: promote role (accessible from Requests page)
+- [ ] Realtime pending badge (via `admin_get_pending_count()` RPC)
 
 ---
 
-### Sprint 5 — Edit Submission + Profile + Polish
+### Sprint 5 — Edit Submission + Profile + About + Polish
 
 **Duration:** ~1 week
-**Goal:** Volunteers can edit submissions; profile shows full history with rejection reasons.
+**Goal:** Edit flow works; profile shows full history; About page is live; all pages are polished.
 
 - [ ] `getSubmissionById()` query (with ownership check)
 - [ ] `updateSubmission()` query (volunteer: stays approved; admin context: sets reviewed_by)
@@ -241,16 +263,18 @@ Rules: No colors. No images. Boxes and labels only.
 - [ ] Disabled edit button for pending submissions (with tooltip)
 - [ ] Profile page — submission history with: title, edition, mosque, date, status
 - [ ] Rejection reason displayed inline for rejected submissions
+- [ ] Admin section in Profile: link to Requests page + realtime pending count
 - [ ] About page — mission text
 - [ ] About page — how it works section
-- [ ] About page — feedback form
+- [ ] About page — feedback form (stores to `feedback` table)
+- [ ] `submitFeedback()` query function
 - [ ] 404 page
 - [ ] Empty states for all pages ("لا توجد نتائج")
 - [ ] Loading states / skeletons
 - [ ] Mobile responsiveness review (all pages)
 - [ ] RTL layout QA (all pages)
 - [ ] Error handling (form validation, network errors)
-- [ ] Accessibility review (contrast, tap targets)
+- [ ] Accessibility review (contrast, tap targets ≥ 44px)
 
 ---
 
@@ -265,18 +289,28 @@ Rules: No colors. No images. Boxes and labels only.
   - [ ] Email user bypasses /onboarding (location set during registration)
   - [ ] Regular user submissions go to pending
   - [ ] Volunteer submissions auto-approve
-  - [ ] Only admins see /requests
+  - [ ] Only admins see /requests (accessible from profile only)
   - [ ] Only the submitter (volunteer) can edit their own submission
+- [ ] Navigation testing:
+  - [ ] Side menu renders correctly for all 4 role states (guest / visitor / volunteer / admin)
+  - [ ] Bottom tabs render correctly on mobile for all roles
+  - [ ] Requests link appears in Profile for admin only
+  - [ ] Realtime badge updates without page refresh
 - [ ] Edition logic testing:
   - [ ] Same title + same edition in same mosque → blocked
   - [ ] Same title + NULL edition twice in same mosque → blocked
   - [ ] Same title + different edition in same mosque → allowed, new row created
+- [ ] Guest location testing:
+  - [ ] Guest sets location → stored in session cookie only
+  - [ ] Guest closes browser → location is gone on next visit
+  - [ ] Auth user sets location → persists across sessions
 - [ ] Cross-browser testing (Chrome, Firefox, Safari)
 - [ ] Mobile testing (iOS Safari, Android Chrome)
 - [ ] Performance check — browse page loads < 3s on 4G
 - [ ] RTL rendering check — all pages
 - [ ] Image upload testing (size limits, formats)
 - [ ] Unnamed mosque fallback display — all components
+- [ ] Feedback form submission (stored in `feedback` table)
 - [ ] User testing session with 3–5 volunteers
 
 ---
@@ -300,17 +334,18 @@ Rules: No colors. No images. Boxes and labels only.
 
 ## V2 — Future Features (Post-Launch)
 
-| Feature                                          | Priority |
+| Feature | Priority |
 | ------------------------------------------------ | -------- |
-| Home page with stats and intro                   | High     |
-| GPS-based proximity sorting                      | High     |
-| Map view with mosque pins                        | Medium   |
-| Push / email notifications for submission status | Medium   |
-| Volunteer recruitment page                       | Medium   |
-| Financial support / donations                    | Low      |
-| Multi-language (English)                         | Low      |
-| Multi-country support                            | Low      |
-| Mobile app (React Native)                        | Low      |
-| ISBN support for books                           | Low      |
-| Book condition / availability field              | Low      |
-| "Request a book" feature (notify when found)     | Low      |
+| Separate Home page with stats and intro | High |
+| GPS-based proximity sorting | High |
+| Map view with mosque pins | Medium |
+| Push / email notifications for submission status | Medium |
+| Volunteer recruitment page | Medium |
+| Financial support / donations | Low |
+| Multi-language (English) | Low |
+| Multi-country support | Low |
+| Mobile app (React Native) | Low |
+| ISBN support for books | Low |
+| Book condition / availability field | Low |
+| "Request a book" feature (notify when found) | Low |
+| Flag incorrect / outdated book info | Low |

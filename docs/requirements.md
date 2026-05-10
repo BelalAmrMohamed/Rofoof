@@ -4,6 +4,7 @@
 >
 > - 2026 (initial) — First draft
 > - 2026 (updated) — Corrected edition/publisher scope; fixed SUBMIT-09 duplicate logic; added SUBMIT-10, SUBMIT-11, AUTH-13; closed open questions #2 and #6; updated data requirements to reflect 2026 schema decisions.
+> - 2026 (prototyping update) — Closed open questions #8, #9, #10; added NAV requirements; added ABOUT-06 for feedback table; updated scope to reflect Browse-as-home-page decision.
 
 ---
 
@@ -34,18 +35,20 @@
 - User registration and authentication (email, Google, Facebook)
 - Guest / skip-login access (browse only)
 - Location-based book and mosque browsing
+- `/browse` as the platform entry point and V1 home page
 - Book submission by volunteers (auto-approved)
 - Book submission requests by public users (pending admin review)
-- Admin moderation dashboard (approve / reject / edit requests)
+- Admin moderation dashboard (approve / reject / edit requests), accessible from Profile
 - Volunteer edit of own approved submissions
 - Book edition and publisher tracking (per mosque copy)
-- About page with feedback system
+- About page with feedback system (stored in `feedback` table)
+- Side menu navigation (desktop/tablet) + bottom tab bar (mobile)
 
 ### ❌ Out of Scope — V1
 
 | Feature                       | Reason           | Target |
 | ----------------------------- | ---------------- | ------ |
-| Home page                     | Not yet designed | V2     |
+| Separate Home page            | /browse serves as home in V1 | V2 |
 | Financial support / donations | Not yet designed | V2     |
 | Notifications (email / push)  | Adds complexity  | V2     |
 | GPS-based proximity sorting   | Stretch goal     | V2     |
@@ -53,8 +56,6 @@
 | Multi-language (English)      | Scope management | V2     |
 | Multi-country support         | Egypt-first      | V2     |
 | Mobile app (iOS / Android)    | Web-first        | V3     |
-
-> **Note:** "Book edition / publisher" was previously listed as V2. This was incorrect. Edition and publisher are fully in scope for V1. They are stored on the `mosque_books` junction table (not on the `books` table), because the same title can exist in different mosques in different editions. See §6 and schema.sql for details.
 
 ---
 
@@ -89,7 +90,7 @@
 | BROWSE-05 | User can filter books by: category, governorate, city                                                                                   | Must     |
 | BROWSE-06 | User can search books by: title, author                                                                                                 | Must     |
 | BROWSE-07 | User can search mosques by: name, city, governorate                                                                                     | Must     |
-| BROWSE-08 | User can change their current location from the browse page; the change saves to their profile                                          | Must     |
+| BROWSE-08 | User can change their current location from the browse page; the change saves to their profile (or session cookie if guest)             | Must     |
 | BROWSE-09 | Each book card shows: title, author, category, mosque name (or fallback), city                                                          | Must     |
 | BROWSE-10 | Each mosque card shows: name (or fallback), city, governorate, number of cataloged books                                                | Must     |
 | BROWSE-11 | Mosques with no registered name display as "مسجد — [المدينة]" in all UI contexts                                                        | Must     |
@@ -108,25 +109,37 @@
 | SUBMIT-06 | Book form fields: title (required), author, category, edition, publisher, notes, image                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Must     |
 | SUBMIT-07 | Mosque form fields: governorate (required), city (required), name (optional), image (optional)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Must     |
 | SUBMIT-08 | Volunteers can edit their own approved submissions via `/submit/edit/[id]`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Should   |
-| SUBMIT-09 | **Edition-aware duplicate detection** — when a submission arrives for title T, mosque M, and edition E, the system checks for an existing `mosque_books` row with the same (book_id, mosque_id, edition) using NULLS NOT DISTINCT logic (NULL edition matches NULL edition). Two outcomes: **(A) True duplicate** — same title + same mosque + same edition (or both NULL) → submission is **blocked** with the message "هذا الكتاب بهذه الطبعة مسجّل بالفعل في هذا المسجد". The user cannot proceed. **(B) New edition** — same title + same mosque + different edition → a new `mosque_books` row is created and the user sees "تمت إضافة طبعة جديدة لهذا الكتاب في نفس المسجد". | Should   |
+| SUBMIT-09 | **Edition-aware duplicate detection** — when a submission arrives for title T, mosque M, and edition E, the system checks for an existing `mosque_books` row with the same (book_id, mosque_id, edition) using NULLS NOT DISTINCT logic. **(A) True duplicate** — blocked with "هذا الكتاب بهذه الطبعة مسجّل بالفعل في هذا المسجد". **(B) New edition** — a new row is created and the user sees "تمت إضافة طبعة جديدة لهذا الكتاب في نفس المسجد".                                                                                                                                                                                                                              | Should   |
 | SUBMIT-10 | A volunteer who originally submitted an entry can edit it from `/submit/edit/[id]`. The edit form is pre-filled. Changes save immediately and the entry remains `approved`. Pending submissions cannot be edited while awaiting review.                                                                                                                                                                                                                                                                                                                                                                                                                                            | Should   |
 | SUBMIT-11 | Rejected submissions are visible to the submitter in their profile page, including the admin's rejection note (if provided).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Should   |
 
 ### 4.4 Moderation (Admin)
 
-| ID     | Requirement                                                                                                                                                                                                   | Priority |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| MOD-01 | Admins can view all pending book submissions                                                                                                                                                                  | Must     |
-| MOD-02 | Admins can approve a pending submission                                                                                                                                                                       | Must     |
-| MOD-03 | Admins can reject a pending submission                                                                                                                                                                        | Must     |
-| MOD-04 | Admins can edit a submission's data before approving it, via `/submit/edit/[id]?context=admin`                                                                                                                | Should   |
-| MOD-05 | Admins can add a note/reason when rejecting; this note is stored and shown to the submitter in their profile                                                                                                  | Should   |
-| MOD-06 | Admins can filter requests by: status, date, governorate                                                                                                                                                      | Should   |
-| MOD-07 | Admins can promote users to volunteer or admin                                                                                                                                                                | Must     |
-| MOD-08 | Admins can edit or delete any book entry                                                                                                                                                                      | Must     |
-| MOD-09 | The navigation bar displays a live badge counter showing the current number of pending submissions, visible only to admins. The counter updates in real time via Supabase Realtime (no page refresh required) | Must     |
+| ID     | Requirement                                                                                                                                                                                   | Priority |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| MOD-01 | Admins can view all pending book submissions                                                                                                                                                  | Must     |
+| MOD-02 | Admins can approve a pending submission                                                                                                                                                       | Must     |
+| MOD-03 | Admins can reject a pending submission                                                                                                                                                        | Must     |
+| MOD-04 | Admins can edit a submission's data before approving it, via `/submit/edit/[id]?context=admin`                                                                                                | Should   |
+| MOD-05 | Admins can add a note/reason when rejecting; this note is stored and shown to the submitter in their profile                                                                                  | Should   |
+| MOD-06 | Admins can filter requests by: status, date, governorate                                                                                                                                      | Should   |
+| MOD-07 | Admins can promote users to volunteer or admin                                                                                                                                                | Must     |
+| MOD-08 | Admins can edit or delete any book entry                                                                                                                                                      | Must     |
+| MOD-09 | The Requests page is accessible from the admin's Profile page only — it is not a top-level navigation item                                                                                    | Must     |
+| MOD-10 | A live pending count is displayed on the Profile page (next to the Requests link) for admins, updating in real time via Supabase Realtime. On mobile, a dot indicator appears on the Profile tab. | Must |
 
-### 4.5 About Page
+### 4.5 Navigation
+
+| ID    | Requirement                                                                                                           | Priority |
+| ----- | --------------------------------------------------------------------------------------------------------------------- | -------- |
+| NAV-01 | Desktop: a fixed side menu (dark green, RTL) provides navigation; it appears on the right side of the screen         | Must     |
+| NAV-02 | Tablet: the side menu is collapsible (icon-only when collapsed, expands on demand)                                   | Must     |
+| NAV-03 | Mobile: a bottom tab bar replaces the side menu; it shows Browse, Submit, and Profile tabs                           | Must     |
+| NAV-04 | The nav renders differently based on role: guests see Browse, About, Login; authenticated users see Submit and Profile; admins see no extra top-level link for Requests | Must |
+| NAV-05 | The Requests page is NOT a top-level nav item; it is accessed via the Profile page (admin section only)              | Must     |
+| NAV-06 | On mobile, a dot indicator appears on the Profile tab when the admin has pending submissions (count > 0)             | Should   |
+
+### 4.6 About Page
 
 | ID       | Requirement                                                     | Priority   |
 | -------- | --------------------------------------------------------------- | ---------- |
@@ -135,6 +148,7 @@
 | ABOUT-03 | Page includes a feedback / rating form                          | Should     |
 | ABOUT-04 | Page includes a way to contact the team                         | Should     |
 | ABOUT-05 | Page includes financial support info                            | Could (V2) |
+| ABOUT-06 | Feedback form submissions are stored in a `feedback` table in the database; guest users can also submit (no login required) | Must |
 
 ---
 
@@ -168,22 +182,28 @@
 ### Editions & Publishers (on `mosque_books`, not `books`)
 
 - **Edition** and **publisher** describe a specific physical copy held by a mosque — they belong on the `mosque_books` junction table, not the `books` table
-- The same title (same `book_id`) can appear in the same mosque in multiple editions; each edition is stored as a separate `mosque_books` row
-- Edition is optional (NULL = unspecified). NULLS NOT DISTINCT logic means two rows with NULL edition for the same book + mosque are treated as the same entry (duplicate)
+- Edition is optional (NULL = unspecified). NULLS NOT DISTINCT logic means two rows with NULL edition for the same book + mosque are treated as a duplicate
 - Publisher is optional
 
 ### Mosques
 
 - Governorate and city are the only required fields
-- Mosque name is optional — many mosques in Egypt are unnamed; the display fallback is "مسجد — [المدينة]"
+- Mosque name is optional — display fallback: "مسجد — [المدينة]"
 - Coordinates (lat/lng) stored for future map feature, not required in V1
 
 ### Users
 
-- Location (governorate + city) is always user-defined — never auto-detected from email or IP
+- Location (governorate + city) is always user-defined — never auto-detected
 - Email users set location during registration; OAuth users set location during `/onboarding`
-- Guests who set location on browse page have it stored in a session cookie only — it does not persist across sessions
+- **Guests** who set location on browse page have it stored in a **session cookie only** — it does not persist across sessions and is not linked to any profile
+- **Authenticated users** who change location anywhere have it saved to their `users` profile record immediately
 - All role changes must be made by an admin
+
+### Feedback
+
+- Stored in the `feedback` table (see schema.sql)
+- Fields: message (required), email (optional, for guests who want a reply), rating (1–5, optional), user_id (nullable — null for guests)
+- No login required to submit feedback
 
 ---
 
@@ -215,9 +235,12 @@
 | #   | Question                                                  | Owner | Status                                                                                                                                                          |
 | --- | --------------------------------------------------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | How are volunteers recruited and onboarded?               | Team  | ❓ Open                                                                                                                                                         |
-| 2   | What happens if a book already exists in the DB?          | Dev   | ✅ Resolved — See SUBMIT-09. Duplicate detection is edition-aware. True duplicates are blocked. Different editions create a new row.                            |
+| 2   | What happens if a book already exists in the DB?          | Dev   | ✅ Resolved — See SUBMIT-09. Duplicate detection is edition-aware.                                                                                              |
 | 3   | Should books have ISBNs for standardization?              | Team  | ❓ Open — Could (V2)                                                                                                                                            |
 | 4   | Who owns the domain and pays for hosting long-term?       | Team  | ❓ Open                                                                                                                                                         |
 | 5   | Is there a maximum number of books per mosque entry?      | Dev   | ❓ Open — No limit enforced in V1                                                                                                                               |
-| 6   | Should rejected submissions be visible to the submitter?  | UX    | ✅ Resolved — Yes. The rejection note is stored in `mosque_books.rejection_note` and displayed in the submitter's `/profile` submission history. See SUBMIT-11. |
+| 6   | Should rejected submissions be visible to the submitter?  | UX    | ✅ Resolved — Yes. The rejection note is stored in `mosque_books.rejection_note` and displayed in /profile.                                                     |
 | 7   | Will there be a way to flag incorrect/outdated book info? | UX    | ❓ Open — Could (V2)                                                                                                                                            |
+| 8   | Should the Browse page be the home page?                  | UX    | ✅ Resolved — Yes. `/browse` is the platform entry point in V1. Root `/` redirects to `/browse`. A dedicated home page is a V2 feature.                         |
+| 9   | Should the feedback form store data in the DB?            | Dev   | ✅ Resolved — Yes. A `feedback` table is added to schema.sql. Guests can submit without logging in.                                                             |
+| 10  | Desktop nav: top bar or side menu?                        | UX    | ✅ Resolved — Side menu (fixed, dark green, RTL). Tablet: collapsible. Mobile: bottom tab bar. Requests page is accessed from Profile, not the nav.             |

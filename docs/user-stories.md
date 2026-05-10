@@ -31,7 +31,7 @@
 - [ ] Visiting the platform root or `/browse` takes any unauthenticated user directly to the browse page — no login screen is shown
 - [ ] I can see all approved books and mosques
 - [ ] I cannot access the book submission page (`/submit` redirects me to `/login`)
-- [ ] A "تسجيل الدخول" (Login) link is visible in the navbar so I can choose to sign in when ready
+- [ ] A "تسجيل الدخول" (Login) link is visible in the side nav so I can choose to sign in when ready
 - [ ] My guest session persists for the duration of the browser session — I am not interrupted
 
 ---
@@ -78,7 +78,7 @@
 **Acceptance Criteria:**
 
 - [ ] A location change option is accessible from the browse page and my profile page
-- [ ] Both entry points update the same underlying profile record — there is no distinction between a "temporary" and "permanent" location
+- [ ] Both entry points update the same underlying profile record — there is no distinction between a "temporary" and "permanent" location for authenticated users
 - [ ] I can select any governorate + city combination from dropdowns
 - [ ] The change is saved immediately to my profile
 - [ ] The browse results update to reflect my new location
@@ -165,8 +165,9 @@
 - [ ] A "تغيير الموقع" button is visible on the browse page
 - [ ] I can select any governorate + city combination from dropdowns
 - [ ] Proximity sorting updates immediately after I confirm
-- [ ] The change is saved to my profile — it is the same action as editing location from my profile page
-- [ ] On my next visit, the browse page defaults to my updated location
+- [ ] For authenticated users: the change is saved to my profile record (same as editing from profile page)
+- [ ] For guests: the change is stored in a session cookie only — it is not persisted to any profile and is lost when the browser is closed
+- [ ] On my next visit as an auth user, the browse page defaults to my updated location
 
 ---
 
@@ -234,7 +235,7 @@
 
 - [ ] When I select a book title and a mosque, the system checks for an existing approved or pending entry for the same title + same edition in that mosque
 - [ ] **Same title + same edition (or both edition fields are blank):** A warning is shown — "هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد" — and submission is blocked
-- [ ] **Same title + different edition (e.g., existing entry has "الطبعة الثانية", new submission has "الطبعة الثالثة"):** A new `mosque_books` row is created for the new edition. The user sees: "تمت إضافة طبعة جديدة لهذا الكتاب في نفس المسجد ✓" — submission proceeds and is treated as a new entry
+- [ ] **Same title + different edition:** A new `mosque_books` row is created. The user sees: "تمت إضافة طبعة جديدة لهذا الكتاب في نفس المسجد ✓"
 - [ ] On the book detail page, if a mosque holds multiple editions, each is listed as a separate entry with its edition label
 - [ ] The duplicate/edition check happens client-side before the form is submitted (with a server-side re-check on submit)
 
@@ -253,6 +254,7 @@
 **Acceptance Criteria:**
 
 - [ ] The "طلبات التسجيل" page is only accessible to admins
+- [ ] It is reached from the admin's Profile page — it is not in the main side nav
 - [ ] It shows a list of all `pending` submissions with: book title, author, edition, mosque, submitter name, date
 - [ ] I can filter by: status, governorate, date range
 - [ ] Each submission has Approve, Edit & Approve, and Reject buttons
@@ -315,7 +317,7 @@
 
 **Acceptance Criteria:**
 
-- [ ] An admin panel page lists all registered users
+- [ ] User management is accessible from the /requests page
 - [ ] I can search by name or email
 - [ ] I can change a user's role to `volunteer` or `admin`
 - [ ] The change takes effect immediately
@@ -323,7 +325,64 @@
 
 ---
 
-## 5. Profile & Settings
+## 5. Navigation
+
+---
+
+### US-24 — Navigate Using the Side Menu (Desktop)
+
+**As a** desktop user,
+**I want to** use a side menu to navigate between sections,
+**so that** I always know where I am and can move around quickly.
+
+**Acceptance Criteria:**
+
+- [ ] A fixed side menu is visible on the right side of the screen (RTL) on desktop
+- [ ] The menu shows different links based on my role (guest / visitor / volunteer / admin)
+- [ ] Guests see: Browse, About, Login
+- [ ] Authenticated users additionally see: Submit, Profile, Logout
+- [ ] Admins do NOT see a Requests link in the side menu — it is accessed from the Profile page
+- [ ] The currently active page is highlighted in the menu
+- [ ] On tablet, the menu collapses to icon-only and expands on demand
+
+---
+
+### US-25 — Navigate Using the Bottom Tab Bar (Mobile)
+
+**As a** mobile user,
+**I want to** use a bottom tab bar to navigate between the main sections,
+**so that** core actions are always within thumb reach.
+
+**Acceptance Criteria:**
+
+- [ ] A bottom tab bar is visible on mobile with tabs: Browse, Submit, Profile
+- [ ] Guests see Browse and a Login option in place of Submit/Profile
+- [ ] The currently active tab is highlighted
+- [ ] For admins with pending submissions, a small dot indicator appears on the Profile tab
+- [ ] The tab bar does not cover page content
+
+---
+
+### US-21 — Live Pending Submissions Badge (Admin)
+
+**As an** admin,
+**I want to** see a live counter showing how many submissions are pending,
+**so that** I know immediately when new submissions arrive without having to refresh the page.
+
+**Acceptance Criteria:**
+
+- [ ] A numeric badge appears next to the "طلبات التسجيل" link on the Profile page, visible only to admins
+- [ ] On mobile, a dot indicator appears on the Profile bottom tab when pending count > 0
+- [ ] The badge shows the exact count of `pending` submissions
+- [ ] The count updates in real time via Supabase Realtime — no page refresh needed
+- [ ] When a submission is approved or rejected, the counter decrements immediately
+- [ ] When a new submission arrives, the counter increments immediately
+- [ ] If there are zero pending submissions, the badge is hidden (not shown as "0")
+- [ ] The count is fetched via the `admin_get_pending_count()` SECURITY DEFINER function to respect RLS
+
+---
+
+## 6. Profile & Settings
 
 ---
 
@@ -341,6 +400,7 @@
 - [ ] Approved submissions show a link to view the book in browse
 - [ ] Volunteer submissions show an "تعديل" (Edit) button that leads to /submit/edit/[id]
 - [ ] Visitor submissions do NOT show an edit button
+- [ ] Admin users see a "طلبات التسجيل" link at the top of their profile, with a live pending count badge
 
 ---
 
@@ -362,7 +422,7 @@
 
 ---
 
-## 6. About & Feedback
+## 7. About & Feedback
 
 ---
 
@@ -377,37 +437,20 @@
 - [ ] The About page clearly explains the mission in 2–3 sentences
 - [ ] It explains what users can do vs. what volunteers do
 - [ ] It explains how to become a volunteer
-- [ ] It is accessible from the main navigation
+- [ ] It is accessible from the side nav (desktop) and via a link accessible on mobile
 
 ---
 
 ### US-20 — Submit Feedback
 
-**As a** user,
+**As a** user or guest,
 **I want to** send feedback or a suggestion to the team,
 **so that** I can help improve the platform.
 
 **Acceptance Criteria:**
 
 - [ ] A feedback form is present on the About page
-- [ ] The form accepts: name (optional), message (required), rating (1–5 stars, optional)
+- [ ] The form accepts: name (optional), email (optional — for guests who want a reply), message (required), rating (1–5 stars, optional)
 - [ ] After submitting, I see a confirmation: "شكراً على ملاحظتك"
 - [ ] Guest users can also submit feedback (no login required)
-
----
-
-### US-21 — Live Pending Submissions Badge (Admin)
-
-**As an** admin,
-**I want to** see a live counter badge on the navigation bar showing how many submissions are pending,
-**so that** I know immediately when new submissions arrive without having to open the requests page.
-
-**Acceptance Criteria:**
-
-- [ ] A numeric badge appears next to "طلبات التسجيل" in the navbar, visible only to admins
-- [ ] The badge shows the exact count of `pending` submissions
-- [ ] The count updates in real time via Supabase Realtime — no page refresh needed
-- [ ] When a submission is approved or rejected, the counter decrements immediately
-- [ ] When a new submission arrives, the counter increments immediately
-- [ ] If there are zero pending submissions, the badge is hidden (not shown as "0")
-- [ ] The count is fetched via the `admin_get_pending_count()` SECURITY DEFINER function to respect RLS
+- [ ] Feedback is stored in the `feedback` table in the database with user_id (null for guests)

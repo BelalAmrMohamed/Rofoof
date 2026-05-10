@@ -27,20 +27,74 @@ A document database (MongoDB) would require duplicating data or using nested arr
 
 ---
 
-## 2. Folder Structure
+## 2. Design Language
+
+Established during the prototyping phase. The Login page prototype is the canonical design reference — all new pages and components must match this system.
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| Forest Green | `#1B3A2D` | Side nav background, primary buttons, panel headers |
+| Cream | `#F5EFE0` | Page background, form panels, cards |
+| Gold / Amber | `#C9A84C` | Logo, brand mark, decorative accent |
+| Teal / Mint | `#D4EDE8` | Expandable sections, highlighted/interactive states |
+| Dark text | `#1A1A1A` | Body text, labels |
+| Subtle border | Warm light gray | Card borders, input field borders |
+| **Font** | Cairo (Arabic) | ExtraBold for headings; Medium for body; RTL baseline |
+
+**Component conventions (from prototypes):**
+- Pill tab switcher for binary toggles (e.g., Login / Register)
+- Full-width rounded buttons (dark green, white label)
+- Numbered section cards with green circle badge (①, ②)
+- Labels above input fields; no placeholder-as-label
+- Dashed border image upload zones
+- Teal background for expandable / conditional sections
+
+---
+
+## 3. Navigation System
+
+**Decided during prototyping phase (2026).**
+
+| Breakpoint | Pattern | Notes |
+|---|---|---|
+| **Desktop** | Fixed side menu (dark green, RTL) | Logo at top, nav links below, user info at bottom |
+| **Tablet** | Collapsible side menu (icon-only when collapsed) | Expands on demand |
+| **Mobile** | Bottom tab bar | 3 tabs: Browse, Submit, Profile |
+
+### Role-Based Nav States
+
+| Element | Guest | Visitor | Volunteer | Admin |
+|---|---|---|---|---|
+| Browse | ✅ | ✅ | ✅ | ✅ |
+| Submit | ❌ | ✅ | ✅ | ✅ |
+| About | ✅ | ✅ | ✅ | ✅ |
+| Profile | ❌ | ✅ | ✅ | ✅ |
+| Login | ✅ | ❌ | ❌ | ❌ |
+| Logout | ❌ | ✅ | ✅ | ✅ |
+| Requests link | ❌ | ❌ | ❌ | In Profile only |
+
+**Key decision:** The Requests page is NOT a top-level nav item. Admins access it from their Profile page. This keeps the nav clean and makes the admin workflow deliberate.
+
+### Realtime Admin Badge
+
+The pending submissions count badge lives inside the Profile page (next to the Requests link), not in the side menu. On mobile, a small dot indicator appears on the Profile tab when pending > 0. Implementation via `admin_get_pending_count()` SECURITY DEFINER RPC + Supabase Realtime.
+
+---
+
+## 4. Folder Structure
 
 ```
 على-رفوف-المساجد/
 │
 ├── app/                          # Next.js App Router pages
-│   ├── layout.tsx                # Root layout (RTL, Arabic font, nav)
-│   ├── page.tsx                  # Home page (V2)
+│   ├── layout.tsx                # Root layout (RTL, Cairo font, side nav shell)
+│   ├── page.tsx                  # Root → redirects to /browse
 │   ├── login/
 │   │   └── page.tsx              # Login & registration
 │   ├── onboarding/
 │   │   └── page.tsx              # First-time OAuth location setup
 │   ├── browse/
-│   │   ├── page.tsx              # Browse books & mosques
+│   │   ├── page.tsx              # Browse books & mosques (V1 home page)
 │   │   ├── book/
 │   │   │   └── [id]/page.tsx     # Book detail
 │   │   └── mosque/
@@ -50,14 +104,16 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   │   └── edit/
 │   │       └── [id]/page.tsx     # Edit own submission (volunteer/admin)
 │   ├── requests/
-│   │   └── page.tsx              # Admin moderation (admin-only)
+│   │   └── page.tsx              # Admin moderation (admin-only; reached from /profile)
 │   ├── profile/
-│   │   └── page.tsx              # User profile & history
+│   │   └── page.tsx              # User profile, history, and admin Requests link
 │   └── about/
-│       └── page.tsx              # About page
+│       └── page.tsx              # About page with feedback form
 │
 ├── components/                   # Reusable UI components
 │   ├── ui/                       # Generic elements (Button, Input, Card...)
+│   ├── SideNav.tsx               # Side menu — desktop/tablet (all role states)
+│   ├── BottomNav.tsx             # Bottom tab bar — mobile (all role states)
 │   ├── BookCard.tsx
 │   ├── MosqueCard.tsx
 │   ├── BrowseFilters.tsx
@@ -65,7 +121,7 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   ├── SubmitBookForm.tsx        # Shared — used in /submit and /submit/edit/[id]
 │   ├── MosqueSearchSelect.tsx
 │   ├── SubmissionsList.tsx       # Admin requests list
-│   └── Navbar.tsx
+│   └── FeedbackForm.tsx          # About page feedback form
 │
 ├── lib/                          # Utilities and integrations
 │   ├── supabase/
@@ -76,6 +132,7 @@ A document database (MongoDB) would require duplicating data or using nested arr
 │   │   ├── books.ts
 │   │   ├── mosques.ts
 │   │   ├── submissions.ts
+│   │   ├── feedback.ts           # submitFeedback() query
 │   │   └── users.ts
 │   └── utils.ts                  # Helper functions
 │
@@ -95,7 +152,7 @@ A document database (MongoDB) would require duplicating data or using nested arr
 
 ---
 
-## 3. Authentication Strategy
+## 5. Authentication Strategy
 
 ### Flow
 
@@ -132,9 +189,18 @@ NO  → proceed to /browse (or originally intended page)
 
 Supabase Auth uses JWTs with refresh tokens stored in cookies. Sessions persist across browser restarts. No manual session handling needed.
 
+### Guest Location vs. Auth User Location
+
+| State | Where stored | Persistence |
+|-------|-------------|-------------|
+| Guest sets location on /browse | Session cookie (client-side only) | Lost on browser close |
+| Auth user sets location anywhere | `users.governorate` + `users.city` | Persists across all sessions |
+
+Both the browse-page location picker and the profile-page location editor write to the same `users` record for authenticated users. There is no concept of a "temporary" vs. "permanent" location for logged-in users.
+
 ---
 
-## 4. Edition & Schema Design Decision
+## 6. Edition & Schema Design Decision
 
 **Decision (2026):** `edition` and `publisher` were moved from the `books` table to the `mosque_books` table.
 
@@ -157,7 +223,7 @@ This ensures:
 
 ---
 
-## 5. Admin RLS Strategy
+## 7. Admin RLS Strategy
 
 **Decision (2026):** Admin database access uses **SECURITY DEFINER PostgreSQL functions**, not the Supabase service role key client-side.
 
@@ -171,7 +237,6 @@ Both functions contain an internal role check (`auth.uid()` must belong to a use
 ```typescript
 // lib/queries/submissions.ts
 
-// Called from a server component — never from client-side code
 export async function getAllSubmissions() {
   const supabase = createServerClient();
   const { data, error } = await supabase.rpc("admin_get_all_submissions");
@@ -189,7 +254,7 @@ export async function getPendingCount() {
 
 ---
 
-## 6. Edit Submission Route
+## 8. Edit Submission Route
 
 **Decision (2026):** `/submit/edit/[id]` is a dedicated route that reuses the `SubmitBookForm` component in edit mode.
 
@@ -203,8 +268,8 @@ export async function getPendingCount() {
 **Edit mode behavior:**
 
 - The route fetches the `mosque_books` entry by `id`, pre-filling all form fields
-- For volunteers accessing their own submission: saving keeps status as `'approved'`
-- For admins accessing via `?context=admin`: saving sets status to `'approved'` and records `reviewed_by` + `reviewed_at`
+- For volunteers: saving keeps status as `'approved'`
+- For admins (`?context=admin`): saving sets status to `'approved'` and records `reviewed_by` + `reviewed_at`
 - RLS policy enforces that only the original submitter (if volunteer) or an admin can update the row
 
 ```typescript
@@ -214,7 +279,7 @@ import { SubmitBookForm } from '@/components/SubmitBookForm';
 import { getSubmissionById } from '@/lib/queries/submissions';
 
 export default async function EditSubmissionPage({ params }: { params: { id: string } }) {
-  const submission = await getSubmissionById(params.id); // throws if not authorized
+  const submission = await getSubmissionById(params.id);
   const isAdminContext = /* check searchParams.context === 'admin' */;
 
   return (
@@ -229,13 +294,12 @@ export default async function EditSubmissionPage({ params }: { params: { id: str
 
 ---
 
-## 7. Database Access Pattern
+## 9. Database Access Pattern
 
-All database operations go through typed query functions in `lib/queries/`. Components and pages never call Supabase directly — they call these functions.
+All database operations go through typed query functions in `lib/queries/`. Components and pages never call Supabase directly.
 
 ```typescript
 // lib/queries/books.ts
-
 export async function getApprovedBooks(filters: BookFilters) {
   const supabase = createServerClient();
   return supabase
@@ -244,22 +308,24 @@ export async function getApprovedBooks(filters: BookFilters) {
     .eq("mosque_governorate", filters.governorate ?? undefined)
     .order("created_at", { ascending: false });
 }
+```
 
-export async function submitBook(
-  data: BookSubmission,
-  userId: string,
-  isVolunteer: boolean,
-) {
+```typescript
+// lib/queries/feedback.ts
+export async function submitFeedback(data: FeedbackSubmission) {
   const supabase = createServerClient();
-  const status = isVolunteer ? "approved" : "pending";
-  // 1. Upsert into books (find by title+author or create new)
-  // 2. Insert into mosque_books with edition, publisher, status
+  return supabase.from("feedback").insert({
+    user_id: data.userId ?? null,   // null for guests
+    message: data.message,
+    email: data.email ?? null,
+    rating: data.rating ?? null,
+  });
 }
 ```
 
 ---
 
-## 8. Onboarding Middleware Logic
+## 10. Onboarding Middleware Logic
 
 ```typescript
 // middleware.ts
@@ -267,11 +333,9 @@ export async function submitBook(
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const supabase = createMiddlewareClient(request);
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  // Protected routes — require authentication
+  // Protected routes
   if (["/submit", "/profile"].some((p) => pathname.startsWith(p))) {
     if (!session) return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -283,7 +347,6 @@ export async function middleware(request: NextRequest) {
       .select("governorate, city")
       .eq("user_id", session.user.id)
       .single();
-
     if (user && (!user.governorate || !user.city)) {
       return NextResponse.redirect(new URL("/onboarding", request.url));
     }
@@ -298,10 +361,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/requests")) {
     if (!session) return NextResponse.redirect(new URL("/login", request.url));
     const { data: user } = await supabase
-      .from("users")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .single();
+      .from("users").select("role").eq("user_id", session.user.id).single();
     if (user?.role !== "admin")
       return NextResponse.redirect(new URL("/browse", request.url));
   }
@@ -312,7 +372,7 @@ export async function middleware(request: NextRequest) {
 
 ---
 
-## 9. Image Handling
+## 11. Image Handling
 
 - Images are uploaded to **Supabase Storage** (not stored in the DB)
 - The DB stores only the URL
@@ -326,56 +386,39 @@ export async function middleware(request: NextRequest) {
 
 ---
 
-## 10. Proximity / Location Sorting
+## 12. Proximity / Location Sorting
 
 **V1 (Simple):** Sort by governorate + city match. If user is in المنيا, show المنيا books first, then others.
 
-**V2 (GPS-based):** Use `mosque_lat` and `mosque_lng` columns (already in schema) with PostGIS or a Haversine formula in a Supabase SQL function to return results ordered by distance.
-
-```sql
--- Future: Haversine distance sort (V2)
-SELECT *, (
-  6371 * acos(
-    cos(radians($user_lat)) * cos(radians(mosque_lat)) *
-    cos(radians(mosque_lng) - radians($user_lng)) +
-    sin(radians($user_lat)) * sin(radians(mosque_lat))
-  )
-) AS distance_km
-FROM public_books_view
-ORDER BY distance_km ASC;
-```
+**V2 (GPS-based):** Use `mosque_lat` and `mosque_lng` columns (already in schema) with a Haversine formula in a Supabase SQL function.
 
 ---
 
-## 11. RTL / Arabic Layout
+## 13. RTL / Arabic Layout
 
 - Set `dir="rtl"` and `lang="ar"` on the `<html>` element in `layout.tsx`
-- Use an Arabic-friendly font: **Cairo** or **Noto Sans Arabic** (Google Fonts)
-- Avoid using absolute positioning for left/right; use CSS logical properties:
-  - `margin-inline-start` instead of `margin-left`
-  - `padding-inline-end` instead of `padding-right`
+- Use **Cairo** font (Arabic, Google Fonts) — ExtraBold for headings, Medium for body
+- Use CSS logical properties (`margin-inline-start`, `padding-inline-end`) throughout
+- The side menu renders on the **right side** in RTL
+- Unnamed mosque fallback: `"مسجد — [المدينة]"` — standardize this string across all components
 - Test all layouts in RTL before finalizing
-- Unnamed mosque fallback display: `"مسجد — [المدينة]"` — standardize this string across all components
 
 ---
 
-## 12. Environment Variables
+## 14. Environment Variables
 
 ```bash
 # .env.example
 
-# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # server-only; used only if RPC functions are insufficient
-
-# App
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # server-only
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ---
 
-## 13. Deployment
+## 15. Deployment
 
 | Environment | URL              | Trigger            |
 | ----------- | ---------------- | ------------------ |
@@ -393,70 +436,46 @@ main          ← production (protected, requires PR)
         └── feature/onboarding
         └── feature/submit-form
         └── feature/edit-submission
+        └── feature/side-nav
         └── fix/mosque-search-bug
 ```
 
-- All work happens in `feature/*` branches
-- Merge into `dev` for testing
-- Merge `dev` into `main` for releases
-- Vercel auto-deploys preview URLs for every branch
-
 ---
 
-## 14. Real-Time Features (Supabase Realtime)
+## 16. Real-Time Features (Supabase Realtime)
 
-The admin navbar badge (pending submissions counter) must update live without page refresh.
-
-### Implementation
+The admin pending submissions counter must update live. The badge lives inside the Profile page (next to the Requests link) and as a dot indicator on the mobile bottom tab Profile icon.
 
 ```typescript
-// components/Navbar.tsx (admin only)
-
-import { useEffect, useState } from "react";
-import { createBrowserClient } from "@/lib/supabase/client";
+// Used in Profile page (admin only)
 
 export function usePendingCount() {
   const [count, setCount] = useState<number>(0);
   const supabase = createBrowserClient();
 
   useEffect(() => {
-    // Initial fetch via SECURITY DEFINER RPC (respects RLS + admin check)
-    supabase
-      .rpc("admin_get_pending_count")
-      .then(({ data }) => setCount(data ?? 0));
+    supabase.rpc("admin_get_pending_count").then(({ data }) => setCount(data ?? 0));
 
-    // Live subscription — re-fetches count via RPC on any mosque_books change
     const channel = supabase
       .channel("pending_count")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "mosque_books" },
-        () => {
-          supabase
-            .rpc("admin_get_pending_count")
-            .then(({ data }) => setCount(data ?? 0));
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "mosque_books" }, () => {
+        supabase.rpc("admin_get_pending_count").then(({ data }) => setCount(data ?? 0));
+      })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return count;
 }
 ```
 
-### Notes
-
-- Realtime must be enabled for the `mosque_books` table in the Supabase dashboard
-- The RPC function `admin_get_pending_count()` handles the admin role check internally — no RLS change needed
-- The badge renders `null` (hidden) when count is 0 — never shows "0"
+- Realtime must be enabled for `mosque_books` in the Supabase dashboard
+- Badge renders `null` (hidden) when count is 0 — never shows "0"
 
 ---
 
-## 15. Performance Considerations
+## 17. Performance Considerations
 
 | Concern          | Approach                                                                           |
 | ---------------- | ---------------------------------------------------------------------------------- |
