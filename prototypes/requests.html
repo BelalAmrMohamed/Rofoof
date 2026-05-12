@@ -68,6 +68,33 @@
       --shadow-sm: 0 1px 3px rgba(42, 35, 24, 0.08), 0 1px 2px rgba(42, 35, 24, 0.04);
       --shadow-md: 0 4px 12px rgba(42, 35, 24, 0.10), 0 2px 4px rgba(42, 35, 24, 0.06);
       --shadow-lg: 0 8px 24px rgba(42, 35, 24, 0.14), 0 4px 8px rgba(42, 35, 24, 0.08);
+
+      /* Motion */
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-fast: 120ms;
+      --duration-base: 220ms;
+      --duration-slow: 360ms;
+
+      /* Elevation — card-layer shadows */
+      --shadow-card-rest:
+        inset 0 1px 0 rgba(255, 255, 255, 0.90),
+        0 2px 4px rgba(42, 35, 24, 0.06),
+        0 1px 2px rgba(42, 35, 24, 0.04);
+      --shadow-card-hover:
+        inset 0 1px 0 rgba(255, 255, 255, 0.90),
+        0 8px 24px rgba(42, 35, 24, 0.12),
+        0 3px 8px rgba(42, 35, 24, 0.08);
+
+      /* Focus rings */
+      --focus-ring-green: 0 0 0 3px rgba(45, 168, 130, 0.30);
+      --focus-ring-red: 0 0 0 3px rgba(181, 37, 37, 0.22);
+      --focus-ring-gold: 0 0 0 3px rgba(201, 163, 42, 0.28);
+
+      /* Glassmorphism */
+      --glass-bg: rgba(255, 253, 249, 0.92);
+      --glass-border: rgba(255, 255, 255, 0.55);
+      --glass-blur: blur(16px);
     }
 
     body {
@@ -90,59 +117,7 @@
       z-index: 0;
     }
 
-    /* ── TOPBAR ── */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--green-900);
-      padding: 0 16px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .topbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-icon {
-      width: 34px;
-      height: 34px;
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-size: 15px;
-      color: var(--gold-200);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .brand-text {
-      font-family: var(--font-display);
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.95);
-      line-height: 1.2;
-      display: none;
-    }
-
-    @media (min-width: 400px) {
-      .brand-text {
-        display: block;
-      }
-    }
-
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
+    /* ── ICON BUTTONS (navbar actions) ── */
     .icon-btn {
       width: 36px;
       height: 36px;
@@ -237,6 +212,21 @@
       padding: 10px 10px 8px;
       text-align: center;
       box-shadow: var(--shadow-sm);
+    }
+
+    .stat-chip.pending {
+      background: linear-gradient(135deg, #FFFDF9, var(--gold-50));
+      border-color: var(--gold-200);
+    }
+
+    .stat-chip.approved {
+      background: linear-gradient(135deg, #FFFDF9, var(--green-50));
+      border-color: var(--green-200);
+    }
+
+    .stat-chip.rejected {
+      background: linear-gradient(135deg, #FFFDF9, var(--red-50));
+      border-color: #F5C5C5;
     }
 
     .stat-chip-num {
@@ -401,23 +391,27 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       padding-right: 2px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
     }
 
     /* ── CARD ── */
     .card {
-      background: var(--surface);
+      background: linear-gradient(160deg, #FFFEF9 0%, #FDF8EF 100%);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       margin-bottom: 12px;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-card-rest);
       overflow: hidden;
-      transition: box-shadow 0.2s, transform 0.2s;
+      transition: box-shadow 0.22s var(--ease-spring), transform 0.22s var(--ease-spring), border-color 0.22s ease;
     }
 
     .card:hover {
-      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--border-strong);
     }
 
     .card.removing {
@@ -427,7 +421,7 @@
     @keyframes card-remove {
       to {
         opacity: 0;
-        transform: translateX(60px) scale(0.95);
+        transform: translateX(-60px) scale(0.95);
         max-height: 0;
         margin-bottom: 0;
         padding: 0;
@@ -445,26 +439,26 @@
       }
 
       100% {
-        background: var(--surface);
+        background: linear-gradient(160deg, #FFFEF9 0%, #FDF8EF 100%);
         border-color: var(--border);
       }
     }
 
     .card-accent {
       height: 3px;
-      background: var(--gold-400);
+      background: linear-gradient(90deg, var(--gold-400), var(--gold-200));
     }
 
     .card-accent.approved-accent {
-      background: var(--green-500);
+      background: linear-gradient(90deg, var(--green-700), var(--green-200));
     }
 
     .card-accent.rejected-accent {
-      background: var(--red-600);
+      background: linear-gradient(90deg, var(--red-600), #F5C5C5);
     }
 
     .card-body {
-      padding: 14px 14px 0;
+      padding: 16px 16px 0;
     }
 
     .card-top {
@@ -589,7 +583,7 @@
     }
 
     .card-footer {
-      padding: 10px 14px 12px;
+      padding: 12px 16px 14px;
     }
 
     .submitter-row {
@@ -665,8 +659,11 @@
       font-weight: 600;
       cursor: pointer;
       border: 1.5px solid transparent;
-      transition: all 0.15s ease;
+      transition: background-color 0.18s ease, box-shadow 0.18s ease,
+        transform 0.12s ease, border-color 0.18s ease;
       white-space: nowrap;
+      outline: 2px solid transparent;
+      outline-offset: 2px;
     }
 
     .btn:active {
@@ -677,31 +674,54 @@
       background: var(--green-900);
       color: #fff;
       border-color: var(--green-900);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 6px rgba(29, 92, 73, 0.35);
     }
 
     .btn-approve:hover {
       background: var(--green-800);
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 10px rgba(29, 92, 73, 0.40);
+    }
+
+    .btn-approve:focus-visible {
+      outline-color: var(--green-500);
+      box-shadow: var(--focus-ring-green);
     }
 
     .btn-edit {
-      background: var(--gold-50);
+      background: linear-gradient(135deg, var(--gold-50), var(--gold-100));
       color: var(--gold-700);
       border-color: var(--gold-200);
       grid-column: 1 / -1;
+      box-shadow: 0 1px 4px rgba(138, 106, 0, 0.14);
     }
 
     .btn-edit:hover {
       background: var(--gold-100);
+      box-shadow: 0 2px 8px rgba(138, 106, 0, 0.22);
+    }
+
+    .btn-edit:focus-visible {
+      outline-color: var(--gold-400);
+      box-shadow: var(--focus-ring-gold);
     }
 
     .btn-reject {
       background: var(--red-50);
       color: var(--red-600);
-      border-color: #F5C5C5;
+      border: 1.5px solid #F5C5C5;
+      box-shadow: 0 1px 4px rgba(155, 32, 32, 0.18);
     }
 
     .btn-reject:hover {
       background: var(--red-100);
+      border-color: var(--red-600);
+      box-shadow: 0 2px 6px rgba(155, 32, 32, 0.24);
+    }
+
+    .btn-reject:focus-visible {
+      outline-color: var(--red-600);
+      box-shadow: var(--focus-ring-red);
     }
 
     /* ── STATUS CARD (approved/rejected view) ── */
@@ -834,7 +854,7 @@
       font-size: 13px;
       color: var(--text-secondary);
       margin-bottom: 20px;
-      line-height: 1.5;
+      line-height: 1.65;
     }
 
     .modal-sub strong {
@@ -862,17 +882,22 @@
       color: var(--text-primary);
       resize: vertical;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       direction: rtl;
       margin-bottom: 16px;
+      box-shadow: 0 0 0 0px rgba(181, 37, 37, 0);
     }
 
     .textarea:focus {
       border-color: var(--red-600);
+      box-shadow: 0 0 0 3px rgba(181, 37, 37, 0.18);
+      outline: 2px solid var(--red-600);
+      outline-offset: 2px;
     }
 
     .textarea::placeholder {
       color: var(--text-muted);
+      font-style: italic;
     }
 
     .modal-actions {
@@ -884,7 +909,7 @@
     .btn-cancel {
       background: var(--sand-100);
       color: var(--text-secondary);
-      border-color: var(--border);
+      border: 1.5px solid var(--border-strong);
     }
 
     .btn-cancel:hover {
@@ -895,102 +920,72 @@
       background: var(--red-600);
       color: #fff;
       border-color: var(--red-600);
+      box-shadow: 0 4px 12px rgba(181, 37, 37, 0.40);
     }
 
     .btn-confirm-reject:hover {
       background: var(--red-700);
+      box-shadow: 0 6px 16px rgba(181, 37, 37, 0.45);
+    }
+
+    .btn-confirm-reject:focus-visible {
+      outline-color: var(--red-600);
+      box-shadow: var(--focus-ring-red);
+      animation: pulse-border-danger 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-border-danger {
+
+      0%,
+      100% {
+        outline-color: var(--red-600);
+      }
+
+      50% {
+        outline-color: rgba(181, 37, 37, 0.4);
+      }
     }
 
     /* ── TOAST ── */
     .toast {
       position: fixed;
       bottom: 80px;
-      right: 50%;
-      transform: translateX(50%);
-      z-index: 300;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
       background: var(--sand-900);
       color: #fff;
-      padding: 10px 18px;
-      border-radius: 24px;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
       font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: var(--shadow-lg);
+      font-weight: 600;
+      z-index: 9999;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s;
+      transition: opacity 0.22s ease, transform 0.22s ease;
       white-space: nowrap;
+      box-shadow: var(--shadow-lg);
     }
 
     .toast.show {
       opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
-    .toast.toast-green {
+    .toast-green {
       background: var(--green-900);
     }
 
-    .toast.toast-red {
+    .toast-red {
       background: var(--red-600);
     }
 
-    /* ── BOTTOM NAV ── */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      z-index: 50;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-      box-shadow: 0 -2px 12px rgba(42, 35, 24, 0.08);
+    @media (min-width: 640px) {
+      .toast {
+        bottom: 32px;
+      }
     }
 
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 4px;
-      cursor: pointer;
-      gap: 3px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-family: var(--font-ui);
-      font-size: 10px;
-      position: relative;
-    }
-
-    .nav-item.active {
-      color: var(--green-800);
-    }
-
-    .nav-item svg {
-      transition: transform 0.2s;
-    }
-
-    .nav-item.active svg {
-      transform: scale(1.1);
-    }
-
-    .nav-dot {
-      position: absolute;
-      top: 7px;
-      left: calc(50% + 6px);
-      width: 7px;
-      height: 7px;
-      background: var(--gold-400);
-      border-radius: 50%;
-      border: 1.5px solid var(--surface);
-    }
-
-    /* ── DESKTOP ── */
+    /* ── RESPONSIVE BREAKPOINTS ── */
     @media (min-width: 640px) {
       .page-header {
         padding: 24px 24px 0;
@@ -1012,15 +1007,6 @@
         display: none;
       }
 
-      .topbar {
-        height: 60px;
-        padding: 0 24px;
-      }
-
-      .brand-text {
-        display: block;
-      }
-
       .stats-row {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
@@ -1038,6 +1024,10 @@
         border-radius: var(--radius-xl);
         margin: 20px;
         max-width: 480px;
+        background: rgba(255, 253, 249, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
       }
 
       .cards-grid {
@@ -1053,606 +1043,1203 @@
     }
 
     @media (min-width: 960px) {
-      body {
+      .page-wrapper {
         max-width: 900px;
         margin: 0 auto;
-      }
-
-      .topbar {
-        max-width: 900px;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        width: 100%;
       }
 
       .cards-grid {
         grid-template-columns: 1fr 1fr 1fr;
       }
     }
+
+
+    /* ═══════════════════════════════════════════════════════
+       NAV SYSTEM — matches about.html
+    ═══════════════════════════════════════════════════════ */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 500;
+      height: 66px;
+      background: linear-gradient(160deg, #2d5e4a 0%, #254d3c 55%, #1B3A2D 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    #page-content {
+      padding-top: 66px;
+    }
+
+    .nav-inner {
+      max-width: 100%;
+      padding: 0 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: #fff;
+      flex-shrink: 0;
+      transition: opacity 0.18s;
+      text-decoration: none;
+    }
+
+    .nav-brand:hover {
+      opacity: 0.85;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #C9A84C, #a07a30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+      flex-shrink: 0;
+      color: #132b21;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #fff;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.48);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-right: auto;
+    }
+
+    .btn-login {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-family: 'Cairo', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.18s;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .btn-login:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    #toggle-btn,
+    #sidebar-toggle-btn {
+      padding: 8px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    #toggle-btn:hover,
+    #sidebar-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    #toggle-btn svg,
+    #sidebar-toggle-btn svg {
+      fill: currentColor;
+    }
+
+    #sidebar {
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(180deg, #254d3c 0%, #0A2218 100%);
+      border-left: 1px solid rgba(255, 255, 255, 0.07);
+      position: fixed;
+      top: 0;
+      right: 0;
+      transform: translateX(100%);
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16), 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    #sidebar.open {
+      transform: translateX(0);
+    }
+
+    #page-content {
+      transition: margin-right 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #page-content.sidebar-open {
+      margin-right: 300px;
+    }
+
+    .sidebar-header {
+      height: 66px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      flex-shrink: 0;
+    }
+
+    #sidebar>ul {
+      list-style: none;
+      padding: 10px 10px 20px;
+      margin: 0;
+      flex: 1;
+    }
+
+    #sidebar>ul>li.active>a,
+    #sidebar>ul>li.active>.dropdown-btn {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #sidebar>ul>li.active>a svg,
+    #sidebar>ul>li.active>.dropdown-btn svg {
+      fill: #fff;
+      color: #fff;
+    }
+
+    #sidebar a,
+    #sidebar .dropdown-btn {
+      border-radius: 12px;
+      padding: 11px 12px;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.65);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.18s, color 0.18s;
+      white-space: normal;
+    }
+
+    .dropdown-btn {
+      width: 100%;
+      text-align: right;
+      background: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    #sidebar svg {
+      flex-shrink: 0;
+      fill: currentColor;
+    }
+
+    #sidebar a span,
+    #sidebar .dropdown-btn span {
+      flex-grow: 1;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    #sidebar a:hover,
+    #sidebar .dropdown-btn:hover {
+      background-color: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+
+    .chevron {
+      transition: rotate 220ms ease;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    .rotate .chevron {
+      rotate: 180deg;
+    }
+
+    #sidebar .sub-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 280ms ease-in-out;
+    }
+
+    #sidebar .sub-menu.show {
+      max-height: 300px;
+    }
+
+    #sidebar .sub-menu>ul {
+      list-style: none;
+      padding: 3px 0 6px;
+      margin: 0;
+    }
+
+    #sidebar .sub-menu a {
+      padding-inline-start: 3.2em;
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.5);
+      padding-top: 9px;
+      padding-bottom: 9px;
+    }
+
+    #sidebar .sub-menu a:hover {
+      color: rgba(255, 255, 255, 0.88);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    #sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: rgba(15, 12, 8, 0.42);
+    }
+
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 58px;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      z-index: 200;
+      padding: 0;
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .bottom-nav-inner {
+      display: flex;
+      height: 100%;
+    }
+
+    .bottom-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-light);
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Cairo', sans-serif;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    .bottom-tab:active {
+      opacity: 0.7;
+    }
+
+    .bottom-tab.active {
+      color: var(--green);
+    }
+
+    .bottom-tab-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      position: relative;
+    }
+
+    .bottom-tab-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .bottom-nav-safe {
+      height: env(safe-area-inset-bottom, 0px);
+      background: #fff;
+    }
+
+    .nav-dot {
+      position: absolute;
+      top: 8px;
+      left: calc(50% + 8px);
+      width: 7px;
+      height: 7px;
+      background: var(--gold-400);
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+    }
+
+    @media (max-width: 1023px) and (min-width: 768px) {
+      #page-content.sidebar-open {
+        margin-right: 300px;
+      }
+    }
+
+    @media (max-width: 767px) {
+      #sidebar {
+        display: none;
+      }
+
+      #toggle-btn {
+        display: none;
+      }
+
+      #page-content {
+        margin-right: 0 !important;
+      }
+
+      .bottom-nav {
+        display: block;
+      }
+
+      .navbar {
+        height: 56px;
+      }
+
+      .nav-inner {
+        padding: 0 16px;
+        gap: 12px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .btn-login {
+        display: none;
+      }
+
+      .nav-actions {
+        gap: 4px;
+      }
+    }
   </style>
 </head>
 
-<body>
 
-  <!-- TOPBAR -->
-  <nav class="topbar" role="banner">
-    <div class="topbar-brand">
-      <div class="brand-icon">رف</div>
-      <span class="brand-text">على رفوف المساجد</span>
+<body class="nav-collapsed">
+
+  <!-- SIDEBAR NAV -->
+  <nav id="sidebar" aria-label="روابط رئيسية">
+    <div class="sidebar-header">
+      <button id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="إغلاق القائمة">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+          <path
+            d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z" />
+        </svg>
+      </button>
+
+      <a href="browse.html" class="nav-brand" aria-label="الصفحة الرئيسية — على رفوف المساجد">
+        <div class="brand-mark" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+            <path
+              d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">على رفوف المساجد</div>
+          <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+        </div>
+      </a>
     </div>
-    <div class="topbar-actions">
-      <button class="icon-btn" aria-label="بحث">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
+
+    <ul>
+      <li>
+        <button onclick="toggleSubMenu(this)" class="dropdown-btn" aria-expanded="false">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path
+              d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+          </svg>
+          <span>تصفح</span>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+            fill="#e8eaed">
+            <path
+              d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z" />
+          </svg>
+        </button>
+        <div class="sub-menu">
+          <ul>
+            <li><a href="browse.html">كتاب</a></li>
+            <li><a href="browse.html">مسجد</a></li>
+          </ul>
+        </div>
+      </li>
+
+      <li>
+        <a href="submit.html">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+          </svg>
+          <span>تسجيل كتاب</span>
+        </a>
+      </li>
+
+      <li class="active">
+        <a href="requests.html" aria-current="page">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+          <span>الطلبات</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path
+              d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
+          </svg>
+          <span>حسابي</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="about.html">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path
+              d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
+          </svg>
+          <span>عن المنصة</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div id="sidebar-backdrop" aria-hidden="true"></div>
+
+  <!-- Top Navbar — fixed full-viewport-width -->
+  <nav class="navbar" role="navigation" aria-label="القائمة الرئيسية">
+    <div class="nav-inner">
+      <button id="toggle-btn" onclick="toggleSidebar()" aria-label="تبديل القائمة">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+          <path
+            d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z" />
         </svg>
       </button>
-      <button class="icon-btn" aria-label="الإشعارات">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-        <span class="notif-badge" aria-label="4 إشعارات جديدة">4</span>
-      </button>
-      <button class="icon-btn" aria-label="الملف الشخصي">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-        </svg>
-      </button>
+
+      <a href="browse.html" class="nav-brand" aria-label="الصفحة الرئيسية">
+        <div class="brand-mark" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+            <path
+              d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">على رفوف المساجد</div>
+          <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="بحث" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </button>
+        <button class="icon-btn" aria-label="الإشعارات">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            aria-hidden="true">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span class="notif-badge" aria-label="4 إشعارات جديدة">4</span>
+        </button>
+        <button class="icon-btn" aria-label="الملف الشخصي">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            aria-hidden="true">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
+        </button>
+      </div>
     </div>
   </nav>
 
-  <!-- PAGE HEADER -->
-  <header class="page-header">
-    <div class="page-title-row">
-      <h1 class="page-title">طلبات التسجيل</h1>
-    </div>
-    <p class="page-subtitle">مراجعة الكتب المُقدَّمة من المستخدمين والمتطوعين</p>
+  <div id="page-content" style="display: flex; flex-direction: column; min-width: 0; min-height: 100vh;">
+    <div class="page-wrapper" style="flex:1; display:flex; flex-direction:column;">
+      <header class="page-header">
+        <div class="page-title-row">
+          <h1 class="page-title">طلبات التسجيل</h1>
+        </div>
+        <p class="page-subtitle">مراجعة الكتب المُقدَّمة من المستخدمين والمتطوعين</p>
 
-    <div class="stats-row">
-      <div class="stat-chip pending">
-        <div class="stat-chip-num" id="stat-pending">4</div>
-        <div class="stat-chip-label">في الانتظار</div>
-      </div>
-      <div class="stat-chip approved">
-        <div class="stat-chip-num">28</div>
-        <div class="stat-chip-label">موافق عليه</div>
-      </div>
-      <div class="stat-chip rejected">
-        <div class="stat-chip-num">3</div>
-        <div class="stat-chip-label">مرفوض</div>
-      </div>
-    </div>
-  </header>
-
-  <!-- TABS -->
-  <div class="tabs-wrap">
-    <div class="tabs" role="tablist">
-      <button class="tab-btn active tab-pending" role="tab" aria-selected="true" onclick="switchTab('pending', this)">
-        في الانتظار
-        <span class="tab-count" id="tab-pending-count">4</span>
-      </button>
-      <button class="tab-btn tab-approved" role="tab" aria-selected="false" onclick="switchTab('approved', this)">
-        موافق عليه
-        <span class="tab-count">28</span>
-      </button>
-      <button class="tab-btn tab-rejected" role="tab" aria-selected="false" onclick="switchTab('rejected', this)">
-        مرفوض
-        <span class="tab-count">3</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- FILTER BAR -->
-  <div class="filter-bar" role="toolbar" aria-label="تصفية الطلبات">
-    <button class="filter-chip active" onclick="toggleFilter(this)">
-      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-        <line x1="8" y1="6" x2="21" y2="6" />
-        <line x1="8" y1="12" x2="21" y2="12" />
-        <line x1="8" y1="18" x2="21" y2="18" />
-        <line x1="3" y1="6" x2="3.01" y2="6" />
-        <line x1="3" y1="12" x2="3.01" y2="12" />
-        <line x1="3" y1="18" x2="3.01" y2="18" />
-      </svg>
-      الكل
-    </button>
-    <button class="filter-chip" onclick="toggleFilter(this)">المنيا</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">القاهرة</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">الإسكندرية</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">أسيوط</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">فقه</button>
-    <button class="filter-chip" onclick="toggleFilter(this)">حديث</button>
-  </div>
-
-  <!-- CONTENT -->
-  <main class="content" id="main-content">
-
-    <!-- PENDING TAB -->
-    <div id="tab-pending" class="tab-content" role="tabpanel">
-      <p class="section-label">طلبات تنتظر مراجعتك</p>
-      <div class="cards-grid">
-
-        <!-- CARD 1 -->
-        <article class="card" id="card-1">
-          <div class="card-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">فقه السنة</div>
-                <div class="book-author">سيد سابق</div>
-              </div>
-              <span class="category-badge cat-fiqh">فقه</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد الرحمن</span> — المنيا</span>
-              </div>
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <polyline points="3 9 21 9" />
-                  <polyline points="9 21 9 9" />
-                </svg>
-                <span>الطبعة الثالثة</span>
-                <span class="edition-pill">دار الفتح</span>
-              </div>
-            </div>
+        <div class="stats-row">
+          <div class="stat-chip pending">
+            <div class="stat-chip-num" id="stat-pending">4</div>
+            <div class="stat-chip-label">في الانتظار</div>
           </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-a">أم</div>
-              <span class="submitter-name">أحمد محمود</span>
-              <span class="submit-date">منذ ساعتين</span>
-            </div>
-            <div class="actions three">
-              <button class="btn btn-approve" onclick="approveCard('card-1')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                موافقة
-              </button>
-              <button class="btn btn-reject" onclick="openReject('card-1', 'فقه السنة')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                رفض
-              </button>
-              <button class="btn btn-edit" onclick="openEdit('card-1')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                تعديل وموافقة
-              </button>
-            </div>
+          <div class="stat-chip approved">
+            <div class="stat-chip-num">28</div>
+            <div class="stat-chip-label">موافق عليه</div>
           </div>
-        </article>
-
-        <!-- CARD 2 -->
-        <article class="card" id="card-2">
-          <div class="card-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">تفسير ابن كثير</div>
-                <div class="book-author">ابن كثير الدمشقي</div>
-              </div>
-              <span class="category-badge cat-tafsir">تفسير</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد النور</span> — القاهرة، عين شمس</span>
-              </div>
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <polyline points="3 9 21 9" />
-                  <polyline points="9 21 9 9" />
-                </svg>
-                <span class="meta-highlight">4 مجلدات</span>
-                <span class="edition-pill">دار طيبة</span>
-              </div>
-            </div>
+          <div class="stat-chip rejected">
+            <div class="stat-chip-num">3</div>
+            <div class="stat-chip-label">مرفوض</div>
           </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-b">فع</div>
-              <span class="submitter-name">فاطمة علي</span>
-              <span class="submit-date">منذ 5 ساعات</span>
-            </div>
-            <div class="actions three">
-              <button class="btn btn-approve" onclick="approveCard('card-2')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                موافقة
-              </button>
-              <button class="btn btn-reject" onclick="openReject('card-2', 'تفسير ابن كثير')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                رفض
-              </button>
-              <button class="btn btn-edit" onclick="openEdit('card-2')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                تعديل وموافقة
-              </button>
-            </div>
-          </div>
-        </article>
+        </div>
+      </header>
 
-        <!-- CARD 3 -->
-        <article class="card" id="card-3">
-          <div class="card-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">رياض الصالحين</div>
-                <div class="book-author">يحيى بن شرف النووي</div>
-              </div>
-              <span class="category-badge cat-tazkiya">تزكية</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد الإخلاص</span> — الإسكندرية</span>
-              </div>
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <polyline points="3 9 21 9" />
-                  <polyline points="9 21 9 9" />
-                </svg>
-                <span style="color:var(--text-muted); font-style:italic">طبعة غير محددة</span>
-              </div>
-            </div>
-          </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-c">مح</div>
-              <span class="submitter-name">محمد حسن</span>
-              <span class="submit-date">أمس</span>
-            </div>
-            <div class="actions three">
-              <button class="btn btn-approve" onclick="approveCard('card-3')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                موافقة
-              </button>
-              <button class="btn btn-reject" onclick="openReject('card-3', 'رياض الصالحين')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                رفض
-              </button>
-              <button class="btn btn-edit" onclick="openEdit('card-3')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                تعديل وموافقة
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <!-- CARD 4 -->
-        <article class="card" id="card-4">
-          <div class="card-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">صحيح البخاري</div>
-                <div class="book-author">محمد بن إسماعيل البخاري</div>
-              </div>
-              <span class="category-badge cat-hadith">حديث</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد عمر بن الخطاب</span> — أسيوط</span>
-              </div>
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <polyline points="3 9 21 9" />
-                  <polyline points="9 21 9 9" />
-                </svg>
-                <span>الطبعة الأولى</span>
-                <span class="edition-pill">دار ابن كثير</span>
-              </div>
-            </div>
-          </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-d">سأ</div>
-              <span class="submitter-name">سارة أحمد</span>
-              <span class="submit-date">منذ يومين</span>
-            </div>
-            <div class="actions three">
-              <button class="btn btn-approve" onclick="approveCard('card-4')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                موافقة
-              </button>
-              <button class="btn btn-reject" onclick="openReject('card-4', 'صحيح البخاري')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                رفض
-              </button>
-              <button class="btn btn-edit" onclick="openEdit('card-4')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-                تعديل وموافقة
-              </button>
-            </div>
-          </div>
-        </article>
-
-      </div><!-- /cards-grid -->
-
-      <!-- empty state (hidden initially) -->
-      <div class="empty-state" id="pending-empty" style="display:none">
-        <div class="empty-icon">✓</div>
-        <div class="empty-title">لا طلبات معلقة</div>
-        <div class="empty-sub">أحسنت! تمت مراجعة جميع الطلبات.</div>
-      </div>
-    </div>
-
-    <!-- APPROVED TAB -->
-    <div id="tab-approved" class="tab-content" style="display:none" role="tabpanel">
-      <p class="section-label">طلبات تمت الموافقة عليها</p>
-      <div class="cards-grid">
-
-        <article class="card">
-          <div class="card-accent approved-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">الجامع الصغير</div>
-                <div class="book-author">جلال الدين السيوطي</div>
-              </div>
-              <span class="category-badge cat-hadith">حديث</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد السيدة زينب</span> — القاهرة</span>
-              </div>
-            </div>
-            <div class="status-row status-approved">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              تمت الموافقة بواسطة: أنت — منذ 3 أيام
-            </div>
-          </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-a">خم</div>
-              <span class="submitter-name">خالد مصطفى</span>
-              <span class="submit-date">منذ 3 أيام</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-accent approved-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">إحياء علوم الدين</div>
-                <div class="book-author">أبو حامد الغزالي</div>
-              </div>
-              <span class="category-badge cat-tazkiya">تزكية</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد الفتح</span> — المنيا، ملوي</span>
-              </div>
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <polyline points="3 9 21 9" />
-                  <polyline points="9 21 9 9" />
-                </svg>
-                <span>الطبعة الثانية</span>
-                <span class="edition-pill">دار المعرفة</span>
-              </div>
-            </div>
-            <div class="status-row status-approved">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              تمت الموافقة — منذ أسبوع
-            </div>
-          </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-b">نع</div>
-              <span class="submitter-name">نور العمري</span>
-              <span class="submit-date">منذ أسبوع</span>
-            </div>
-          </div>
-        </article>
-
-      </div>
-    </div>
-
-    <!-- REJECTED TAB -->
-    <div id="tab-rejected" class="tab-content" style="display:none" role="tabpanel">
-      <p class="section-label">طلبات مرفوضة</p>
-      <div class="cards-grid">
-
-        <article class="card">
-          <div class="card-accent rejected-accent"></div>
-          <div class="card-body">
-            <div class="card-top">
-              <div class="book-info">
-                <div class="book-title">مختصر صحيح مسلم</div>
-                <div class="book-author">المنذري</div>
-              </div>
-              <span class="category-badge cat-hadith">حديث</span>
-            </div>
-            <div class="card-meta">
-              <div class="meta-row">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span><span class="meta-highlight">مسجد التوحيد</span> — الجيزة</span>
-              </div>
-            </div>
-            <div class="status-row status-rejected">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-              مرفوض — منذ 4 أيام
-            </div>
-            <div class="rejection-note">
-              <div class="rejection-note-label">سبب الرفض:</div>
-              هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد — تكرار.
-            </div>
-          </div>
-          <div class="divider"></div>
-          <div class="card-footer">
-            <div class="submitter-row">
-              <div class="avatar avatar-c">رب</div>
-              <span class="submitter-name">ريم بكر</span>
-              <span class="submit-date">منذ 4 أيام</span>
-            </div>
-          </div>
-        </article>
-
-      </div>
-    </div>
-
-  </main>
-
-  <!-- REJECT MODAL -->
-  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title"
-    onclick="closeModalOnOverlay(event)">
-    <div class="modal">
-      <div class="modal-handle" aria-hidden="true"></div>
-      <div class="modal-body">
-        <h2 class="modal-title" id="modal-title">رفض الطلب</h2>
-        <p class="modal-sub">سيتم إخطار المُقدِّم برفض طلبه. الكتاب: <strong id="modal-book-name"></strong></p>
-        <label class="field-label" for="reject-reason">سبب الرفض (اختياري)</label>
-        <textarea class="textarea" id="reject-reason" placeholder="مثال: هذا الكتاب مسجل بالفعل في نفس المسجد..."
-          rows="3"></textarea>
-        <div class="modal-actions">
-          <button class="btn btn-cancel" onclick="closeModal()">إلغاء</button>
-          <button class="btn btn-confirm-reject" onclick="confirmReject()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-            تأكيد الرفض
+      <!-- TABS -->
+      <div class="tabs-wrap">
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active tab-pending" role="tab" aria-selected="true"
+            onclick="switchTab('pending', this)">
+            في الانتظار
+            <span class="tab-count" id="tab-pending-count">4</span>
+          </button>
+          <button class="tab-btn tab-approved" role="tab" aria-selected="false" onclick="switchTab('approved', this)">
+            موافق عليه
+            <span class="tab-count">28</span>
+          </button>
+          <button class="tab-btn tab-rejected" role="tab" aria-selected="false" onclick="switchTab('rejected', this)">
+            مرفوض
+            <span class="tab-count">3</span>
           </button>
         </div>
       </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar" role="toolbar" aria-label="تصفية الطلبات">
+        <button class="filter-chip active" onclick="toggleFilter(this)">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+          الكل
+        </button>
+        <button class="filter-chip" onclick="toggleFilter(this)">المنيا</button>
+        <button class="filter-chip" onclick="toggleFilter(this)">القاهرة</button>
+        <button class="filter-chip" onclick="toggleFilter(this)">الإسكندرية</button>
+        <button class="filter-chip" onclick="toggleFilter(this)">أسيوط</button>
+        <button class="filter-chip" onclick="toggleFilter(this)">فقه</button>
+        <button class="filter-chip" onclick="toggleFilter(this)">حديث</button>
+      </div>
+
+      <!-- CONTENT -->
+      <main class="content" id="main-content">
+
+        <!-- PENDING TAB -->
+        <div id="tab-pending" class="tab-content" role="tabpanel">
+          <p class="section-label">طلبات تنتظر مراجعتك</p>
+          <div class="cards-grid">
+
+            <!-- CARD 1 -->
+            <article class="card" id="card-1">
+              <div class="card-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">فقه السنة</div>
+                    <div class="book-author">سيد سابق</div>
+                  </div>
+                  <span class="category-badge cat-fiqh">فقه</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد الرحمن</span> — المنيا</span>
+                  </div>
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <polyline points="3 9 21 9" />
+                      <polyline points="9 21 9 9" />
+                    </svg>
+                    <span>الطبعة الثالثة</span>
+                    <span class="edition-pill">دار الفتح</span>
+                  </div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-a">أم</div>
+                  <span class="submitter-name">أحمد محمود</span>
+                  <span class="submit-date">منذ ساعتين</span>
+                </div>
+                <div class="actions three">
+                  <button class="btn btn-approve" onclick="approveCard('card-1')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    موافقة
+                  </button>
+                  <button class="btn btn-reject" onclick="openReject('card-1', 'فقه السنة')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                    رفض
+                  </button>
+                  <button class="btn btn-edit" onclick="openEdit('card-1')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    تعديل وموافقة
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- CARD 2 -->
+            <article class="card" id="card-2">
+              <div class="card-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">تفسير ابن كثير</div>
+                    <div class="book-author">ابن كثير الدمشقي</div>
+                  </div>
+                  <span class="category-badge cat-tafsir">تفسير</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد النور</span> — القاهرة، عين شمس</span>
+                  </div>
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <polyline points="3 9 21 9" />
+                      <polyline points="9 21 9 9" />
+                    </svg>
+                    <span class="meta-highlight">4 مجلدات</span>
+                    <span class="edition-pill">دار طيبة</span>
+                  </div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-b">فع</div>
+                  <span class="submitter-name">فاطمة علي</span>
+                  <span class="submit-date">منذ 5 ساعات</span>
+                </div>
+                <div class="actions three">
+                  <button class="btn btn-approve" onclick="approveCard('card-2')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    موافقة
+                  </button>
+                  <button class="btn btn-reject" onclick="openReject('card-2', 'تفسير ابن كثير')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                    رفض
+                  </button>
+                  <button class="btn btn-edit" onclick="openEdit('card-2')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    تعديل وموافقة
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- CARD 3 -->
+            <article class="card" id="card-3">
+              <div class="card-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">رياض الصالحين</div>
+                    <div class="book-author">يحيى بن شرف النووي</div>
+                  </div>
+                  <span class="category-badge cat-tazkiya">تزكية</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد الإخلاص</span> — الإسكندرية</span>
+                  </div>
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <polyline points="3 9 21 9" />
+                      <polyline points="9 21 9 9" />
+                    </svg>
+                    <span style="color:var(--text-muted); font-style:italic">طبعة غير محددة</span>
+                  </div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-c">مح</div>
+                  <span class="submitter-name">محمد حسن</span>
+                  <span class="submit-date">أمس</span>
+                </div>
+                <div class="actions three">
+                  <button class="btn btn-approve" onclick="approveCard('card-3')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    موافقة
+                  </button>
+                  <button class="btn btn-reject" onclick="openReject('card-3', 'رياض الصالحين')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                    رفض
+                  </button>
+                  <button class="btn btn-edit" onclick="openEdit('card-3')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    تعديل وموافقة
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- CARD 4 -->
+            <article class="card" id="card-4">
+              <div class="card-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">صحيح البخاري</div>
+                    <div class="book-author">محمد بن إسماعيل البخاري</div>
+                  </div>
+                  <span class="category-badge cat-hadith">حديث</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد عمر بن الخطاب</span> — أسيوط</span>
+                  </div>
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <polyline points="3 9 21 9" />
+                      <polyline points="9 21 9 9" />
+                    </svg>
+                    <span>الطبعة الأولى</span>
+                    <span class="edition-pill">دار ابن كثير</span>
+                  </div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-d">سأ</div>
+                  <span class="submitter-name">سارة أحمد</span>
+                  <span class="submit-date">منذ يومين</span>
+                </div>
+                <div class="actions three">
+                  <button class="btn btn-approve" onclick="approveCard('card-4')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    موافقة
+                  </button>
+                  <button class="btn btn-reject" onclick="openReject('card-4', 'صحيح البخاري')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                      viewBox="0 0 24 24">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                    رفض
+                  </button>
+                  <button class="btn btn-edit" onclick="openEdit('card-4')">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    تعديل وموافقة
+                  </button>
+                </div>
+              </div>
+            </article>
+
+          </div><!-- /cards-grid -->
+
+          <!-- empty state (hidden initially) -->
+          <div class="empty-state" id="pending-empty" style="display:none">
+            <div class="empty-icon">✓</div>
+            <div class="empty-title">لا طلبات معلقة</div>
+            <div class="empty-sub">أحسنت! تمت مراجعة جميع الطلبات.</div>
+          </div>
+        </div>
+
+        <!-- APPROVED TAB -->
+        <div id="tab-approved" class="tab-content" style="display:none" role="tabpanel">
+          <p class="section-label">طلبات تمت الموافقة عليها</p>
+          <div class="cards-grid">
+
+            <article class="card">
+              <div class="card-accent approved-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">الجامع الصغير</div>
+                    <div class="book-author">جلال الدين السيوطي</div>
+                  </div>
+                  <span class="category-badge cat-hadith">حديث</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد السيدة زينب</span> — القاهرة</span>
+                  </div>
+                </div>
+                <div class="status-row status-approved">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  تمت الموافقة بواسطة: أنت — منذ 3 أيام
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-a">خم</div>
+                  <span class="submitter-name">خالد مصطفى</span>
+                  <span class="submit-date">منذ 3 أيام</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-accent approved-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">إحياء علوم الدين</div>
+                    <div class="book-author">أبو حامد الغزالي</div>
+                  </div>
+                  <span class="category-badge cat-tazkiya">تزكية</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد الفتح</span> — المنيا، ملوي</span>
+                  </div>
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <polyline points="3 9 21 9" />
+                      <polyline points="9 21 9 9" />
+                    </svg>
+                    <span>الطبعة الثانية</span>
+                    <span class="edition-pill">دار المعرفة</span>
+                  </div>
+                </div>
+                <div class="status-row status-approved">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  تمت الموافقة — منذ أسبوع
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-b">نع</div>
+                  <span class="submitter-name">نور العمري</span>
+                  <span class="submit-date">منذ أسبوع</span>
+                </div>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- REJECTED TAB -->
+        <div id="tab-rejected" class="tab-content" style="display:none" role="tabpanel">
+          <p class="section-label">طلبات مرفوضة</p>
+          <div class="cards-grid">
+
+            <article class="card">
+              <div class="card-accent rejected-accent"></div>
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="book-info">
+                    <div class="book-title">مختصر صحيح مسلم</div>
+                    <div class="book-author">المنذري</div>
+                  </div>
+                  <span class="category-badge cat-hadith">حديث</span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                      <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span><span class="meta-highlight">مسجد التوحيد</span> — الجيزة</span>
+                  </div>
+                </div>
+                <div class="status-row status-rejected">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  مرفوض — منذ 4 أيام
+                </div>
+                <div class="rejection-note">
+                  <div class="rejection-note-label">سبب الرفض:</div>
+                  هذا الكتاب بهذه الطبعة مسجل بالفعل في هذا المسجد — تكرار.
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="card-footer">
+                <div class="submitter-row">
+                  <div class="avatar avatar-c">رب</div>
+                  <span class="submitter-name">ريم بكر</span>
+                  <span class="submit-date">منذ 4 أيام</span>
+                </div>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+      </main>
+
+      <!-- REJECT MODAL -->
+      <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+        onclick="closeModalOnOverlay(event)">
+        <div class="modal">
+          <div class="modal-handle" aria-hidden="true"></div>
+          <div class="modal-body">
+            <h2 class="modal-title" id="modal-title">رفض الطلب</h2>
+            <p class="modal-sub">سيتم إخطار المُقدِّم برفض طلبه. الكتاب: <strong id="modal-book-name"></strong></p>
+            <label class="field-label" for="reject-reason">سبب الرفض (اختياري)</label>
+            <textarea class="textarea" id="reject-reason" placeholder="مثال: هذا الكتاب مسجل بالفعل في نفس المسجد..."
+              rows="3"></textarea>
+            <div class="modal-actions">
+              <button class="btn btn-cancel" onclick="closeModal()">إلغاء</button>
+              <button class="btn btn-confirm-reject" onclick="confirmReject()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                تأكيد الرفض
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOAST -->
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <!-- BOTTOM NAV -->
+      <nav class="bottom-nav" aria-label="التنقل الرئيسي">
+        <div class="bottom-nav-inner">
+          <a class="bottom-tab" href="browse.html" aria-label="تصفح">
+            <span class="bottom-tab-icon" aria-hidden="true">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              </svg>
+            </span>
+            تصفح
+          </a>
+          <a class="bottom-tab" href="submit.html" aria-label="تسجيل كتاب">
+            <span class="bottom-tab-icon" aria-hidden="true">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </svg>
+            </span>
+            تسجيل
+          </a>
+          <a class="bottom-tab active" href="requests.html" aria-label="الطلبات" aria-current="page">
+            <span class="bottom-tab-icon" aria-hidden="true">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+            </span>
+            <span class="nav-dot" aria-hidden="true"></span>
+            الطلبات
+          </a>
+          <a class="bottom-tab" href="profile.html" aria-label="حسابي">
+            <span class="bottom-tab-icon" aria-hidden="true">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+            </span>
+            حسابي
+          </a>
+        </div>
+        <div class="bottom-nav-safe" aria-hidden="true"></div>
+      </nav>
+
     </div>
-  </div>
 
-  <!-- TOAST -->
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav" aria-label="التنقل الرئيسي">
-    <button class="nav-item" aria-label="تصفح">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      </svg>
-      تصفح
-    </button>
-    <button class="nav-item" aria-label="تسجيل كتاب">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="16" />
-        <line x1="8" y1="12" x2="16" y2="12" />
-      </svg>
-      تسجيل
-    </button>
-    <button class="nav-item active" aria-label="الطلبات" aria-current="page">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <path d="M9 11l3 3L22 4" />
-        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-      </svg>
-      <span class="nav-dot" aria-hidden="true"></span>
-      الطلبات
-    </button>
-    <button class="nav-item" aria-label="ملفي الشخصي">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-      </svg>
-      ملفي
-    </button>
-  </nav>
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
 
-  <script>
-    let pendingCount = 4;
-    let rejectTargetId = null;
+      function toggleSidebar() {
+        if (window.innerWidth <= 767) return;
+        sidebar.classList.toggle('open');
+        const isOpen = sidebar.classList.contains('open');
+        backdrop.style.display = isOpen ? 'block' : 'none';
+        const pageContent = document.getElementById('page-content');
+        if (pageContent) pageContent.classList.toggle('sidebar-open', isOpen);
+        if (!isOpen) closeAllSubMenus();
+      }
 
-    function switchTab(tab, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-      btn.classList.add('active');
-      document.getElementById('tab-' + tab).style.display = 'block';
-    }
+      function toggleSubMenu(button) {
+        const submenu = button.nextElementSibling;
+        if (!submenu.classList.contains('show')) {
+          closeAllSubMenus();
+        }
+        submenu.classList.toggle('show');
+        button.classList.toggle('rotate');
+        button.setAttribute('aria-expanded', submenu.classList.contains('show') ? 'true' : 'false');
+      }
 
-    function toggleFilter(btn) {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-    }
+      function closeAllSubMenus() {
+        Array.from(sidebar.getElementsByClassName('show')).forEach(el => {
+          el.classList.remove('show');
+          const prev = el.previousElementSibling;
+          if (prev) {
+            prev.classList.remove('rotate');
+            prev.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
 
-    function approveCard(id) {
-      const card = document.getElementById(id);
-      if (!card) return;
-      card.classList.add('approved-flash');
-      setTimeout(() => {
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          closeAllSubMenus();
+          if (document.getElementById('modal-overlay')?.classList.contains('open')) closeModal();
+        }
+      });
+
+      backdrop?.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        backdrop.style.display = 'none';
+        document.getElementById('page-content')?.classList.remove('sidebar-open');
+        closeAllSubMenus();
+      });
+
+      let pendingCount = 4;
+      let rejectTargetId = null;
+
+      function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).style.display = 'block';
+      }
+
+      function toggleFilter(btn) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      function approveCard(id) {
+        const card = document.getElementById(id);
+        if (!card) return;
+        card.classList.add('approved-flash');
+        setTimeout(() => {
+          card.classList.add('removing');
+          setTimeout(() => {
+            card.remove();
+            pendingCount = Math.max(0, pendingCount - 1);
+            updatePendingCount();
+            checkEmpty();
+          }, 400);
+        }, 300);
+        showToast('تمت الموافقة على الطلب ✓', 'green');
+      }
+
+      function openReject(id, bookName) {
+        rejectTargetId = id;
+        document.getElementById('modal-book-name').textContent = bookName;
+        document.getElementById('reject-reason').value = '';
+        document.getElementById('modal-overlay').classList.add('open');
+        setTimeout(() => document.getElementById('reject-reason').focus(), 350);
+      }
+
+      function closeModal() {
+        document.getElementById('modal-overlay').classList.remove('open');
+        rejectTargetId = null;
+      }
+
+      function closeModalOnOverlay(e) {
+        if (e.target === document.getElementById('modal-overlay')) closeModal();
+      }
+
+      function confirmReject() {
+        if (!rejectTargetId) return;
+        const card = document.getElementById(rejectTargetId);
+        closeModal();
+        if (!card) return;
         card.classList.add('removing');
         setTimeout(() => {
           card.remove();
@@ -1660,75 +2247,42 @@
           updatePendingCount();
           checkEmpty();
         }, 400);
-      }, 300);
-      showToast('تمت الموافقة على الطلب ✓', 'green');
-    }
-
-    function openReject(id, bookName) {
-      rejectTargetId = id;
-      document.getElementById('modal-book-name').textContent = bookName;
-      document.getElementById('reject-reason').value = '';
-      document.getElementById('modal-overlay').classList.add('open');
-      setTimeout(() => document.getElementById('reject-reason').focus(), 350);
-    }
-
-    function closeModal() {
-      document.getElementById('modal-overlay').classList.remove('open');
-      rejectTargetId = null;
-    }
-
-    function closeModalOnOverlay(e) {
-      if (e.target === document.getElementById('modal-overlay')) closeModal();
-    }
-
-    function confirmReject() {
-      if (!rejectTargetId) return;
-      const card = document.getElementById(rejectTargetId);
-      closeModal();
-      if (!card) return;
-      card.classList.add('removing');
-      setTimeout(() => {
-        card.remove();
-        pendingCount = Math.max(0, pendingCount - 1);
-        updatePendingCount();
-        checkEmpty();
-      }, 400);
-      showToast('تم رفض الطلب', 'red');
-    }
-
-    function openEdit(id) {
-      showToast('جارٍ فتح نموذج التعديل...', '');
-    }
-
-    function updatePendingCount() {
-      document.getElementById('stat-pending').textContent = pendingCount;
-      document.getElementById('tab-pending-count').textContent = pendingCount;
-      const badge = document.querySelector('.notif-badge');
-      if (badge) badge.textContent = Math.max(0, pendingCount);
-    }
-
-    function checkEmpty() {
-      const grid = document.querySelector('#tab-pending .cards-grid');
-      const empty = document.getElementById('pending-empty');
-      if (grid && grid.children.length === 0) {
-        grid.style.display = 'none';
-        empty.style.display = 'block';
+        showToast('تم رفض الطلب', 'red');
       }
-    }
 
-    let toastTimer;
-    function showToast(msg, type) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast show' + (type ? ' toast-' + type : '');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-    }
+      function openEdit(id) {
+        showToast('جارٍ فتح نموذج التعديل...', '');
+      }
 
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeModal();
-    });
-  </script>
+      function updatePendingCount() {
+        document.getElementById('stat-pending').textContent = pendingCount;
+        document.getElementById('tab-pending-count').textContent = pendingCount;
+        const badge = document.querySelector('.notif-badge');
+        if (badge) badge.textContent = Math.max(0, pendingCount);
+      }
+
+      function checkEmpty() {
+        const grid = document.querySelector('#tab-pending .cards-grid');
+        const empty = document.getElementById('pending-empty');
+        if (grid && grid.children.length === 0) {
+          grid.style.display = 'none';
+          empty.style.display = 'block';
+        }
+      }
+
+      let toastTimer;
+      function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show' + (type ? ' toast-' + type : '');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+      }
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+      });
+    </script>
 </body>
 
 </html>
