@@ -5,21 +5,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>عن المنصة — على رفوف المساجد</title>
-
-    <!-- Performance: preconnect + font preload -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style"
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
-        onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript>
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
-            rel="stylesheet" />
-    </noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
 
     <style>
         /* ═══════════════════════════════════════════════════════
-       DESIGN TOKENS
+       DESIGN TOKENS  — matches Login prototype
     ═══════════════════════════════════════════════════════ */
         :root {
             --green: #1B3A2D;
@@ -39,18 +32,24 @@
             --text-light: #9a948e;
             --border: rgba(27, 58, 45, 0.11);
             --border-strong: rgba(27, 58, 45, 0.22);
-            --error: #c0392b;
-            --error-ring: rgba(192, 57, 43, 0.12);
 
-            --nav-w: 258px;
-            --nav-icon-w: 66px;
-            --btm-nav-h: 70px;
+            /* sidebar colour aliases — mirrors browse.html nav tokens */
+            --g-950: #0A2218;
+            --g-900: #1B3A2D;
+            --g-800: #254d3c;
+            --g-700: #2d5e4a;
+            --g-300: #8ec8be;
+            --a-400: var(--gold);
+            --a-600: #a07a30;
+            --a-900: var(--green-deep);
+            --nav-h: 66px;
+            --r-md: 12px;
+            --ease-out-nav: cubic-bezier(0.22, 1, 0.36, 1);
+            --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.16), 0 8px 20px rgba(0, 0, 0, 0.08);
 
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --ease-spring: cubic-bezier(0.34, 1.44, 0.64, 1);
             --ease-out: cubic-bezier(0, 0, 0.2, 1);
-
-            --transition-nav: 0.35s var(--ease);
         }
 
         /* ═══════════════════════════════════════════════════════
@@ -79,217 +78,433 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-       LAYOUT
-       BUG FIX: was margin-inline-end (= margin-left in RTL),
-       which created empty space on the left while the nav
-       is fixed to the RIGHT. Correct: margin-inline-start
-       (= margin-right in RTL) offsets from the nav.
+       TOP NAVBAR
     ═══════════════════════════════════════════════════════ */
-        .main-content {
-            margin-inline-start: var(--nav-w);
-            transition: margin-inline-start var(--transition-nav);
-            min-height: 100vh;
-        }
-
-        body.nav-collapsed .main-content {
-            margin-inline-start: var(--nav-icon-w);
-        }
-
-        /* ═══════════════════════════════════════════════════════
-       SIDE NAV PLACEHOLDER
-       ⚠️  Replace with the SideNav component once built.
-       Role state: guest (Login visible, Submit hidden).
-    ═══════════════════════════════════════════════════════ */
-        .side-nav {
-            position: fixed;
+        .navbar {
+            position: sticky;
             top: 0;
-            /* Use logical inset-inline-start so RTL/LTR flips automatically */
-            inset-inline-start: 0;
-            /* right: 0 in RTL */
-            width: var(--nav-w);
-            height: 100vh;
-            background: var(--green);
-            display: flex;
-            flex-direction: column;
             z-index: 200;
-            overflow: hidden;
-            transition: width var(--transition-nav);
+            height: var(--nav-h);
+            background: linear-gradient(160deg, var(--g-700) 0%, var(--g-800) 55%, var(--g-900) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
-        body.nav-collapsed .side-nav {
-            width: var(--nav-icon-w);
-        }
-
-        /* nav placeholder badge — logical inset so it works in any dir */
-        .nav-placeholder-badge {
-            position: absolute;
-            top: 8px;
-            inset-inline-end: 8px;
-            /* left in RTL */
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: .04em;
-            color: var(--gold);
-            background: rgba(201, 168, 76, 0.15);
-            border: 1px solid rgba(201, 168, 76, 0.3);
-            border-radius: 4px;
-            padding: 2px 5px;
-            white-space: nowrap;
-            opacity: 0.7;
-            pointer-events: none;
+        .nav-inner {
+            max-width: 100%;
+            padding: 0 24px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .nav-brand {
-            padding: 28px 20px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            flex-shrink: 0;
             display: flex;
             align-items: center;
-            gap: 12px;
-            overflow: hidden;
+            gap: 11px;
+            color: #fff;
+            flex-shrink: 0;
+            transition: opacity 0.18s;
+            text-decoration: none;
         }
 
-        .nav-logo-mark {
+        .nav-brand:hover {
+            opacity: 0.85;
+        }
+
+        .brand-mark {
             width: 38px;
             height: 38px;
-            flex-shrink: 0;
-            border: 1.5px solid var(--gold);
-            border-radius: 10px;
+            border-radius: var(--r-md);
+            background: linear-gradient(135deg, var(--a-400), var(--a-600));
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--gold);
-            font-size: 20px;
-            font-weight: 900;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+            flex-shrink: 0;
+            color: var(--a-900);
         }
 
-        .nav-brand-text {
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .nav-brand-title {
-            color: var(--cream);
-            font-size: 14px;
+        .brand-name {
+            font-size: 15px;
             font-weight: 800;
-            line-height: 1.3;
+            line-height: 1.2;
+            color: #fff;
+            letter-spacing: -0.2px;
         }
 
-        .nav-brand-sub {
-            color: rgba(245, 239, 224, 0.45);
+        .brand-sub {
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.48);
         }
 
-        .nav-links {
-            flex: 1;
-            padding: 16px 12px;
+        .nav-actions {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .nav-item {
-            display: flex;
+            gap: 8px;
             align-items: center;
-            gap: 12px;
-            padding: 11px 12px;
-            border-radius: 10px;
-            color: rgba(245, 239, 224, 0.65);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s, color 0.2s;
-            white-space: nowrap;
-            overflow: hidden;
+            margin-right: auto;
         }
 
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.07);
-            color: var(--cream);
-        }
-
-        .nav-item.active {
-            background: rgba(201, 168, 76, 0.15);
-            color: var(--gold);
-        }
-
-        .nav-item.active .nav-icon {
-            color: var(--gold);
-        }
-
-        .nav-icon {
-            font-size: 18px;
-            flex-shrink: 0;
-            width: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-label {
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .nav-footer-section {
-            padding: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            flex-shrink: 0;
-        }
-
-        .nav-login-btn {
-            width: 100%;
-            padding: 10px 16px;
-            background: var(--gold);
-            color: var(--green-deep);
-            border: none;
-            border-radius: 10px;
+        .btn-login {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            padding: 8px 16px;
+            border-radius: var(--r-md);
             font-family: 'Cairo', sans-serif;
             font-size: 13px;
-            font-weight: 800;
+            font-weight: 500;
+            transition: all 0.18s;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        #toggle-btn,
+        #sidebar-toggle-btn {
+            padding: 8px;
+            border: none;
+            border-radius: var(--r-md);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            white-space: nowrap;
-            overflow: hidden;
             transition: background 0.2s;
+            flex-shrink: 0;
         }
 
-        .nav-login-btn:hover {
-            background: var(--gold-light);
+        #toggle-btn:hover,
+        #sidebar-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
         }
 
-        /* Tablet toggle */
-        .nav-toggle-btn {
+        #toggle-btn svg,
+        #sidebar-toggle-btn svg {
+            fill: currentColor;
+        }
+
+        @media (max-width: 640px) {
+            .brand-sub {
+                display: none;
+            }
+
+            .btn-login {
+                display: none;
+            }
+
+            .nav-inner {
+                padding: 0 16px;
+                gap: 12px;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+       SIDEBAR — Desktop slide-in drawer
+    ═══════════════════════════════════════════════════════ */
+        #sidebar {
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--g-900) 0%, var(--g-950) 100%);
+            border-left: 1px solid rgba(255, 255, 255, 0.07);
             position: fixed;
-            top: 18px;
-            /* Logical: sits just outside the nav's inline-end edge */
-            inset-inline-end: calc(var(--nav-w) + 14px);
-            /* left of nav in RTL */
-            width: 38px;
-            height: 38px;
-            background: var(--green);
-            border: none;
-            border-radius: 10px;
-            color: var(--cream);
-            font-size: 18px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 201;
-            transition: inset-inline-end var(--transition-nav);
-            box-shadow: 0 2px 12px rgba(27, 58, 45, 0.25);
+            top: 0;
+            right: 0;
+            transform: translateX(100%);
+            transition: transform 280ms var(--ease-out-nav);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xl);
         }
 
-        body.nav-collapsed .nav-toggle-btn {
-            inset-inline-end: calc(var(--nav-icon-w) + 14px);
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        #page-content {
+            transition: margin-right 280ms var(--ease-out-nav);
+        }
+
+        #page-content.sidebar-open {
+            margin-right: 300px;
+        }
+
+        /* sidebar header */
+        .sidebar-header {
+            height: var(--nav-h);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            flex-shrink: 0;
+        }
+
+        /* nav list */
+        #sidebar>ul {
+            list-style: none;
+            padding: 10px 10px 20px;
+            margin: 0;
+            flex: 1;
+        }
+
+        #sidebar>ul>li.active>a,
+        #sidebar>ul>li.active>.dropdown-btn {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #sidebar>ul>li.active>a svg,
+        #sidebar>ul>li.active>.dropdown-btn svg {
+            fill: #fff;
+            color: #fff;
+        }
+
+        #sidebar a,
+        #sidebar .dropdown-btn {
+            border-radius: var(--r-md);
+            padding: 11px 12px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.65);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.18s, color 0.18s;
+            white-space: normal;
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            text-align: right;
+            background: none;
+            border: none;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        #sidebar svg {
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+
+        #sidebar a span,
+        #sidebar .dropdown-btn span {
+            flex-grow: 1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        #sidebar a:hover,
+        #sidebar .dropdown-btn:hover {
+            background-color: rgba(255, 255, 255, 0.07);
+            color: #fff;
+        }
+
+        .chevron {
+            transition: rotate 220ms ease;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .rotate .chevron {
+            rotate: 180deg;
+        }
+
+        #sidebar .sub-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 280ms ease-in-out;
+        }
+
+        #sidebar .sub-menu.show {
+            max-height: 300px;
+        }
+
+        #sidebar .sub-menu>ul {
+            list-style: none;
+            padding: 3px 0 6px;
+            margin: 0;
+        }
+
+        #sidebar .sub-menu a {
+            padding-inline-start: 3.2em;
+            font-size: 13.5px;
+            color: rgba(255, 255, 255, 0.5);
+            padding-top: 9px;
+            padding-bottom: 9px;
+        }
+
+        #sidebar .sub-menu a:hover {
+            color: rgba(255, 255, 255, 0.88);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+       MOBILE — Bottom Navigation Bar (≤ 768px)
+    ═══════════════════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            #toggle-btn {
+                display: none;
+            }
+
+            #sidebar {
+                width: 100%;
+                height: auto;
+                transform: none !important;
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.09);
+                overflow: visible;
+                flex-direction: column;
+                z-index: 300;
+                transition: none !important;
+                box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.32);
+                background: linear-gradient(180deg, var(--g-900), var(--g-950));
+            }
+
+            #sidebar.open {
+                transform: none !important;
+            }
+
+            .sidebar-header {
+                display: none;
+            }
+
+            #sidebar>ul {
+                display: flex;
+                flex-direction: row;
+                align-items: stretch;
+                padding: 0;
+                width: 100%;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+
+            #sidebar>ul>li {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: stretch;
+            }
+
+            #sidebar>ul>li>a,
+            #sidebar>ul>li>.dropdown-btn {
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 4px;
+                padding: 10px 6px 8px;
+                border-radius: 0;
+                width: 100%;
+                min-height: 58px;
+                font-size: 10px;
+                text-align: center;
+                color: rgba(255, 255, 255, 0.55);
+            }
+
+            #sidebar>ul>li>a span,
+            #sidebar>ul>li>.dropdown-btn span {
+                font-size: 10.5px;
+                font-weight: 500;
+                flex-grow: 0;
+                white-space: nowrap;
+            }
+
+            #sidebar>ul>li.active>a,
+            #sidebar>ul>li.active>.dropdown-btn {
+                color: var(--g-300);
+                background: transparent;
+            }
+
+            #sidebar>ul>li.active>a svg,
+            #sidebar>ul>li.active>.dropdown-btn svg {
+                fill: var(--g-300);
+                color: var(--g-300);
+            }
+
+            #sidebar .chevron {
+                display: none;
+            }
+
+            #sidebar .sub-menu {
+                position: fixed;
+                bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+                right: 0;
+                left: 0;
+                max-height: 0;
+                overflow: hidden;
+                background: var(--g-900);
+                border-top: 1px solid rgba(255, 255, 255, 0.09);
+                box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.35);
+                z-index: 999;
+                transition: max-height 260ms ease-in-out;
+            }
+
+            #sidebar .sub-menu.show {
+                max-height: 100px;
+            }
+
+            #sidebar .sub-menu>ul {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+                padding: 12px 20px;
+            }
+
+            #sidebar .sub-menu a {
+                padding-inline-start: 0;
+                padding: 9px 22px;
+                border-radius: var(--r-md);
+                font-size: 13.5px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.8);
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                flex-direction: row;
+                gap: 8px;
+                white-space: nowrap;
+            }
+
+            #sidebar .sub-menu a:hover,
+            #sidebar .sub-menu a:active {
+                background: rgba(255, 255, 255, 0.16);
+                color: #fff;
+            }
+
+            #sidebar-backdrop {
+                display: none !important;
+            }
+
+            #page-content {
+                padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+            }
+
+            #page-content.sidebar-open {
+                margin-right: 0;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+       LAYOUT — main content wrapper
+    ═══════════════════════════════════════════════════════ */
+        .main-content {
+            min-height: 100vh;
         }
 
         /* ═══════════════════════════════════════════════════════
@@ -325,7 +540,7 @@
             pointer-events: none;
         }
 
-        /* radial vignette so pattern fades at edges */
+        /* radial fade so pattern fades to edges */
         .hero::after {
             content: '';
             position: absolute;
@@ -355,12 +570,11 @@
         .ornament-line {
             height: 1px;
             width: 80px;
-            /* Logical gradient direction for RTL/LTR correctness */
-            background: linear-gradient(to inline-start, transparent, var(--gold));
+            background: linear-gradient(to left, transparent, var(--gold));
         }
 
         .ornament-line.right {
-            background: linear-gradient(to inline-end, transparent, var(--gold));
+            background: linear-gradient(to right, transparent, var(--gold));
         }
 
         .ornament-diamond {
@@ -433,7 +647,7 @@
             animation: fadeSlideUp 0.8s var(--ease-out) 0.8s forwards;
         }
 
-        /* bottom wave transition into next section */
+        /* bottom wave cut into the next section */
         .hero-wave {
             position: absolute;
             bottom: 0;
@@ -475,7 +689,6 @@
             margin-bottom: 14px;
         }
 
-        /* Decorative leading line — visual only, aria-hidden on wrapper */
         .section-label::before {
             content: '';
             display: block;
@@ -483,16 +696,6 @@
             height: 2px;
             background: var(--gold);
             flex-shrink: 0;
-        }
-
-        /* Centred variant used in feedback header */
-        .section-label--center {
-            justify-content: center;
-        }
-
-        .section-label--center::before {
-            display: none;
-            /* Replaced by explicit sibling element in markup */
         }
 
         .section-heading {
@@ -515,14 +718,6 @@
             margin-bottom: 52px;
         }
 
-        .section-header--center {
-            text-align: center;
-        }
-
-        .section-header--center .section-desc {
-            margin: 0 auto;
-        }
-
         /* ═══════════════════════════════════════════════════════
        SCROLL REVEAL
     ═══════════════════════════════════════════════════════ */
@@ -532,12 +727,11 @@
             transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
         }
 
-        .reveal.is-revealed {
+        .reveal.revealed {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* Staggered delay helpers */
         .reveal-delay-1 {
             transition-delay: 0.1s;
         }
@@ -570,6 +764,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
+            margin-top: 0;
         }
 
         .step-card {
@@ -628,7 +823,7 @@
             line-height: 1.9;
         }
 
-        /* decorative connector between step-cards */
+        /* connector arrow between cards */
         .steps-connector {
             display: flex;
             align-items: center;
@@ -658,7 +853,8 @@
             content: '';
             position: absolute;
             top: -40px;
-            inset-inline: 0;
+            left: 0;
+            right: 0;
             height: 40px;
             background: var(--cream);
             clip-path: ellipse(55% 100% at 50% 0%);
@@ -763,14 +959,14 @@
 
         .vol-card-1 {
             top: 0;
-            inset-inline-start: 0;
+            right: 0;
             transform: rotate(4deg);
             z-index: 1;
         }
 
         .vol-card-2 {
             top: 30px;
-            inset-inline-start: 30px;
+            right: 30px;
             transform: rotate(-3deg);
             z-index: 2;
             background: var(--cream);
@@ -779,9 +975,10 @@
 
         .vol-card-3 {
             top: 60px;
-            inset-inline-start: 10px;
+            right: 10px;
             transform: rotate(1deg);
             z-index: 3;
+            background: #fff;
         }
 
         .vol-card-book-title {
@@ -808,7 +1005,7 @@
             color: var(--green);
         }
 
-        .vol-card-status.is-approved {
+        .vol-card-status.approved {
             background: rgba(27, 58, 45, 0.12);
             color: var(--green);
         }
@@ -835,15 +1032,15 @@
             box-shadow: 0 4px 24px rgba(27, 58, 45, 0.06);
         }
 
-        /* ── Star rating ── */
+        /* star rating */
         .star-rating {
             display: flex;
             flex-direction: row-reverse;
             justify-content: center;
             gap: 8px;
             margin-bottom: 36px;
-            /* Stars are ordinal symbols — force LTR so 1 is leftmost */
             direction: ltr;
+            /* stars always LTR */
         }
 
         .star-btn {
@@ -858,7 +1055,7 @@
         }
 
         .star-btn:hover,
-        .star-btn.is-active {
+        .star-btn.active {
             color: var(--gold);
             transform: scale(1.15);
         }
@@ -873,11 +1070,7 @@
             transition: color 0.2s;
         }
 
-        .star-rating-label.is-selected {
-            color: var(--gold);
-        }
-
-        /* ── Form fields ── */
+        /* form fields */
         .form-field {
             margin-bottom: 20px;
         }
@@ -890,15 +1083,11 @@
             margin-bottom: 8px;
         }
 
-        .form-label-hint {
+        .form-label span {
             font-weight: 500;
             color: var(--text-light);
-            /* Logical margin: sits inline-start (to the left in RTL) */
-            margin-inline-start: 4px;
-        }
-
-        .form-required {
-            color: var(--gold);
+            margin-right: 4px;
+            /* RTL: appears to the left of label */
         }
 
         .form-input,
@@ -922,13 +1111,6 @@
         .form-textarea:focus {
             border-color: var(--green);
             box-shadow: 0 0 0 3px rgba(27, 58, 45, 0.08);
-        }
-
-        /* Error state via CSS class — no inline style overrides in JS */
-        .form-input.is-error,
-        .form-textarea.is-error {
-            border-color: var(--error);
-            box-shadow: 0 0 0 3px var(--error-ring);
         }
 
         .form-textarea {
@@ -977,11 +1159,11 @@
             display: none;
         }
 
-        .submit-btn.is-loading .btn-spinner {
+        .submit-btn.loading .btn-spinner {
             display: block;
         }
 
-        .submit-btn.is-loading .btn-text {
+        .submit-btn.loading .btn-text {
             display: none;
         }
 
@@ -992,10 +1174,6 @@
             align-items: center;
             text-align: center;
             padding: 24px 0 8px;
-        }
-
-        .feedback-success.is-visible {
-            display: flex;
         }
 
         .success-check {
@@ -1146,9 +1324,9 @@
             margin-top: 2px;
         }
 
-        .footer-meta {
-            /* Logical: aligns to inline-end (left in RTL) */
-            text-align: end;
+        .footer-right {
+            text-align: left;
+            /* LTR alignment for left side in RTL layout */
         }
 
         .footer-copy {
@@ -1165,10 +1343,11 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-       MOBILE BOTTOM NAV PLACEHOLDER
-       ⚠️  Replace with BottomNav component.
-       About page has no active bottom tab — none of the 3
-       standard tabs map to /about.
+       MOBILE BOTTOM NAV
+       ⚠️  Placeholder — Replace with BottomNav component.
+       Note: About page is NOT a bottom tab. This nav shows
+       the standard 3-tab bar with no active state (none of
+       the 3 main tabs correspond to the About page).
     ═══════════════════════════════════════════════════════ */
         .bottom-nav {
             display: none;
@@ -1180,6 +1359,7 @@
             background: #fff;
             border-top: 1px solid var(--border);
             z-index: 200;
+            padding: 0;
         }
 
         .bottom-nav-inner {
@@ -1208,7 +1388,7 @@
             opacity: 0.7;
         }
 
-        .bottom-tab.is-active {
+        .bottom-tab.active {
             color: var(--green);
         }
 
@@ -1218,7 +1398,7 @@
             position: relative;
         }
 
-        /* iOS safe area */
+        /* safe area for iOS */
         .bottom-nav-safe {
             height: env(safe-area-inset-bottom, 0px);
             background: #fff;
@@ -1276,14 +1456,17 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-       RESPONSIVE — TABLET  (768–1023px)
+       RESPONSIVE — TABLET  (768 – 1023px)
     ═══════════════════════════════════════════════════════ */
         @media (max-width: 1023px) and (min-width: 768px) {
             .nav-toggle-btn {
                 display: flex;
             }
 
-            /* Collapsed state overrides */
+            body.nav-collapsed .side-nav {
+                width: var(--nav-icon-w);
+            }
+
             body.nav-collapsed .nav-brand-text,
             body.nav-collapsed .nav-label,
             body.nav-collapsed .nav-placeholder-badge {
@@ -1356,7 +1539,7 @@
             }
 
             .main-content {
-                margin-inline-start: 0;
+                margin-inline-end: 0;
                 padding-bottom: var(--btm-nav-h);
             }
 
@@ -1452,31 +1635,8 @@
                 flex-direction: column;
             }
 
-            .footer-meta {
-                text-align: start;
-            }
-        }
-
-        /* ═══════════════════════════════════════════════════════
-       REDUCED MOTION
-    ═══════════════════════════════════════════════════════ */
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-
-            html {
-                scroll-behavior: auto;
-            }
-
-            .reveal {
-                opacity: 1;
-                transform: none;
+            .footer-right {
+                text-align: right;
             }
         }
     </style>
@@ -1484,609 +1644,556 @@
 
 <body class="nav-collapsed">
 
-    <!-- ════════════════════════════════════════════════════
-       ⚠️  SIDE NAV PLACEHOLDER
-       Replace entirely with the <SideNav> component.
-       Current role state: guest
-  ════════════════════════════════════════════════════ -->
-    <aside class="side-nav" id="sideNav" aria-label="قائمة التنقل الرئيسية">
-        <span class="nav-placeholder-badge" aria-hidden="true">PLACEHOLDER NAV</span>
+    <!-- SIDEBAR NAV (from browse.html) -->
+    <nav id="sidebar" aria-label="روابط رئيسية">
+        <div class="sidebar-header">
+            <button id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="إغلاق القائمة">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="currentColor">
+                    <path
+                        d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z" />
+                </svg>
+            </button>
 
-        <div class="nav-brand">
-            <div class="nav-logo-mark" aria-hidden="true">ر</div>
-            <div class="nav-brand-text">
-                <div class="nav-brand-title">على رفوف المساجد</div>
-                <div class="nav-brand-sub">مكتبات المساجد</div>
-            </div>
+            <a href="browse.html" class="nav-brand" aria-label="الصفحة الرئيسية — على رفوف المساجد">
+                <div class="brand-mark" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e3e3e3">
+                        <path
+                            d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-name">على رفوف المساجد</div>
+                    <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+                </div>
+            </a>
         </div>
 
-        <nav class="nav-links" aria-label="روابط التنقل">
-            <a href="browse.html" class="nav-item" title="تصفح الكتب">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        <ul>
+            <!-- Browse -->
+            <li>
+                <button onclick="toggleSubMenu(this)" class="dropdown-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path
+                            d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
                     </svg>
-                </span>
-                <span class="nav-label">تصفح الكتب</span>
-            </a>
+                    <span>تصفح</span>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960"
+                        width="20px" fill="#e8eaed">
+                        <path
+                            d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z" />
+                    </svg>
+                </button>
+                <div class="sub-menu">
+                    <ul>
+                        <li><a href="browse.html">كتاب</a></li>
+                        <li><a href="browse.html">مسجد</a></li>
+                    </ul>
+                </div>
+            </li>
 
-            <a href="about.html" class="nav-item active" title="عن المنصة" aria-current="page">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="16" x2="12" y2="12" />
-                        <line x1="12" y1="8" x2="12.01" y2="8" />
+            <!-- Submit -->
+            <li>
+                <a href="submit.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
                     </svg>
-                </span>
-                <span class="nav-label">عن المنصة</span>
-            </a>
+                    <span>تسجيل كتاب</span>
+                </a>
+            </li>
 
-            <a href="log-in.html" class="nav-item" title="تسجيل الدخول">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                        <polyline points="10 17 15 12 10 7" />
-                        <line x1="15" y1="12" x2="3" y2="12" />
+            <!-- Profile -->
+            <li>
+                <a href="profile.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path
+                            d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
                     </svg>
-                </span>
-                <span class="nav-label">تسجيل الدخول</span>
-            </a>
+                    <span>حسابي</span>
+                </a>
+            </li>
+
+            <!-- About (active) -->
+            <li class="active">
+                <a href="about.html">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path
+                            d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                    </svg>
+                    <span>عن المنصة</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Backdrop -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; backdrop-filter: blur(2px);">
+    </div>
+
+    <div id="page-content" style="display: flex; flex-direction: column; min-width: 0; min-height: 100vh;">
+
+        <!-- Top Navbar -->
+        <nav class="navbar" role="navigation" aria-label="القائمة الرئيسية">
+            <div class="nav-inner">
+                <button id="toggle-btn" onclick="toggleSidebar()" aria-label="تبديل القائمة">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="currentColor">
+                        <path
+                            d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z" />
+                    </svg>
+                </button>
+
+                <a href="browse.html" class="nav-brand" aria-label="الصفحة الرئيسية">
+                    <div class="brand-mark" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                            fill="#e3e3e3">
+                            <path
+                                d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="brand-name">على رفوف المساجد</div>
+                        <div class="brand-sub">مكتبات المساجد في مكان واحد</div>
+                    </div>
+                </a>
+
+                <div class="nav-actions">
+                    <button class="btn-login">تسجيل الدخول</button>
+                </div>
+            </div>
         </nav>
 
-        <div class="nav-footer-section">
-            <button class="nav-login-btn" aria-label="تسجيل الدخول إلى حسابك">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                    <polyline points="10 17 15 12 10 7" />
-                    <line x1="15" y1="12" x2="3" y2="12" />
-                </svg>
-                <span>تسجيل الدخول</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- Tablet nav toggle -->
-    <button class="nav-toggle-btn" id="navToggle" aria-label="فتح / إغلاق قائمة التنقل" aria-expanded="true"
-        aria-controls="sideNav">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
-    </button>
-
-    <!-- ════════════════════════════════════════════════════
+        <!-- ══════════════════════════════════════════════════════
        MAIN CONTENT
-  ════════════════════════════════════════════════════ -->
-    <main class="main-content" id="mainContent">
+  ══════════════════════════════════════════════════════ -->
+        <main class="main-content" id="mainContent">
 
-        <!-- ── HERO ──────────────────────────────────────── -->
-        <section class="hero" aria-labelledby="hero-heading">
-            <div class="hero-inner">
+            <!-- ── HERO ─────────────────────────────────────────── -->
+            <section class="hero" aria-labelledby="hero-heading">
+                <div class="hero-inner">
 
-                <div class="hero-ornament" aria-hidden="true">
-                    <div class="ornament-line"></div>
-                    <div class="ornament-diamond"></div>
-                    <div class="ornament-line right"></div>
+                    <div class="hero-ornament" aria-hidden="true">
+                        <div class="ornament-line"></div>
+                        <div class="ornament-diamond"></div>
+                        <div class="ornament-line right"></div>
+                    </div>
+
+                    <span class="hero-quote-mark" aria-hidden="true">❝</span>
+
+                    <blockquote class="hero-quote">
+                        معظم المساجد يكون بها <em>مكتبة ثرية بالكتب</em> —
+                        ولا يكاد يقرأها أحد
+                        وهي تحت التراب على رفوف المساجد.
+                    </blockquote>
+
+                    <div class="hero-divider" aria-hidden="true"></div>
+
+                    <h1 class="hero-title" id="hero-heading">
+                        على <span>رفوف</span> المساجد
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        منصة مجتمعية لفهرسة كتب مكتبات المساجد في مصر،
+                        تجعلها قابلة للبحث والاستكشاف من أي مكان.
+                    </p>
                 </div>
 
-                <span class="hero-quote-mark" aria-hidden="true">❝</span>
+                <!-- wave -->
+                <div class="hero-wave" aria-hidden="true">
+                    <svg viewBox="0 0 1200 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0,48 L0,24 Q150,0 300,20 Q450,40 600,20 Q750,0 900,20 Q1050,40 1200,18 L1200,48 Z"
+                            fill="#F5EFE0" />
+                    </svg>
+                </div>
+            </section>
 
-                <!--
-          Using <blockquote> correctly: it wraps a quotation.
-          No cite attribute here as the source is informal/descriptive.
-        -->
-                <blockquote class="hero-quote">
-                    معظم المساجد يكون بها <em>مكتبة ثرية بالكتب</em> —
-                    ولا يكاد يقرأها أحد
-                    وهي تحت التراب على رفوف المساجد.
-                </blockquote>
+            <!-- ── HOW IT WORKS ──────────────────────────────────── -->
+            <section class="how-section" aria-labelledby="how-heading">
+                <div class="section-inner">
 
-                <div class="hero-divider" aria-hidden="true"></div>
-
-                <h1 class="hero-title" id="hero-heading">
-                    على <span>رفوف</span> المساجد
-                </h1>
-
-                <p class="hero-subtitle">
-                    منصة مجتمعية لفهرسة كتب مكتبات المساجد في مصر،
-                    تجعلها قابلة للبحث والاستكشاف من أي مكان.
-                </p>
-            </div>
-
-            <div class="hero-wave" aria-hidden="true">
-                <svg viewBox="0 0 1200 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0,48 L0,24 Q150,0 300,20 Q450,40 600,20 Q750,0 900,20 Q1050,40 1200,18 L1200,48 Z"
-                        fill="#F5EFE0" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- ── HOW IT WORKS ──────────────────────────────── -->
-        <section class="how-section" aria-labelledby="how-heading">
-            <div class="section-inner">
-
-                <header class="section-header reveal">
-                    <div class="section-label" aria-hidden="true">كيف تعمل المنصة</div>
-                    <h2 class="section-heading" id="how-heading">ثلاث خطوات بسيطة</h2>
-                    <p class="section-desc">
-                        سواء كنت تبحث عن كتاب أو تريد إضافة ما وجدته في مسجدك —
-                        العملية كلها بسيطة وسريعة.
-                    </p>
-                </header>
-
-                <ol class="steps-grid" aria-label="خطوات استخدام المنصة">
-
-                    <li class="step-card reveal reveal-delay-1">
-                        <div class="step-icon-row" aria-hidden="true">
-                            <div class="step-number">١</div>
-                            <span class="step-emoji">🔍</span>
-                        </div>
-                        <h3 class="step-title">تصفح وابحث</h3>
-                        <p class="step-desc">
-                            أدخل مدينتك واستعرض الكتب المتاحة في المساجد القريبة منك.
-                            ابحث بالعنوان أو المؤلف أو التصنيف، أو تصفح حسب المسجد.
-                            لا يلزمك حساب للبحث.
+                    <header class="section-header reveal">
+                        <div class="section-label">كيف تعمل المنصة</div>
+                        <h2 class="section-heading" id="how-heading">ثلاث خطوات بسيطة</h2>
+                        <p class="section-desc">
+                            سواء كنت تبحث عن كتاب أو تريد إضافة ما وجدته في مسجدك —
+                            العملية كلها بسيطة وسريعة.
                         </p>
-                    </li>
+                    </header>
 
-                    <li class="step-card reveal reveal-delay-2">
-                        <div class="step-icon-row" aria-hidden="true">
-                            <div class="step-number">٢</div>
-                            <span class="step-emoji">🕌</span>
+                    <div class="steps-grid">
+
+                        <div class="step-card reveal reveal-delay-1">
+                            <div class="step-icon-row">
+                                <div class="step-number" aria-hidden="true">١</div>
+                                <span class="step-emoji" aria-hidden="true">🔍</span>
+                            </div>
+                            <h3 class="step-title">تصفح وابحث</h3>
+                            <p class="step-desc">
+                                أدخل مدينتك واستعرض الكتب المتاحة في المساجد القريبة منك.
+                                ابحث بالعنوان أو المؤلف أو التصنيف، أو تصفح حسب المسجد.
+                                لا يلزمك حساب للبحث.
+                            </p>
                         </div>
-                        <h3 class="step-title">اعثر على الكتاب</h3>
-                        <p class="step-desc">
-                            تعرف على المسجد الذي يحتوي على الكتاب الذي تبحث عنه،
-                            واعرف المحافظة والمدينة والطبعة المتاحة.
-                            ثم اذهب وخذ الكتاب.
-                        </p>
-                    </li>
 
-                    <li class="step-card reveal reveal-delay-3">
-                        <div class="step-icon-row" aria-hidden="true">
-                            <div class="step-number">٣</div>
-                            <span class="step-emoji">📖</span>
+                        <div class="step-card reveal reveal-delay-2">
+                            <div class="step-icon-row">
+                                <div class="step-number" aria-hidden="true">٢</div>
+                                <span class="step-emoji" aria-hidden="true">🕌</span>
+                            </div>
+                            <h3 class="step-title">اعثر على الكتاب</h3>
+                            <p class="step-desc">
+                                تعرف على المسجد الذي يحتوي على الكتاب الذي تبحث عنه،
+                                واعرف المحافظة والمدينة والطبعة المتاحة.
+                                ثم اذهب وخذ الكتاب.
+                            </p>
                         </div>
-                        <h3 class="step-title">ساهم وسجّل</h3>
-                        <p class="step-desc">
-                            إذا وجدت كتابًا غير مسجّل، أنشئ حسابًا مجانيًا وسجّله.
-                            طلبك يُرسَل للمراجعة ويظهر للجميع عند الموافقة عليه.
-                            أنت تبني الفهرس مع المجتمع.
+
+                        <div class="step-card reveal reveal-delay-3">
+                            <div class="step-icon-row">
+                                <div class="step-number" aria-hidden="true">٣</div>
+                                <span class="step-emoji" aria-hidden="true">📖</span>
+                            </div>
+                            <h3 class="step-title">ساهم وسجّل</h3>
+                            <p class="step-desc">
+                                إذا وجدت كتابًا غير مسجّل، أنشئ حسابًا مجانيًا وسجّله.
+                                طلبك يُرسَل للمراجعة ويظهر للجميع عند الموافقة عليه.
+                                أنت تبني الفهرس مع المجتمع.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── VOLUNTEER ──────────────────────────────────────── -->
+            <section class="volunteer-section" aria-labelledby="volunteer-heading">
+                <div class="volunteer-inner">
+
+                    <div class="volunteer-text reveal">
+                        <div class="section-label">للمتطوعين</div>
+                        <h2 class="section-heading" id="volunteer-heading">انضم إلى فريق الفهرسة</h2>
+                        <p class="section-desc" style="color: var(--text-muted); margin-bottom: 0;">
+                            المتطوعون هم عمود المنصة. إضافاتهم تُعتمد فورًا دون مراجعة،
+                            ويمكنهم تعديل ما سجّلوه في أي وقت.
                         </p>
-                    </li>
 
-                </ol>
-            </div>
-        </section>
+                        <ul class="volunteer-perks" aria-label="مميزات التطوع">
+                            <li>
+                                <span class="perk-check" aria-hidden="true">
+                                    <svg viewBox="0 0 12 12">
+                                        <polyline points="2,6 5,9 10,3" />
+                                    </svg>
+                                </span>
+                                الإضافات تظهر للجميع فورًا دون انتظار موافقة
+                            </li>
+                            <li>
+                                <span class="perk-check" aria-hidden="true">
+                                    <svg viewBox="0 0 12 12">
+                                        <polyline points="2,6 5,9 10,3" />
+                                    </svg>
+                                </span>
+                                إمكانية تعديل التسجيلات وتحديثها في أي وقت
+                            </li>
+                            <li>
+                                <span class="perk-check" aria-hidden="true">
+                                    <svg viewBox="0 0 12 12">
+                                        <polyline points="2,6 5,9 10,3" />
+                                    </svg>
+                                </span>
+                                المساهمة في إحياء تراث مكتبات المساجد
+                            </li>
+                        </ul>
 
-        <!-- ── VOLUNTEER ─────────────────────────────────── -->
-        <section class="volunteer-section" aria-labelledby="volunteer-heading">
-            <div class="volunteer-inner">
+                        <a href="#" class="volunteer-cta-btn" aria-label="تواصل معنا للتطوع عبر تليغرام">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            تواصل معنا للتطوع
+                        </a>
+                    </div>
 
-                <div class="volunteer-text reveal">
-                    <div class="section-label" aria-hidden="true">للمتطوعين</div>
-                    <h2 class="section-heading" id="volunteer-heading">انضم إلى فريق الفهرسة</h2>
-                    <p class="section-desc">
-                        المتطوعون هم عمود المنصة. إضافاتهم تُعتمد فورًا دون مراجعة،
-                        ويمكنهم تعديل ما سجّلوه في أي وقت.
-                    </p>
+                    <!-- decorative stacked cards illustration -->
+                    <div class="volunteer-visual" aria-hidden="true">
+                        <div class="volunteer-card-stack">
+                            <div class="vol-card vol-card-1">
+                                <div class="vol-card-book-title">الرقائق والمواعظ</div>
+                                <div class="vol-card-mosque">مسجد الرحمة — القاهرة</div>
+                                <div class="vol-card-status">قيد المراجعة</div>
+                            </div>
+                            <div class="vol-card vol-card-2">
+                                <div class="vol-card-book-title">فقه السيرة النبوية</div>
+                                <div class="vol-card-mosque">مسجد النور — الجيزة</div>
+                                <div class="vol-card-status approved">✓ مُعتمد</div>
+                            </div>
+                            <div class="vol-card vol-card-3">
+                                <div class="vol-card-book-title">تفسير ابن كثير</div>
+                                <div class="vol-card-mosque">مسجد العمري — الإسكندرية</div>
+                                <div class="vol-card-status approved">✓ مُعتمد</div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <ul class="volunteer-perks" aria-label="مميزات التطوع">
-                        <li>
-                            <span class="perk-check" aria-hidden="true">
-                                <svg viewBox="0 0 12 12" focusable="false">
-                                    <polyline points="2,6 5,9 10,3" />
+                </div>
+            </section>
+
+            <!-- ── FEEDBACK FORM ──────────────────────────────────── -->
+            <section class="feedback-section" aria-labelledby="feedback-heading">
+                <div class="feedback-inner">
+
+                    <header class="section-header reveal" style="text-align: center;">
+                        <div class="section-label" style="justify-content: center;">
+                            <span style="display:block;width:24px;height:2px;background:var(--gold);"></span>
+                            أرسل رأيك
+                        </div>
+                        <h2 class="section-heading" id="feedback-heading">رأيك يهمنا</h2>
+                        <p class="section-desc" style="margin: 0 auto;">
+                            ساعدنا في تحسين المنصة بمشاركة ملاحظاتك أو اقتراحاتك.
+                            يمكنك الإرسال بدون حساب.
+                        </p>
+                    </header>
+
+                    <div class="feedback-card reveal reveal-delay-1">
+
+                        <!-- form state -->
+                        <div id="feedbackForm">
+                            <div class="star-rating" role="group" aria-label="تقييمك للمنصة (اختياري)">
+                                <button class="star-btn" data-value="1" aria-label="نجمة واحدة">★</button>
+                                <button class="star-btn" data-value="2" aria-label="نجمتان">★</button>
+                                <button class="star-btn" data-value="3" aria-label="ثلاث نجوم">★</button>
+                                <button class="star-btn" data-value="4" aria-label="أربع نجوم">★</button>
+                                <button class="star-btn" data-value="5" aria-label="خمس نجوم">★</button>
+                            </div>
+                            <p class="star-rating-label" id="ratingLabel" aria-live="polite">
+                                اختر تقييمك للمنصة
+                            </p>
+
+                            <div class="form-field">
+                                <label class="form-label" for="feedbackMessage">
+                                    رسالتك <span style="color:var(--gold)">*</span>
+                                </label>
+                                <textarea class="form-textarea" id="feedbackMessage"
+                                    placeholder="اكتب ملاحظاتك أو اقتراحاتك هنا..." rows="4"
+                                    aria-required="true"></textarea>
+                            </div>
+
+                            <div class="form-field">
+                                <label class="form-label" for="feedbackEmail">
+                                    بريدك الإلكتروني
+                                    <span>(اختياري — للرد عليك)</span>
+                                </label>
+                                <input class="form-input" id="feedbackEmail" type="email"
+                                    placeholder="example@email.com" autocomplete="email" dir="ltr" />
+                            </div>
+
+                            <button class="submit-btn" id="submitBtn" type="button">
+                                <span class="btn-text">إرسال الرأي</span>
+                                <div class="btn-spinner" aria-hidden="true"></div>
+                            </button>
+                        </div>
+
+                        <!-- success state (hidden by default) -->
+                        <div class="feedback-success" id="feedbackSuccess" role="status" aria-live="polite">
+                            <div class="success-check" aria-hidden="true">
+                                <svg viewBox="0 0 28 28">
+                                    <polyline points="5,14 11,20 23,8" />
                                 </svg>
-                            </span>
-                            الإضافات تظهر للجميع فورًا دون انتظار موافقة
-                        </li>
-                        <li>
-                            <span class="perk-check" aria-hidden="true">
-                                <svg viewBox="0 0 12 12" focusable="false">
-                                    <polyline points="2,6 5,9 10,3" />
-                                </svg>
-                            </span>
-                            إمكانية تعديل التسجيلات وتحديثها في أي وقت
-                        </li>
-                        <li>
-                            <span class="perk-check" aria-hidden="true">
-                                <svg viewBox="0 0 12 12" focusable="false">
-                                    <polyline points="2,6 5,9 10,3" />
-                                </svg>
-                            </span>
-                            المساهمة في إحياء تراث مكتبات المساجد
-                        </li>
-                    </ul>
+                            </div>
+                            <p class="success-title">شكرًا على رأيك!</p>
+                            <p class="success-msg">
+                                وصلنا رأيك بنجاح.<br>
+                                كل ملاحظة تساعدنا على تحسين المنصة.
+                            </p>
+                        </div>
 
-                    <a href="#" class="volunteer-cta-btn" aria-label="تواصل معنا للتطوع عبر تليغرام">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                            focusable="false">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── CONTACT STRIP ─────────────────────────────────── -->
+            <div class="contact-strip">
+                <div class="contact-inner">
+                    <div class="contact-text">
+                        هل لديك سؤال أو تريد التواصل مع الفريق؟
+                        <span>نحن نتواصل عبر تيليغرام وبريد المشروع</span>
+                    </div>
+                    <a href="#" class="contact-btn" aria-label="تواصل مع الفريق">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <line x1="22" y1="2" x2="11" y2="13" />
                             <polygon points="22 2 15 22 11 13 2 9 22 2" />
                         </svg>
-                        تواصل معنا للتطوع
+                        تواصل مع الفريق
                     </a>
                 </div>
-
-                <!-- Decorative stacked-cards illustration — hidden from AT -->
-                <div class="volunteer-visual" aria-hidden="true">
-                    <div class="volunteer-card-stack">
-                        <div class="vol-card vol-card-1">
-                            <div class="vol-card-book-title">الرقائق والمواعظ</div>
-                            <div class="vol-card-mosque">مسجد الرحمة — القاهرة</div>
-                            <div class="vol-card-status">قيد المراجعة</div>
-                        </div>
-                        <div class="vol-card vol-card-2">
-                            <div class="vol-card-book-title">فقه السيرة النبوية</div>
-                            <div class="vol-card-mosque">مسجد النور — الجيزة</div>
-                            <div class="vol-card-status is-approved">✓ مُعتمد</div>
-                        </div>
-                        <div class="vol-card vol-card-3">
-                            <div class="vol-card-book-title">تفسير ابن كثير</div>
-                            <div class="vol-card-mosque">مسجد العمري — الإسكندرية</div>
-                            <div class="vol-card-status is-approved">✓ مُعتمد</div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </section>
 
-        <!-- ── FEEDBACK FORM ─────────────────────────────── -->
-        <section class="feedback-section" aria-labelledby="feedback-heading">
-            <div class="feedback-inner">
-
-                <header class="section-header section-header--center reveal">
-                    <!--
-            Centred label: decorative line rendered as a presentational span
-            so it is symmetric, rather than using the ::before pseudo-element
-            which can only appear on one side.
-          -->
-                    <div class="section-label section-label--center" aria-hidden="true">
-                        <span style="display:block;width:24px;height:2px;background:var(--gold);flex-shrink:0;"></span>
-                        أرسل رأيك
-                        <span style="display:block;width:24px;height:2px;background:var(--gold);flex-shrink:0;"></span>
+            <!-- ── FOOTER ─────────────────────────────────────────── -->
+            <footer class="site-footer">
+                <div class="footer-inner">
+                    <div class="footer-brand">
+                        <div class="footer-logo" aria-hidden="true">ر</div>
+                        <div>
+                            <div class="footer-title">على رفوف المساجد</div>
+                            <div class="footer-tagline">نُعيد الكتب إلى النور</div>
+                        </div>
                     </div>
-                    <h2 class="section-heading" id="feedback-heading">رأيك يهمنا</h2>
-                    <p class="section-desc">
-                        ساعدنا في تحسين المنصة بمشاركة ملاحظاتك أو اقتراحاتك.
-                        يمكنك الإرسال بدون حساب.
-                    </p>
-                </header>
-
-                <div class="feedback-card reveal reveal-delay-1">
-
-                    <!-- ── Form state ── -->
-                    <!--
-            Using <form> for proper semantics. novalidate because we handle
-            validation ourselves for a consistent RTL experience.
-          -->
-                    <form id="feedbackForm" novalidate aria-label="نموذج إرسال الرأي">
-
-                        <div class="star-rating" role="group" aria-label="تقييمك للمنصة (اختياري)">
-                            <!-- DOM order 1→5 matches visual order with flex row-reverse -->
-                            <button class="star-btn" type="button" data-value="1" aria-label="نجمة واحدة">★</button>
-                            <button class="star-btn" type="button" data-value="2" aria-label="نجمتان">★</button>
-                            <button class="star-btn" type="button" data-value="3" aria-label="ثلاث نجوم">★</button>
-                            <button class="star-btn" type="button" data-value="4" aria-label="أربع نجوم">★</button>
-                            <button class="star-btn" type="button" data-value="5" aria-label="خمس نجوم">★</button>
-                        </div>
-
-                        <p class="star-rating-label" id="ratingLabel" aria-live="polite" aria-atomic="true">
-                            اختر تقييمك للمنصة
-                        </p>
-
-                        <div class="form-field">
-                            <label class="form-label" for="feedbackMessage">
-                                رسالتك <span class="form-required" aria-hidden="true">*</span>
-                            </label>
-                            <textarea class="form-textarea" id="feedbackMessage" name="message"
-                                placeholder="اكتب ملاحظاتك أو اقتراحاتك هنا..." rows="4" required aria-required="true"
-                                aria-describedby="msgError"></textarea>
-                            <!-- Screen-reader error container, populated by JS -->
-                            <span id="msgError" role="alert" aria-live="assertive"
-                                style="display:none;font-size:12px;color:var(--error);margin-top:6px;display:block;min-height:0;"></span>
-                        </div>
-
-                        <div class="form-field">
-                            <label class="form-label" for="feedbackEmail">
-                                بريدك الإلكتروني
-                                <span class="form-label-hint">(اختياري — للرد عليك)</span>
-                            </label>
-                            <input class="form-input" id="feedbackEmail" name="email" type="email"
-                                placeholder="example@email.com" autocomplete="email" dir="ltr"
-                                aria-describedby="emailHint" />
-                            <span id="emailHint" class="form-label-hint"
-                                style="display:block;margin-top:4px;font-size:12px;">
-                                لن يُشارَك بريدك مع أي طرف ثالث
-                            </span>
-                        </div>
-
-                        <button class="submit-btn" id="submitBtn" type="submit">
-                            <span class="btn-text">إرسال الرأي</span>
-                            <div class="btn-spinner" aria-hidden="true"></div>
-                        </button>
-
-                    </form>
-
-                    <!-- ── Success state (hidden by default) ── -->
-                    <div class="feedback-success" id="feedbackSuccess" role="status" aria-live="polite"
-                        aria-atomic="true" hidden>
-                        <div class="success-check" aria-hidden="true">
-                            <svg viewBox="0 0 28 28" focusable="false">
-                                <polyline points="5,14 11,20 23,8" />
-                            </svg>
-                        </div>
-                        <p class="success-title">شكرًا على رأيك!</p>
-                        <p class="success-msg">
-                            وصلنا رأيك بنجاح.<br>
-                            كل ملاحظة تساعدنا على تحسين المنصة.
+                    <div class="footer-right">
+                        <p class="footer-copy">
+                            مشروع مجتمعي مفتوح لفهرسة مكتبات المساجد في مصر.<br>
+                            تطوير بدعم من <a href="#">فريق المتطوعين</a>
                         </p>
                     </div>
-
                 </div>
-            </div>
-        </section>
+            </footer>
 
-        <!-- ── CONTACT STRIP ──────────────────────────────── -->
-        <div class="contact-strip" role="complementary" aria-label="التواصل مع الفريق">
-            <div class="contact-inner">
-                <div class="contact-text">
-                    هل لديك سؤال أو تريد التواصل مع الفريق؟
-                    <span>نحن نتواصل عبر تيليغرام وبريد المشروع</span>
-                </div>
-                <a href="#" class="contact-btn" aria-label="تواصل مع الفريق عبر تيليغرام">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                        <line x1="22" y1="2" x2="11" y2="13" />
-                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                    </svg>
-                    تواصل مع الفريق
-                </a>
-            </div>
-        </div>
+        </main>
 
-        <!-- ── FOOTER ──────────────────────────────────────── -->
-        <footer class="site-footer">
-            <div class="footer-inner">
-                <div class="footer-brand">
-                    <div class="footer-logo" aria-hidden="true">ر</div>
-                    <div>
-                        <div class="footer-title">على رفوف المساجد</div>
-                        <div class="footer-tagline">نُعيد الكتب إلى النور</div>
-                    </div>
-                </div>
-                <div class="footer-meta">
-                    <p class="footer-copy">
-                        مشروع مجتمعي مفتوح لفهرسة مكتبات المساجد في مصر.<br>
-                        تطوير بدعم من <a href="#">فريق المتطوعين</a>
-                    </p>
-                </div>
-            </div>
-        </footer>
+        <script>
+            // Sidebar functionality (copied from browse.html)
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
 
-    </main><!-- /main-content -->
+            function toggleSidebar() {
+                if (window.innerWidth <= 768) return;
+                sidebar.classList.toggle('open');
+                const isOpen = sidebar.classList.contains('open');
+                backdrop.style.display = isOpen ? 'block' : 'none';
+                document.getElementById('page-content').classList.toggle('sidebar-open', isOpen);
+                if (!isOpen) closeAllSubMenus();
+            }
 
-    <!-- ════════════════════════════════════════════════════
-       ⚠️  MOBILE BOTTOM NAV PLACEHOLDER
-       Replace with <BottomNav> component.
-       About page has no active bottom tab.
-  ════════════════════════════════════════════════════ -->
-    <nav class="bottom-nav" aria-label="التنقل السريع">
-        <div class="bottom-nav-inner">
-            <a href="browse.html" class="bottom-tab" aria-label="تصفح الكتب">
-                <span class="bottom-tab-icon" aria-hidden="true">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                    </svg>
-                </span>
-                تصفح
-            </a>
-            <a href="submit.html" class="bottom-tab" aria-label="تسجيل كتاب">
-                <span class="bottom-tab-icon" aria-hidden="true">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="16" />
-                        <line x1="8" y1="12" x2="16" y2="12" />
-                    </svg>
-                </span>
-                تسجيل
-            </a>
-            <a href="profile.html" class="bottom-tab" aria-label="الملف الشخصي">
-                <span class="bottom-tab-icon" aria-hidden="true">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
-                </span>
-                حسابي
-            </a>
-        </div>
-        <div class="bottom-nav-safe" aria-hidden="true"></div>
-    </nav>
+            function toggleSubMenu(button) {
+                if (!button.nextElementSibling.classList.contains('show')) {
+                    closeAllSubMenus();
+                }
+                button.nextElementSibling.classList.toggle('show');
+                button.classList.toggle('rotate');
+            }
 
-    <script>
-        /**
-         * ════════════════════════════════════════════════════════
-         *  ABOUT PAGE — JavaScript modules
-         *  Each section is an IIFE to keep its state private and
-         *  avoid polluting the global scope.
-         * ════════════════════════════════════════════════════════
-         */
-        document.addEventListener('DOMContentLoaded', () => {
-
-            /* ── 1. NAV TOGGLE ───────────────────────────────── */
-            (function initNavToggle() {
-                const btn = document.getElementById('navToggle');
-                if (!btn) return;
-
-                btn.addEventListener('click', () => {
-                    const isCollapsed = document.body.classList.toggle('nav-collapsed');
-                    btn.setAttribute('aria-expanded', String(!isCollapsed));
+            function closeAllSubMenus() {
+                Array.from(sidebar.getElementsByClassName('show')).forEach(ul => {
+                    ul.classList.remove('show');
+                    ul.previousElementSibling.classList.remove('rotate');
                 });
-            })();
+            }
 
-            /* ── 2. SCROLL REVEAL ────────────────────────────── */
-            (function initScrollReveal() {
-                const els = document.querySelectorAll('.reveal');
-                if (!els.length) return;
+            // Close on Escape
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    if (sidebar.classList.contains('open')) toggleSidebar();
+                }
+            });
 
-                // Respect prefers-reduced-motion: mark all revealed immediately
-                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                    els.forEach(el => el.classList.add('is-revealed'));
+            /* ═══════════════════════════════════════════════════════
+               TABLET NAV TOGGLE
+            ═══════════════════════════════════════════════════════ */
+            // const navToggle = document.getElementById('navToggle');
+            // navToggle.addEventListener('click', () => {
+            //     document.body.classList.toggle('nav-collapsed');
+            // });
+
+            /* ═══════════════════════════════════════════════════════
+               SCROLL REVEAL  (IntersectionObserver)
+            ═══════════════════════════════════════════════════════ */
+            const revealEls = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('revealed');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+            );
+            revealEls.forEach(el => observer.observe(el));
+
+            /* ═══════════════════════════════════════════════════════
+               STAR RATING
+            ═══════════════════════════════════════════════════════ */
+            const starBtns = document.querySelectorAll('.star-btn');
+            const ratingLabel = document.getElementById('ratingLabel');
+            const ratingLabels = ['', 'ضعيف', 'مقبول', 'جيد', 'جيد جدًا', 'ممتاز!'];
+            let selectedRating = 0;
+
+            function updateStars(hoverVal) {
+                const val = hoverVal || selectedRating;
+                starBtns.forEach((btn) => {
+                    const bv = parseInt(btn.dataset.value);
+                    btn.classList.toggle('active', bv <= val);
+                });
+                if (hoverVal) {
+                    ratingLabel.textContent = ratingLabels[hoverVal];
+                    ratingLabel.style.color = 'var(--gold)';
+                } else if (selectedRating) {
+                    ratingLabel.textContent = ratingLabels[selectedRating];
+                    ratingLabel.style.color = 'var(--gold)';
+                } else {
+                    ratingLabel.textContent = 'اختر تقييمك للمنصة';
+                    ratingLabel.style.color = 'var(--text-light)';
+                }
+            }
+
+            starBtns.forEach((btn) => {
+                const val = parseInt(btn.dataset.value);
+                btn.addEventListener('mouseenter', () => updateStars(val));
+                btn.addEventListener('mouseleave', () => updateStars(0));
+                btn.addEventListener('click', () => {
+                    selectedRating = val;
+                    updateStars(0);
+                });
+                btn.addEventListener('focus', () => updateStars(val));
+                btn.addEventListener('blur', () => updateStars(0));
+            });
+
+            /* ═══════════════════════════════════════════════════════
+               FEEDBACK FORM SUBMISSION
+            ═══════════════════════════════════════════════════════ */
+            const submitBtn = document.getElementById('submitBtn');
+            const feedbackForm = document.getElementById('feedbackForm');
+            const feedbackSuccess = document.getElementById('feedbackSuccess');
+            const messageInput = document.getElementById('feedbackMessage');
+
+            submitBtn.addEventListener('click', () => {
+                const msg = messageInput.value.trim();
+                if (!msg) {
+                    messageInput.focus();
+                    messageInput.style.borderColor = '#c0392b';
+                    messageInput.style.boxShadow = '0 0 0 3px rgba(192,57,43,0.12)';
+                    setTimeout(() => {
+                        messageInput.style.borderColor = '';
+                        messageInput.style.boxShadow = '';
+                    }, 2000);
                     return;
                 }
 
-                const observer = new IntersectionObserver(
-                    (entries) => {
-                        entries.forEach(entry => {
-                            if (!entry.isIntersecting) return;
-                            entry.target.classList.add('is-revealed');
-                            observer.unobserve(entry.target); // fire once
-                        });
-                    },
-                    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-                );
+                /* simulate submit */
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
 
-                els.forEach(el => observer.observe(el));
-            })();
+                setTimeout(() => {
+                    /* in the real implementation, call submitFeedback() here */
+                    feedbackForm.style.display = 'none';
+                    feedbackSuccess.style.display = 'flex';
+                }, 1400);
+            });
 
-            /* ── 3. STAR RATING ──────────────────────────────── */
-            (function initStarRating() {
-                const container = document.querySelector('.star-rating');
-                const labelEl = document.getElementById('ratingLabel');
-                if (!container || !labelEl) return;
+            /* keyboard: Enter on textarea should not submit — only Shift+Enter wraps */
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) e.stopPropagation();
+            });
 
-                const starBtns = Array.from(container.querySelectorAll('.star-btn'));
-                const LABELS = ['', 'ضعيف', 'مقبول', 'جيد', 'جيد جدًا', 'ممتاز!'];
-                let selectedRating = 0;
-
-                /**
-                 * Renders the star highlight and label text.
-                 * @param {number} hoverVal  — 0 means "use selected state"
-                 */
-                function renderStars(hoverVal) {
-                    const active = hoverVal || selectedRating;
-
-                    starBtns.forEach(btn => {
-                        const val = parseInt(btn.dataset.value, 10);
-                        btn.classList.toggle('is-active', val <= active);
-                    });
-
-                    if (active) {
-                        labelEl.textContent = LABELS[active];
-                        labelEl.classList.add('is-selected');
-                    } else {
-                        labelEl.textContent = 'اختر تقييمك للمنصة';
-                        labelEl.classList.remove('is-selected');
-                    }
-                }
-
-                starBtns.forEach(btn => {
-                    const val = parseInt(btn.dataset.value, 10);
-
-                    btn.addEventListener('mouseenter', () => renderStars(val));
-                    btn.addEventListener('mouseleave', () => renderStars(0));
-                    btn.addEventListener('focus', () => renderStars(val));
-                    btn.addEventListener('blur', () => renderStars(0));
-                    btn.addEventListener('click', () => {
-                        // Toggle off if clicking the already-selected star
-                        selectedRating = (selectedRating === val) ? 0 : val;
-                        renderStars(0);
-                    });
-                });
-
-                // Expose getter so the form submit handler can read the value
-                container.getSelectedRating = () => selectedRating;
-            })();
-
-            /* ── 4. FEEDBACK FORM ────────────────────────────── */
-            (function initFeedbackForm() {
-                const form = document.getElementById('feedbackForm');
-                const successEl = document.getElementById('feedbackSuccess');
-                const submitBtn = document.getElementById('submitBtn');
-                const messageInput = document.getElementById('feedbackMessage');
-                const msgErrorEl = document.getElementById('msgError');
-                const starContainer = document.querySelector('.star-rating');
-
-                if (!form || !successEl || !submitBtn || !messageInput) return;
-
-                /** Show or clear the textarea error state */
-                function setMessageError(hasError) {
-                    messageInput.classList.toggle('is-error', hasError);
-                    if (msgErrorEl) {
-                        msgErrorEl.textContent = hasError ? 'هذا الحقل مطلوب' : '';
-                        msgErrorEl.style.minHeight = hasError ? 'auto' : '0';
-                    }
-                    messageInput.setAttribute('aria-invalid', String(hasError));
-                }
-
-                /** Clear error styling as soon as the user types */
-                messageInput.addEventListener('input', () => setMessageError(false));
-
-                /**
-                 * Keyboard: Enter inside the textarea should insert a newline,
-                 * NOT submit the form. Only Shift+Enter is a "submit" intent on
-                 * some keyboards, which we do nothing special with here.
-                 */
-                messageInput.addEventListener('keydown', e => {
-                    if (e.key === 'Enter' && !e.shiftKey) e.stopPropagation();
-                });
-
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    const msg = messageInput.value.trim();
-                    if (!msg) {
-                        setMessageError(true);
-                        messageInput.focus();
-                        return;
-                    }
-
-                    const rating = starContainer?.getSelectedRating?.() ?? 0;
-                    const email = document.getElementById('feedbackEmail')?.value.trim() ?? '';
-
-                    // Loading state
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('is-loading');
-
-                    try {
-                        /**
-                         * TODO: Replace this timeout with a real API call, e.g.:
-                         *   await submitFeedback({ message: msg, rating, email });
-                         */
-                        await new Promise(resolve => setTimeout(resolve, 1400));
-
-                        // Transition to success
-                        form.hidden = true;
-                        successEl.hidden = false;
-                        successEl.classList.add('is-visible');
-                        // Move focus to the success message for AT users
-                        successEl.querySelector('.success-title')?.focus?.();
-
-                    } catch (err) {
-                        // Real implementation: surface a user-visible error message here
-                        console.error('Feedback submission failed:', err);
-                        submitBtn.disabled = false;
-                        submitBtn.classList.remove('is-loading');
-                    }
-                });
-            })();
-
-        }); // end DOMContentLoaded
-    </script>
+            /* reset error styling on input */
+            messageInput.addEventListener('input', () => {
+                messageInput.style.borderColor = '';
+                messageInput.style.boxShadow = '';
+            });
+        </script>
 </body>
 
 </html>
