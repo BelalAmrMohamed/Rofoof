@@ -13,12 +13,17 @@
   <link rel="manifest" href="/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Tajawal for the sidebar, Cairo for page content (both loaded) -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap"
     rel="stylesheet" />
 
   <style>
+    /* ════════════════════════════════════════════
+       DESIGN TOKENS — PROFILE PAGE
+    ════════════════════════════════════════════ */
     :root {
+      /* ── Profile colour palette ── */
       --bg: #f4efe6;
       --bg-soft: #f8f4ec;
       --card: rgba(255, 255, 255, .74);
@@ -44,12 +49,68 @@
       --radius-md: 16px;
       --radius-sm: 12px;
       --max: 1280px;
-      --nav-h: 74px;
-      --bottom-nav-h: 80px;
       --trans: 220ms cubic-bezier(.2, .8, .2, 1);
+
+      /* ── Sidebar / Navbar design tokens (from browse.html) ── */
+      /* Forest Green scale */
+      --g-950: #062922;
+      --g-900: #0A3828;
+      --g-800: #0E5040;
+      --g-700: #146654;
+      --g-600: #1B7D68;
+      --g-500: #229670;
+      --g-400: #3AB58E;
+      --g-300: #6DCFB0;
+      --g-200: #A5E4CE;
+      --g-100: #D3F2E8;
+      --g-50: #EDFAF4;
+      /* Gold Amber scale */
+      --a-900: #543005;
+      --a-800: #7A4510;
+      --a-700: #A05C1A;
+      --a-600: #C07020;
+      --a-500: #D4841A;
+      --a-400: #E8A040;
+      --a-300: #F2BE6C;
+      --a-200: #F8D9A0;
+      --a-100: #FCECD0;
+      --a-50: #FEF7EC;
+      /* Warm Stone scale */
+      --s-950: #1C1814;
+      --s-900: #2C2620;
+      --s-800: #3E3730;
+      --s-700: #564E46;
+      --s-600: #726860;
+      --s-500: #9A8F84;
+      --s-400: #B8B0A8;
+      --s-300: #D4CEC8;
+      --s-200: #E8E4DE;
+      --s-100: #F2EDE8;
+      --s-50: #F9F6F1;
+      /* Border-radius tokens */
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 16px;
+      --r-xl: 20px;
+      --r-2xl: 28px;
+      /* Nav height (unified to browse.html's value) */
+      --nav-h: 66px;
+      /* Motion */
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      /* Shadows */
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, .05);
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, .09), 0 2px 4px rgba(0, 0, 0, .04);
+      --shadow-lg: 0 12px 36px rgba(0, 0, 0, .11), 0 4px 10px rgba(0, 0, 0, .05);
+      --shadow-xl: 0 24px 60px rgba(0, 0, 0, .16), 0 8px 20px rgba(0, 0, 0, .08);
     }
 
-    * {
+    /* ════════════════════════════════════════════
+       RESET & BASE
+    ════════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box
     }
 
@@ -67,6 +128,9 @@
         linear-gradient(180deg, #f7f3eb 0%, #f1eadf 100%);
       min-height: 100vh;
       overflow-x: hidden;
+      direction: rtl;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body::before {
@@ -95,6 +159,30 @@
       cursor: pointer
     }
 
+    img,
+    svg {
+      display: block
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--g-400);
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--s-300);
+      border-radius: 100px
+    }
+
     .skip-link {
       position: absolute;
       top: -48px;
@@ -106,6 +194,7 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow-soft);
       transition: top var(--trans);
+      font-family: "Cairo", sans-serif;
     }
 
     .skip-link:focus {
@@ -113,121 +202,488 @@
       outline: none
     }
 
-    .page {
-      min-height: 100vh;
-      padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
-    }
-
-    .topbar {
+    /* ════════════════════════════════════════════
+       NAVBAR (from browse.html)
+    ════════════════════════════════════════════ */
+    .navbar {
       position: sticky;
       top: 0;
-      z-index: 30;
-      backdrop-filter: saturate(180%) blur(18px);
-      background: linear-gradient(180deg, rgba(245, 239, 229, .92), rgba(245, 239, 229, .72));
-      border-bottom: 1px solid rgba(25, 45, 36, .08);
+      z-index: 200;
+      height: var(--nav-h);
+      background: linear-gradient(160deg, var(--g-700) 0%, var(--g-800) 55%, var(--g-900) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
-    .topbar-inner {
-      max-width: var(--max);
-      margin: 0 auto;
-      min-height: var(--nav-h);
-      padding: .75rem 1.25rem;
+    .nav-inner {
+      max-width: 100%;
+      padding: 0 24px;
+      height: 100%;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+      gap: 16px;
     }
 
-    .brand {
+    .nav-brand {
       display: flex;
       align-items: center;
-      gap: .9rem;
-      min-width: 0;
+      gap: 11px;
+      color: #fff;
+      flex-shrink: 0;
+      transition: opacity 0.18s;
     }
 
-    .brand-mark {
-      width: 46px;
-      height: 46px;
-      border-radius: 16px;
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .02)),
-        linear-gradient(135deg, #0d2619, #173f2c);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 14px 24px rgba(11, 31, 23, .2);
-      display: grid;
-      place-items: center;
-      color: #f5ead1;
-      flex: 0 0 auto;
-      border: 1px solid rgba(255, 255, 255, .08);
+    .nav-brand:hover {
+      opacity: 0.85
     }
 
-    .brand-mark svg {
-      width: 22px;
-      height: 22px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.9;
-      stroke-linecap: round;
-      stroke-linejoin: round
+    /* brand-mark: gold pill (sidebar/navbar version) */
+    .nav-brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--r-md);
+      background: linear-gradient(135deg, var(--a-400), var(--a-600));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .28);
+      flex-shrink: 0;
+      color: var(--a-900);
     }
 
-    .brand-text {
-      min-width: 0
-    }
-
-    .brand-title {
-      margin: 0;
-      font-size: 1.03rem;
-      line-height: 1.2;
+    .nav-brand-name {
+      font-family: 'Tajawal', sans-serif;
+      font-size: 15px;
       font-weight: 800;
-      color: var(--green-950);
-      letter-spacing: .01em;
+      line-height: 1.2;
+      color: #fff;
+      letter-spacing: -0.2px;
     }
 
-    .brand-sub {
-      margin: .15rem 0 0;
-      color: var(--muted);
-      font-size: .84rem;
-      line-height: 1.35;
+    .nav-brand-sub {
+      font-family: 'Tajawal', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, .48);
     }
 
-    .top-actions {
+    .nav-links {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, .65);
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: var(--r-md);
+      transition: all 0.18s;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, .09)
+    }
+
+    .nav-link.active {
+      color: #fff;
+      background: rgba(255, 255, 255, .13);
+      font-weight: 700
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-right: auto;
+    }
+
+    .btn-login {
+      background: transparent;
+      color: rgba(255, 255, 255, .78);
+      border: 1px solid rgba(255, 255, 255, .24);
+      padding: 8px 16px;
+      border-radius: var(--r-md);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.18s;
+      white-space: nowrap;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    .btn-login:hover {
+      background: rgba(255, 255, 255, .10);
+      color: #fff
+    }
+
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none
+      }
+
+      .nav-brand-sub {
+        display: none
+      }
+
+      .btn-login {
+        display: none
+      }
+
+      .nav-inner {
+        padding: 0 16px;
+        gap: 12px
+      }
+    }
+
+    /* ════════════════════════════════════════════
+       TOGGLE BUTTONS
+    ════════════════════════════════════════════ */
+    #toggle-btn,
+    #sidebar-toggle-btn {
+      padding: 8px;
+      border: none;
+      border-radius: var(--r-md);
+      background: rgba(255, 255, 255, .10);
+      color: #fff;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: .65rem;
+      justify-content: center;
+      transition: background 0.2s;
+      flex-shrink: 0;
     }
 
-    .icon-btn {
-      width: 46px;
-      height: 46px;
-      border-radius: 16px;
-      border: 1px solid rgba(25, 45, 36, .08);
-      background: rgba(255, 255, 255, .64);
-      color: var(--green-850);
-      display: grid;
-      place-items: center;
-      box-shadow: 0 8px 18px rgba(14, 28, 20, .06);
-      transition: transform var(--trans), background var(--trans), border-color var(--trans), box-shadow var(--trans);
+    #toggle-btn:hover,
+    #sidebar-toggle-btn:hover {
+      background: rgba(255, 255, 255, .18)
     }
 
-    .icon-btn:hover {
-      transform: translateY(-1px);
-      background: #fff;
-      box-shadow: 0 12px 22px rgba(14, 28, 20, .10)
+    #toggle-btn svg,
+    #sidebar-toggle-btn svg {
+      fill: currentColor
     }
 
-    .icon-btn:focus-visible {
-      outline: 3px solid rgba(176, 141, 61, .28);
-      outline-offset: 2px
+    /* ════════════════════════════════════════════
+       SIDEBAR — Desktop slide-in drawer
+    ════════════════════════════════════════════ */
+    #sidebar {
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--g-900) 0%, var(--g-950) 100%);
+      border-left: 1px solid rgba(255, 255, 255, .07);
+      position: fixed;
+      top: 0;
+      right: 0;
+      transform: translateX(100%);
+      transition: transform 280ms var(--ease-out);
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      font-family: 'Tajawal', sans-serif;
     }
 
-    .icon-btn svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round
+    #sidebar.open {
+      transform: translateX(0)
+    }
+
+    /* Page content shift when sidebar opens */
+    #page-content {
+      transition: margin-right 280ms var(--ease-out)
+    }
+
+    #page-content.sidebar-open {
+      margin-right: 300px
+    }
+
+    /* ── Sidebar header ── */
+    .sidebar-header {
+      height: var(--nav-h);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      flex-shrink: 0;
+    }
+
+    /* ── Nav list ── */
+    #sidebar>ul {
+      list-style: none;
+      padding: 10px 10px 20px;
+      margin: 0;
+      flex: 1;
+    }
+
+    /* Active highlight scoped to direct children only */
+    #sidebar>ul>li.active>a,
+    #sidebar>ul>li.active>.dropdown-btn {
+      color: #fff;
+      background-color: rgba(255, 255, 255, .10);
+    }
+
+    #sidebar>ul>li.active>a svg,
+    #sidebar>ul>li.active>.dropdown-btn svg {
+      fill: #fff;
+      color: #fff;
+    }
+
+    #sidebar a,
+    #sidebar .dropdown-btn {
+      border-radius: var(--r-md);
+      padding: 11px 12px;
+      text-decoration: none;
+      color: rgba(255, 255, 255, .65);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.18s, color 0.18s;
+      white-space: normal;
+    }
+
+    .dropdown-btn {
+      width: 100%;
+      text-align: right;
+      background: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    #sidebar svg {
+      flex-shrink: 0;
+      fill: currentColor
+    }
+
+    #sidebar a span,
+    #sidebar .dropdown-btn span {
+      flex-grow: 1;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    #sidebar a:hover,
+    #sidebar .dropdown-btn:hover {
+      background-color: rgba(255, 255, 255, .07);
+      color: #fff;
+    }
+
+    /* ── Chevron icon rotation ── */
+    .chevron {
+      transition: rotate 220ms ease;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    .rotate .chevron {
+      rotate: 180deg
+    }
+
+    /* ── Sub-menu (accordion) ── */
+    #sidebar .sub-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 280ms ease-in-out;
+    }
+
+    #sidebar .sub-menu.show {
+      max-height: 300px
+    }
+
+    #sidebar .sub-menu>ul {
+      list-style: none;
+      padding: 3px 0 6px;
+      margin: 0;
+    }
+
+    #sidebar .sub-menu a {
+      padding-inline-start: 3.2em;
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, .50);
+      padding-top: 9px;
+      padding-bottom: 9px;
+    }
+
+    #sidebar .sub-menu a:hover {
+      color: rgba(255, 255, 255, .88);
+      background-color: rgba(255, 255, 255, .05);
+    }
+
+    /* ════════════════════════════════════════════
+       MOBILE — Bottom Navigation Bar (≤ 768px)
+    ════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* Hide hamburger button in top navbar on mobile */
+      #toggle-btn {
+        display: none
+      }
+
+      /* Sidebar → always-visible bottom tab bar */
+      #sidebar {
+        width: 100%;
+        height: auto;
+        transform: none !important;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, .09);
+        overflow: visible;
+        flex-direction: column;
+        z-index: 300;
+        transition: none !important;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, .32);
+        background: linear-gradient(180deg, var(--g-900), var(--g-950));
+      }
+
+      #sidebar.open {
+        transform: none !important
+      }
+
+      /* Hide the sidebar header on mobile */
+      .sidebar-header {
+        display: none
+      }
+
+      /* Nav list: horizontal flex row */
+      #sidebar>ul {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        padding: 0;
+        width: 100%;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* Each item takes equal width */
+      #sidebar>ul>li {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+
+      /* Tab buttons/links: icon stacked above label */
+      #sidebar>ul>li>a,
+      #sidebar>ul>li>.dropdown-btn {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        padding: 10px 6px 8px;
+        border-radius: 0;
+        width: 100%;
+        min-height: 58px;
+        font-size: 10px;
+        text-align: center;
+        color: rgba(255, 255, 255, .55);
+      }
+
+      #sidebar>ul>li>a span,
+      #sidebar>ul>li>.dropdown-btn span {
+        font-size: 10.5px;
+        font-weight: 500;
+        flex-grow: 0;
+        white-space: nowrap;
+      }
+
+      /* Active tab */
+      #sidebar>ul>li.active>a,
+      #sidebar>ul>li.active>.dropdown-btn {
+        color: var(--g-300);
+        background: transparent;
+      }
+
+      #sidebar>ul>li.active>a svg,
+      #sidebar>ul>li.active>.dropdown-btn svg {
+        fill: var(--g-300);
+        color: var(--g-300);
+      }
+
+      /* Hide chevron on bottom nav */
+      #sidebar .chevron {
+        display: none
+      }
+
+      /* Sub-menu: popup tray above the bottom bar */
+      #sidebar .sub-menu {
+        position: fixed;
+        bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+        right: 0;
+        left: 0;
+        max-height: 0;
+        overflow: hidden;
+        background: var(--g-900);
+        border-top: 1px solid rgba(255, 255, 255, .09);
+        box-shadow: 0 -6px 24px rgba(0, 0, 0, .35);
+        z-index: 999;
+        transition: max-height 260ms ease-in-out;
+      }
+
+      #sidebar .sub-menu.show {
+        max-height: 100px
+      }
+
+      /* Sub-menu items: horizontal pill row */
+      #sidebar .sub-menu>ul {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+      }
+
+      #sidebar .sub-menu a {
+        padding-inline-start: 0;
+        padding: 9px 22px;
+        border-radius: var(--r-md);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, .80);
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(255, 255, 255, .10);
+        flex-direction: row;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      #sidebar .sub-menu a:hover,
+      #sidebar .sub-menu a:active {
+        background: rgba(255, 255, 255, .16);
+        color: #fff;
+      }
+
+      /* No backdrop on mobile */
+      #sidebar-backdrop {
+        display: none !important
+      }
+
+      /* Push content above bottom nav */
+      #page-content {
+        padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+      }
+
+      /* No horizontal shift on mobile */
+      #page-content.sidebar-open {
+        margin-right: 0
+      }
+    }
+
+    /* ════════════════════════════════════════════
+       PAGE LAYOUT SHELL
+    ════════════════════════════════════════════ */
+    .page {
+      min-height: 100vh;
+      /* Removed fixed bottom-nav padding; handled via #page-content media query above */
     }
 
     .wrap {
@@ -236,6 +692,9 @@
       padding: 1.35rem 1.25rem 1.75rem;
     }
 
+    /* ════════════════════════════════════════════
+       PROFILE HERO
+    ════════════════════════════════════════════ */
     .hero {
       display: grid;
       grid-template-columns: 340px minmax(0, 1fr);
@@ -280,7 +739,8 @@
       gap: 1rem;
     }
 
-    .avatar {
+    /* Profile avatar (distinct class to avoid collision with sidebar brand-mark) */
+    .profile-avatar {
       width: 64px;
       height: 64px;
       border-radius: 22px;
@@ -415,7 +875,7 @@
     .pill-btn:hover {
       transform: translateY(-1px);
       box-shadow: 0 14px 24px rgba(14, 28, 20, .09);
-      border-color: rgba(176, 141, 61, .22)
+      border-color: rgba(176, 141, 61, .22);
     }
 
     .pill-btn svg {
@@ -425,7 +885,7 @@
       fill: none;
       stroke-width: 2;
       stroke-linecap: round;
-      stroke-linejoin: round
+      stroke-linejoin: round;
     }
 
     .grid-3 {
@@ -467,7 +927,7 @@
       font-size: .88rem;
       color: var(--muted);
       margin: 0 0 .35rem;
-      font-weight: 600;
+      font-weight: 600
     }
 
     .stat-value {
@@ -482,7 +942,7 @@
     .stat-note {
       margin: .45rem 0 0;
       font-size: .82rem;
-      color: #7f857b;
+      color: #7f857b
     }
 
     .profile-grid {
@@ -495,11 +955,11 @@
     .profile-side {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1rem
     }
 
     .info-card {
-      padding: 1rem;
+      padding: 1rem
     }
 
     .info-row {
@@ -513,14 +973,14 @@
       color: var(--muted);
       font-size: .84rem;
       font-weight: 700;
-      margin-bottom: .25rem;
+      margin-bottom: .25rem
     }
 
     .info-val {
       font-size: 1rem;
       font-weight: 700;
       color: var(--green-900);
-      line-height: 1.55;
+      line-height: 1.55
     }
 
     .location-card {
@@ -535,7 +995,7 @@
       display: flex;
       align-items: center;
       gap: .9rem;
-      min-width: 0;
+      min-width: 0
     }
 
     .loc-icon {
@@ -556,20 +1016,20 @@
       fill: none;
       stroke-width: 2;
       stroke-linecap: round;
-      stroke-linejoin: round;
+      stroke-linejoin: round
     }
 
     .loc-lbl {
       color: var(--muted);
       font-size: .83rem;
-      font-weight: 700;
+      font-weight: 700
     }
 
     .loc-val {
       margin-top: .15rem;
       font-weight: 800;
       color: var(--green-900);
-      line-height: 1.4;
+      line-height: 1.4
     }
 
     .edit-btn {
@@ -608,7 +1068,7 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      min-height: 100%;
+      min-height: 100%
     }
 
     .history-head {
@@ -623,14 +1083,14 @@
       margin: 0;
       font-size: 1.2rem;
       font-weight: 800;
-      color: var(--green-900);
+      color: var(--green-900)
     }
 
     .history-head p {
       margin: .22rem 0 0;
       color: var(--muted);
       font-size: .92rem;
-      line-height: 1.65;
+      line-height: 1.65
     }
 
     .history-count {
@@ -652,7 +1112,7 @@
     }
 
     .search {
-      position: relative;
+      position: relative
     }
 
     .search input {
@@ -674,7 +1134,7 @@
 
     .search input:focus {
       border-color: rgba(176, 141, 61, .35);
-      box-shadow: 0 0 0 4px rgba(176, 141, 61, .12);
+      box-shadow: 0 0 0 4px rgba(176, 141, 61, .12)
     }
 
     .search svg {
@@ -696,192 +1156,187 @@
       display: flex;
       gap: .55rem;
       flex-wrap: wrap;
-      justify-content: flex-start;
+      justify-content: flex-start
     }
 
     .filter-btn {
-      border: 1px solid rgba(25, 45, 36, .10);
+      height: 52px;
+      border: 1px solid rgba(25, 45, 36, .09);
       background: #fff;
       color: var(--green-850);
-      border-radius: 999px;
-      padding: .64rem .9rem;
-      min-height: 42px;
+      padding: 0 1.1rem;
+      border-radius: 16px;
       display: inline-flex;
       align-items: center;
       gap: .5rem;
-      font-weight: 800;
-      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans), background var(--trans), color var(--trans);
-      box-shadow: 0 8px 16px rgba(14, 28, 20, .04);
+      font-weight: 700;
+      font-size: .92rem;
+      box-shadow: 0 8px 18px rgba(14, 28, 20, .04);
+      transition: transform var(--trans), box-shadow var(--trans), background var(--trans), border-color var(--trans), color var(--trans);
+      white-space: nowrap;
     }
 
     .filter-btn:hover {
       transform: translateY(-1px);
-      border-color: rgba(176, 141, 61, .28)
+      box-shadow: 0 12px 22px rgba(14, 28, 20, .08)
     }
 
     .filter-btn.on {
-      background: linear-gradient(180deg, #184b31, #123525);
-      color: #fff;
-      border-color: transparent;
-      box-shadow: 0 14px 26px rgba(19, 65, 40, .20);
+      background: linear-gradient(180deg, #143523, #0d2118);
+      color: #e8f5ec;
+      border-color: rgba(19, 65, 40, .20);
+      box-shadow: 0 12px 22px rgba(14, 28, 20, .14);
     }
 
     .filter-badge {
-      min-width: 1.5rem;
-      height: 1.5rem;
-      padding: 0 .35rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
       border-radius: 999px;
-      display: inline-grid;
-      place-items: center;
-      background: rgba(176, 141, 61, .12);
-      color: var(--gold);
-      font-size: .8rem;
+      background: rgba(255, 255, 255, .14);
+      color: inherit;
+      font-size: .78rem;
       font-weight: 800;
+      padding: 0 .35rem;
     }
 
-    .filter-btn.on .filter-badge {
-      background: rgba(255, 255, 255, .16);
-      color: #fff;
+    .filter-btn:not(.on) .filter-badge {
+      background: rgba(19, 65, 40, .08)
     }
 
     .history-list {
-      display: grid;
-      gap: .9rem;
+      display: flex;
+      flex-direction: column;
+      gap: .8rem
     }
 
     .history-card {
-      border-radius: 22px;
-      border: 1px solid rgba(25, 45, 36, .08);
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(249, 246, 239, .98));
-      box-shadow: 0 14px 26px rgba(14, 28, 20, .06);
-      padding: 1rem;
-      position: relative;
-      overflow: hidden;
-      transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+      background: #fff;
+      border: 1px solid rgba(25, 45, 36, .07);
+      border-radius: var(--radius-md);
+      padding: 1rem 1rem .92rem;
+      display: flex;
+      flex-direction: column;
+      gap: .72rem;
+      transition: box-shadow var(--trans), transform var(--trans), border-color var(--trans);
+      box-shadow: 0 6px 16px rgba(14, 28, 20, .04);
     }
 
     .history-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 34px rgba(14, 28, 20, .08);
-      border-color: rgba(176, 141, 61, .22);
-    }
-
-    .history-card::before {
-      content: "";
-      position: absolute;
-      inset: 0 auto auto 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, #b08d3d, #d8be7a, #b08d3d);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(14, 28, 20, .08);
+      border-color: rgba(25, 45, 36, .12)
     }
 
     .card-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 1rem;
-      margin-top: .15rem;
+      gap: .8rem
     }
 
     .card-title {
       margin: 0;
-      font-size: 1.05rem;
+      font-size: 1.04rem;
       font-weight: 800;
       color: var(--green-900);
-      line-height: 1.45;
+      line-height: 1.4
     }
 
     .action-chip {
-      flex: 0 0 auto;
-      padding: .42rem .72rem;
-      border-radius: 999px;
-      font-size: .79rem;
-      font-weight: 800;
-      border: 1px solid transparent;
       display: inline-flex;
       align-items: center;
       gap: .35rem;
+      padding: .36rem .72rem;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 800;
       white-space: nowrap;
+      border: 1px solid transparent;
     }
 
-    .chip-view {
-      background: rgba(19, 65, 40, .08);
-      color: var(--green-800);
-      border-color: rgba(19, 65, 40, .08);
+    .action-chip svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
     }
 
-    .chip-search {
+    .chip-viewed {
+      background: rgba(13, 41, 26, .08);
+      color: #0d291a;
+      border-color: rgba(13, 41, 26, .10)
+    }
+
+    .chip-searched {
       background: rgba(176, 141, 61, .10);
-      color: #85652a;
-      border-color: rgba(176, 141, 61, .12);
-    }
-
-    .chip-heart {
-      background: rgba(183, 92, 92, .10);
-      color: #8d4747;
-      border-color: rgba(183, 92, 92, .14);
+      color: #7a5e1a;
+      border-color: rgba(176, 141, 61, .16)
     }
 
     .card-meta {
-      margin-top: .7rem;
       display: flex;
       flex-wrap: wrap;
-      gap: .55rem .85rem;
-      color: var(--muted);
-      font-size: .89rem;
-      line-height: 1.65;
+      gap: .45rem .75rem
     }
 
     .meta-item {
       display: inline-flex;
       align-items: center;
-      gap: .45rem;
+      gap: .38rem;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 600;
     }
 
     .meta-item svg {
-      width: 15px;
-      height: 15px;
+      width: 13px;
+      height: 13px;
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
-      flex: 0 0 auto;
+      flex-shrink: 0
     }
 
     .card-foot {
-      margin-top: .95rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
+      gap: 1rem
     }
 
     .small {
-      color: #7a807a;
-      font-size: .84rem;
-      line-height: 1.65;
+      font-size: .80rem;
+      color: var(--muted);
+      font-weight: 600
     }
 
     .secondary-btn {
-      border: 1px solid rgba(25, 45, 36, .10);
-      background: #fff;
+      border: 1px solid rgba(25, 45, 36, .09);
+      background: rgba(255, 255, 255, .80);
       color: var(--green-850);
-      border-radius: 14px;
-      padding: .62rem .9rem;
+      padding: .62rem .92rem;
+      border-radius: 12px;
       display: inline-flex;
       align-items: center;
-      gap: .45rem;
+      gap: .42rem;
       font-weight: 800;
+      font-size: .84rem;
+      box-shadow: 0 6px 14px rgba(14, 28, 20, .04);
       transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
-      box-shadow: 0 10px 18px rgba(14, 28, 20, .05);
     }
 
     .secondary-btn:hover {
       transform: translateY(-1px);
-      border-color: rgba(176, 141, 61, .24)
+      box-shadow: 0 10px 18px rgba(14, 28, 20, .08);
+      border-color: rgba(176, 141, 61, .22)
     }
 
     .secondary-btn svg {
@@ -891,61 +1346,59 @@
       fill: none;
       stroke-width: 2;
       stroke-linecap: round;
-      stroke-linejoin: round;
+      stroke-linejoin: round
     }
 
     .empty {
-      padding: 2rem 1rem;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, .86), rgba(247, 243, 236, .96));
-      border: 1px dashed rgba(25, 45, 36, .12);
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .65rem;
+      padding: 3rem 1rem;
+      text-align: center
     }
 
     .empty-ico {
-      width: 60px;
-      height: 60px;
-      border-radius: 20px;
-      margin: 0 auto .75rem;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, rgba(19, 65, 40, .08), rgba(176, 141, 61, .10));
-      color: var(--green-800);
-      font-size: 1.5rem;
+      font-size: 2.6rem
     }
 
     .empty-title {
       margin: 0;
-      font-size: 1.05rem;
+      font-size: 1.08rem;
       font-weight: 800;
-      color: var(--green-900);
+      color: var(--green-900)
     }
 
     .empty-sub {
-      margin: .35rem 0 0;
+      margin: 0;
       color: var(--muted);
-      line-height: 1.8;
       font-size: .92rem;
+      line-height: 1.7;
+      max-width: 34ch
     }
 
+    /* ════════════════════════════════════════════
+       TOAST
+    ════════════════════════════════════════════ */
     .toast {
       position: fixed;
+      bottom: calc(80px + env(safe-area-inset-bottom, 0px));
       left: 50%;
-      bottom: calc(var(--bottom-nav-h) + 18px + env(safe-area-inset-bottom, 0px));
       transform: translateX(-50%);
-      z-index: 80;
+      z-index: 9999;
+      background: #fff;
+      border: 1px solid rgba(25, 45, 36, .09);
+      border-radius: 999px;
+      padding: .75rem 1.25rem;
       display: flex;
       align-items: center;
       gap: .65rem;
-      padding: .8rem .95rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .96);
-      border: 1px solid rgba(25, 45, 36, .08);
-      box-shadow: 0 18px 30px rgba(14, 28, 20, .12);
+      box-shadow: 0 16px 40px rgba(14, 28, 20, .12);
+      min-width: 220px;
+      transition: opacity 200ms, transform 200ms;
+      font-weight: 700;
+      font-size: .92rem;
       color: var(--green-900);
-      min-width: min(92vw, 420px);
-      justify-content: flex-start;
-      transition: opacity .22s ease, transform .22s ease;
     }
 
     .toast.hide {
@@ -958,46 +1411,48 @@
     }
 
     .toast-icon {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: grid;
       place-items: center;
       flex: 0 0 auto;
-      color: #fff;
-    }
-
-    .toast-icon.ok {
-      background: linear-gradient(180deg, #1a5c39, #124128)
-    }
-
-    .toast-icon.warn {
-      background: linear-gradient(180deg, #b08d3d, #907030)
     }
 
     .toast-icon svg {
       width: 14px;
       height: 14px;
-      stroke: currentColor;
+      stroke: #fff;
       fill: none;
-      stroke-width: 2.4;
+      stroke-width: 2.5;
       stroke-linecap: round;
       stroke-linejoin: round
     }
 
-    .toast-msg {
-      font-weight: 700
+    .toast-icon.ok {
+      background: var(--green-700)
     }
 
+    .toast-icon.warn {
+      background: var(--gold)
+    }
+
+    .toast-msg {
+      flex: 1
+    }
+
+    /* ════════════════════════════════════════════
+       LOCATION MODAL
+    ════════════════════════════════════════════ */
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(4, 12, 8, .52);
-      backdrop-filter: blur(8px);
-      z-index: 70;
-      display: grid;
-      place-items: end center;
-      padding: 1rem;
+      background: rgba(7, 24, 15, .52);
+      backdrop-filter: blur(6px) saturate(140%);
+      z-index: 800;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
     }
 
     .overlay.hidden {
@@ -1005,36 +1460,48 @@
     }
 
     .modal {
-      width: min(100%, 560px);
-      background: rgba(255, 250, 244, .98);
-      border: 1px solid rgba(255, 255, 255, .26);
-      border-radius: 28px;
-      box-shadow: 0 28px 60px rgba(6, 17, 11, .35);
+      background: var(--bg-soft);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      width: 100%;
+      max-width: 640px;
       overflow: hidden;
+      box-shadow: 0 -20px 60px rgba(7, 24, 15, .22);
+      animation: slideUp 260ms var(--trans) both;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(28px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
     }
 
     .modal-handle {
-      width: 72px;
+      width: 44px;
       height: 5px;
-      border-radius: 999px;
       background: rgba(25, 45, 36, .16);
-      margin: .7rem auto 0;
+      border-radius: 999px;
+      margin: .85rem auto .5rem;
     }
 
     .modal-head {
-      padding: 1rem 1rem .85rem;
+      padding: .65rem 1rem .85rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      border-bottom: 1px solid rgba(25, 45, 36, .08);
     }
 
     .modal-title {
       display: flex;
       align-items: center;
-      gap: .7rem;
-      font-size: 1.05rem;
+      gap: .65rem;
+      font-size: 1.12rem;
       font-weight: 800;
       color: var(--green-900);
     }
@@ -1043,16 +1510,15 @@
       width: 40px;
       height: 40px;
       border-radius: 14px;
-      background: linear-gradient(135deg, rgba(19, 65, 40, .10), rgba(176, 141, 61, .10));
-      color: var(--green-800);
       display: grid;
       place-items: center;
-      flex: 0 0 auto;
+      background: linear-gradient(135deg, rgba(19, 65, 40, .10), rgba(176, 141, 61, .10));
+      color: var(--green-800);
     }
 
     .modal-title-icon svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       stroke: currentColor;
       fill: none;
       stroke-width: 2;
@@ -1061,14 +1527,20 @@
     }
 
     .modal-close {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      border: 1px solid rgba(25, 45, 36, .08);
-      background: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(25, 45, 36, .09);
+      background: rgba(255, 255, 255, .68);
       color: var(--green-850);
       display: grid;
       place-items: center;
+      transition: transform var(--trans), background var(--trans);
+    }
+
+    .modal-close:hover {
+      transform: scale(1.05);
+      background: #fff
     }
 
     .modal-close svg {
@@ -1076,26 +1548,28 @@
       height: 16px;
       stroke: currentColor;
       fill: none;
-      stroke-width: 2.4;
+      stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round
     }
 
     .modal-body {
-      padding: 1rem;
-      display: grid;
+      padding: .5rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
     }
 
     .inp-grp {
-      display: grid;
-      gap: .5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .45rem
     }
 
     .inp-lbl {
-      font-size: .9rem;
-      font-weight: 800;
-      color: var(--green-900);
+      font-size: .87rem;
+      font-weight: 700;
+      color: var(--green-850)
     }
 
     .inp-required {
@@ -1104,7 +1578,7 @@
     }
 
     .sel-wrap {
-      position: relative;
+      position: relative
     }
 
     .sel-wrap select {
@@ -1122,7 +1596,7 @@
 
     .sel-wrap select:focus {
       border-color: rgba(176, 141, 61, .35);
-      box-shadow: 0 0 0 4px rgba(176, 141, 61, .10);
+      box-shadow: 0 0 0 4px rgba(176, 141, 61, .10)
     }
 
     .sel-arrow {
@@ -1150,7 +1624,7 @@
       display: none;
       color: #9e5252;
       font-size: .82rem;
-      font-weight: 700;
+      font-weight: 700
     }
 
     .has-error .inp-error-msg {
@@ -1160,7 +1634,7 @@
     .error select,
     .error {
       border-color: #c78c8c !important;
-      box-shadow: 0 0 0 4px rgba(183, 92, 92, .10) !important;
+      box-shadow: 0 0 0 4px rgba(183, 92, 92, .10) !important
     }
 
     .modal-foot {
@@ -1191,60 +1665,9 @@
       outline-offset: 2px
     }
 
-    .bottom-nav {
-      display: none;
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 60;
-      padding: .55rem .7rem calc(.55rem + env(safe-area-inset-bottom, 0px));
-      background: rgba(247, 242, 233, .86);
-      border-top: 1px solid rgba(25, 45, 36, .08);
-      backdrop-filter: blur(18px) saturate(180%);
-    }
-
-    .bottom-nav-inner {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: .45rem;
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    .bottom-item {
-      min-height: 58px;
-      border: none;
-      border-radius: 18px;
-      background: transparent;
-      color: #718076;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: .22rem;
-      font-weight: 700;
-      font-size: .77rem;
-      transition: background var(--trans), color var(--trans), transform var(--trans), box-shadow var(--trans);
-      position: relative;
-    }
-
-    .bottom-item svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .bottom-item.active {
-      color: var(--green-850);
-      background: rgba(255, 255, 255, .88);
-      box-shadow: 0 10px 16px rgba(14, 28, 20, .08);
-    }
-
+    /* ════════════════════════════════════════════
+       UTILITIES
+    ════════════════════════════════════════════ */
     .sr-only {
       position: absolute;
       width: 1px;
@@ -1257,13 +1680,20 @@
       border: 0;
     }
 
+    .hidden {
+      display: none !important
+    }
+
+    /* ════════════════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════════════════ */
     @media (max-width: 1120px) {
       .hero {
-        grid-template-columns: 300px minmax(0, 1fr);
+        grid-template-columns: 300px minmax(0, 1fr)
       }
 
       .profile-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
       }
     }
 
@@ -1273,44 +1703,29 @@
       }
 
       .hero {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
       }
 
       .hero-left {
-        padding: 1.5rem 1.25rem;
+        padding: 1.5rem 1.25rem
       }
 
       .hero-right {
-        padding: 1.25rem;
+        padding: 1.25rem
       }
 
       .grid-3 {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
       }
 
       .controls {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
       }
     }
 
     @media (max-width: 740px) {
-      :root {
-        --nav-h: 68px;
-        --bottom-nav-h: 76px
-      }
-
       .topbar-inner {
         padding-inline: .9rem
-      }
-
-      .brand-sub {
-        display: none
-      }
-
-      .top-actions .icon-btn {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
       }
 
       .section-title {
@@ -1327,12 +1742,12 @@
 
       .location-card {
         align-items: flex-start;
-        flex-direction: column;
+        flex-direction: column
       }
 
       .edit-btn {
         width: 100%;
-        justify-content: center;
+        justify-content: center
       }
 
       .history-shell {
@@ -1345,7 +1760,7 @@
 
       .card-top {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: flex-start
       }
 
       .action-chip {
@@ -1354,16 +1769,12 @@
 
       .card-foot {
         flex-direction: column;
-        align-items: stretch;
+        align-items: stretch
       }
 
       .secondary-btn {
         justify-content: center;
         width: 100%
-      }
-
-      .bottom-nav {
-        display: block
       }
     }
 
@@ -1380,7 +1791,7 @@
         padding: 1rem
       }
 
-      .avatar {
+      .profile-avatar {
         width: 58px;
         height: 58px;
         border-radius: 20px
@@ -1402,10 +1813,6 @@
 
       .toast {
         min-width: calc(100vw - 1rem)
-      }
-
-      .bottom-item {
-        font-size: .72rem
       }
     }
 
@@ -1429,406 +1836,455 @@
 <body>
   <a href="#main-content" class="skip-link">انتقل إلى المحتوى الرئيسي</a>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="/" aria-label="على رفوف المساجد">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M5 18V8l7-4 7 4v10" />
-            <path d="M12 4v14" />
-            <path d="M8 9h8" />
-            <path d="M7 18h10" />
-          </svg>
-        </span>
-        <span class="brand-text">
-          <h1 class="brand-title">على رفوف المساجد</h1>
-          <p class="brand-sub">الملف الشخصي وسجل الكتب</p>
-        </span>
-      </a>
+  <!-- ════════════════════════════════════════════
+       SIDEBAR NAV (extracted from browse.html)
+       Active item set to "حسابي" (profile page)
+  ════════════════════════════════════════════ -->
+  <nav id="sidebar" aria-label="روابط رئيسية">
+    <!-- Sidebar header — mirrors the top navbar brand -->
+    <div class="sidebar-header">
+      <button id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="إغلاق القائمة">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+          <path
+            d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z" />
+        </svg>
+      </button>
 
-      <div class="top-actions" aria-label="إجراءات سريعة">
-        <button class="icon-btn" type="button" title="الإشعارات" aria-label="الإشعارات"
-          onclick="App.toast('لا توجد إشعارات جديدة', 'ok')">
-          <svg viewBox="0 0 24 24">
+      <a href="#" class="nav-brand" aria-label="الصفحة الرئيسية — على رفوف المساجد">
+        <div class="nav-brand-mark" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
             <path
-              d="M15 17H5a2 2 0 0 1-2-2v-1a4 4 0 0 1 3-3.87V9a6 6 0 1 1 12 0v1.13A4 4 0 0 1 21 14v1a2 2 0 0 1-2 2h-1" />
-            <path d="M9 20a3 3 0 0 0 6 0" />
+              d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
           </svg>
-        </button>
-        <button class="icon-btn" type="button" title="تحديث الموقع" aria-label="تحديث الموقع" onclick="App.openModal()">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 12a9 9 0 0 1 15.5-6.36L21 8" />
-            <path d="M21 3v5h-5" />
-            <path d="M21 12a9 9 0 0 1-15.5 6.36L3 16" />
-            <path d="M8 19H3v5" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="page">
-    <main class="wrap" id="main-content">
-      <section class="hero" aria-label="معلومات الملف الشخصي">
-        <div class="hero-left">
-          <div>
-            <div class="brand-stack">
-              <div class="avatar" id="avatar" aria-hidden="true">أ</div>
-              <div>
-                <div class="badge badge-role" id="role-badge" aria-label="الدور: متطوع">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <polygon
-                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                  متطوع
-                </div>
-                <div class="badge badge-ghost" style="margin-top:.55rem">عضو منذ يناير ٢٠٢٥</div>
-              </div>
-            </div>
-
-            <div class="hero-copy">
-              <h2 id="profile-name">أحمد محمد العمري</h2>
-              <p id="profile-bio">
-                صفحة شخصية نظيفة وسريعة تعرض بياناتك الأساسية وسجل الكتب التي بحثت عنها أو شاهدت مسجدها وموقعها.
-              </p>
-            </div>
-            <span class="badge badge-ghost" id="profile-email">ahmed@example.com</span>
-          </div>
         </div>
-
-        <div class="hero-right">
-          <div class="section-top">
-            <div>
-              <h2 class="section-title">أهلاً بعودتك</h2>
-              <p class="section-sub">
-                هنا يمكنك مراجعة موقعك الحالي، الوصول السريع إلى إعداداتك، والاطلاع على سجل الكتب التي تفاعلت معها داخل
-                المنصة.
-              </p>
-            </div>
-
-            <div class="profile-actions">
-              <button class="pill-btn" type="button" onclick="App.openModal()">
-                <svg viewBox="0 0 24 24">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                تعديل الموقع
-              </button>
-              <button class="pill-btn" type="button" onclick="App.toast('تم حفظ الإعدادات الافتراضية', 'ok')">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 2v4" />
-                  <path d="M12 18v4" />
-                  <path d="M4.93 4.93l2.83 2.83" />
-                  <path d="M16.24 16.24l2.83 2.83" />
-                  <path d="M2 12h4" />
-                  <path d="M18 12h4" />
-                  <path d="M4.93 19.07l2.83-2.83" />
-                  <path d="M16.24 7.76l2.83-2.83" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                إعدادات سريعة
-              </button>
-            </div>
-          </div>
-
-          <div class="grid-3" aria-label="إحصاءات سريعة">
-            <article class="stat-card">
-              <p class="stat-label">كتب في السجل</p>
-              <p class="stat-value" id="stat-total">0</p>
-              <p class="stat-note">كل العناصر المتاحة في هذا العرض</p>
-            </article>
-            <article class="stat-card">
-              <p class="stat-label">تمت المشاهدة</p>
-              <p class="stat-value" id="stat-viewed">0</p>
-              <p class="stat-note">كتب شاهدت مسجدها أو تفاصيلها</p>
-            </article>
-            <article class="stat-card">
-              <p class="stat-label">عمليات البحث</p>
-              <p class="stat-value" id="stat-searched">0</p>
-              <p class="stat-note">سجلات البحث السابقة داخل المنصة</p>
-            </article>
-          </div>
-
-          <div class="profile-grid">
-            <aside class="profile-side">
-              <section class="info-card" aria-label="بيانات الحساب">
-                <div class="info-row">
-                  <div>
-                    <div class="info-lbl">اسم العرض</div>
-                    <div class="info-val" id="display-name">أحمد محمد العمري</div>
-                  </div>
-                  <div class="badge badge-ghost"
-                    style="color:var(--green-850); background:rgba(19,65,40,.06); border-color:rgba(19,65,40,.08)">نشط
-                  </div>
-                </div>
-              </section>
-
-              <section class="location-card" aria-label="الموقع الحالي">
-                <div class="loc-left">
-                  <div class="loc-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div class="loc-lbl">الموقع الحالي</div>
-                    <div class="loc-val" id="current-location">القاهرة — مدينة نصر</div>
-                  </div>
-                </div>
-                <button class="edit-btn" type="button" onclick="App.openModal()">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                  تغيير
-                </button>
-              </section>
-            </aside>
-
-            <section class="history-shell" aria-label="سجل الكتب">
-              <div class="history-head">
-                <div>
-                  <h3>سجل الكتب</h3>
-                  <p>يعرض آخر الكتب التي بحثت عنها أو شاهدت المسجد المرتبط بها وموقعها.</p>
-                </div>
-                <div class="history-count" id="history-count" aria-live="polite">٠ سجل</div>
-              </div>
-
-              <div class="controls">
-                <label class="search" for="history-search">
-                  <span class="sr-only">ابحث في سجل الكتب</span>
-                  <input id="history-search" type="search" inputmode="search"
-                    placeholder="ابحث عن كتاب، مسجد، مدينة، أو نوع..." autocomplete="off" />
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M20 20l-3.5-3.5" />
-                  </svg>
-                </label>
-
-                <div class="filters" role="tablist" aria-label="تصفية سجل الكتب">
-                  <button class="filter-btn on" type="button" data-filter="all" aria-pressed="true">الكل <span
-                      class="filter-badge" id="count-all">0</span></button>
-                  <button class="filter-btn" type="button" data-filter="viewed" aria-pressed="false">المشاهدة <span
-                      class="filter-badge" id="count-viewed">0</span></button>
-                  <button class="filter-btn" type="button" data-filter="searched" aria-pressed="false">البحث <span
-                      class="filter-badge" id="count-searched">0</span></button>
-                </div>
-              </div>
-
-              <div class="history-list" id="history-list" role="list" aria-label="قائمة سجل الكتب"></div>
-            </section>
-          </div>
+        <div>
+          <div class="nav-brand-name">على رفوف المساجد</div>
+          <div class="nav-brand-sub">مكتبات المساجد في مكان واحد</div>
         </div>
-      </section>
-    </main>
-  </div>
-
-  <nav class="bottom-nav" aria-label="التنقل السفلي">
-    <div class="bottom-nav-inner">
-      <a class="bottom-item" href="/" aria-label="الرئيسية">
-        <svg viewBox="0 0 24 24">
-          <path d="M3 11.5 12 4l9 7.5" />
-          <path d="M5 10.5V20h14v-9.5" />
-          <path d="M9 20v-6h6v6" />
-        </svg>
-        <span>الرئيسية</span>
-      </a>
-      <a class="bottom-item" href="/books" aria-label="الكتب">
-        <svg viewBox="0 0 24 24">
-          <path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z" />
-          <path d="M7 3v18" />
-          <path d="M9 7h7" />
-          <path d="M9 11h7" />
-        </svg>
-        <span>الكتب</span>
-      </a>
-      <a class="bottom-item" href="/history" aria-label="السجل">
-        <svg viewBox="0 0 24 24">
-          <path d="M4 7h16" />
-          <path d="M4 12h16" />
-          <path d="M4 17h10" />
-          <path d="M19 17v-5" />
-          <path d="M17 17l2 2 3-3" />
-        </svg>
-        <span>السجل</span>
-      </a>
-      <a class="bottom-item active" href="/profile" aria-current="page" aria-label="الملف">
-        <svg viewBox="0 0 24 24">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-        <span>ملفي</span>
       </a>
     </div>
+
+    <ul>
+      <!-- Browse Page -->
+      <li>
+        <button onclick="toggleSubMenu(this)" class="dropdown-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path
+              d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+          </svg>
+          <span>تصفح</span>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+            fill="#e8eaed">
+            <path
+              d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z" />
+          </svg>
+        </button>
+        <div class="sub-menu">
+          <ul>
+            <li><a href="browse.html">كتاب</a></li>
+            <li><a href="browse.html">مسجد</a></li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Submit a book -->
+      <li>
+        <a href="submit.html">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+          </svg>
+          <span>تسجيل كتاب</span>
+        </a>
+      </li>
+
+      <!-- User Profile Page — ACTIVE -->
+      <li class="active">
+        <a href="profile.html" aria-current="page">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path
+              d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm146.5-204.5Q340-521 340-580t40.5-99.5Q421-720 480-720t99.5 40.5Q620-639 620-580t-40.5 99.5Q539-440 480-440t-99.5-40.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm100-95.5q47-15.5 86-44.5-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160q53 0 100-15.5ZM523-537q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm-43-43Zm0 360Z" />
+          </svg>
+          <span>حسابي</span>
+        </a>
+      </li>
+
+      <!-- About Page -->
+      <li>
+        <a href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path
+              d="M440-280h80v-240h-80v240Zm68.5-331.5Q520-623 520-640t-11.5-28.5Q497-680 480-680t-28.5 11.5Q440-657 440-640t11.5 28.5Q463-600 480-600t28.5-11.5ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+          </svg>
+          <span>عن المنصة</span>
+        </a>
+      </li>
+    </ul>
   </nav>
 
-  <div id="toast" class="toast gone" role="status" aria-live="polite">
-    <span class="toast-icon ok" id="toast-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    </span>
-    <span id="toast-msg" class="toast-msg">تم الحفظ بنجاح</span>
+  <!-- Overlay backdrop (desktop only) -->
+  <div id="sidebar-backdrop" onclick="toggleSidebar()" aria-hidden="true"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:900; backdrop-filter:blur(2px);">
   </div>
 
-  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title"
-    aria-hidden="true" onclick="App.handleOverlayClick(event)">
-    <div class="modal" id="modal">
-      <div class="modal-handle" aria-hidden="true"></div>
-      <div class="modal-head">
-        <div class="modal-title" id="modal-title">
-          <div class="modal-title-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </div>
-          تعديل الموقع
-        </div>
-        <button class="modal-close" type="button" onclick="App.closeModal()" aria-label="إغلاق">
-          <svg viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
+  <!-- ════════════════════════════════════════════
+       PAGE CONTENT WRAPPER
+       Required for desktop sidebar push-effect
+  ════════════════════════════════════════════ -->
+  <div id="page-content" style="display:flex; flex-direction:column; min-width:0; min-height:100vh;">
+
+    <!-- ════ NAVBAR (from browse.html) ════ -->
+    <nav class="navbar" role="navigation" aria-label="القائمة الرئيسية">
+      <div class="nav-inner">
+        <!-- Hamburger: hidden on mobile (sidebar becomes bottom tab bar) -->
+        <button id="toggle-btn" onclick="toggleSidebar()" aria-label="تبديل القائمة">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+            fill="currentColor">
+            <path
+              d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z" />
           </svg>
         </button>
-      </div>
 
-      <div class="modal-body">
-        <div class="inp-grp" id="grp-gov">
-          <label class="inp-lbl" for="sel-gov">المحافظة <span class="inp-required" aria-hidden="true">*</span></label>
-          <div class="sel-wrap" id="wrap-gov">
-            <select id="sel-gov" onchange="App.onGovChange()" aria-required="true" aria-describedby="err-gov">
-              <option value="">اختر المحافظة</option>
-            </select>
-            <span class="sel-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </span>
+        <a href="#" class="nav-brand" aria-label="الصفحة الرئيسية — على رفوف المساجد">
+          <div class="nav-brand-mark" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+              <path
+                d="M560-564v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-600q-38 0-73 9.5T560-564Zm0 220v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-380q-38 0-73 9t-67 27Zm0-110v-68q33-14 67.5-21t72.5-7q26 0 51 4t49 10v64q-24-9-48.5-13.5T700-490q-38 0-73 9.5T560-454ZM260-320q47 0 91.5 10.5T440-278v-394q-41-24-87-36t-93-12q-36 0-71.5 7T120-692v396q35-12 69.5-18t70.5-6Zm260 42q44-21 88.5-31.5T700-320q36 0 70.5 6t69.5 18v-396q-33-14-68.5-21t-71.5-7q-47 0-93 12t-87 36v394Zm-40 118q-48-38-104-59t-116-21q-42 0-82.5 11T100-198q-21 11-40.5-1T40-234v-482q0-11 5.5-21T62-752q46-24 96-36t102-12q58 0 113.5 15T480-740q51-30 106.5-45T700-800q52 0 102 12t96 36q11 5 16.5 15t5.5 21v482q0 23-19.5 35t-40.5 1q-37-20-77.5-31T700-240q-60 0-116 21t-104 59ZM280-494Z" />
+            </svg>
           </div>
-          <span class="inp-error-msg" id="err-gov" role="alert">يرجى اختيار المحافظة</span>
-        </div>
+          <div>
+            <div class="nav-brand-name">على رفوف المساجد</div>
+            <div class="nav-brand-sub">مكتبات المساجد في مكان واحد</div>
+          </div>
+        </a>
 
-        <div class="inp-grp" id="grp-city">
-          <label class="inp-lbl" for="sel-city">المدينة <span class="inp-required" aria-hidden="true">*</span></label>
-          <div class="sel-wrap" id="wrap-city">
-            <select id="sel-city" aria-required="true" aria-describedby="err-city">
-              <option value="">اختر المدينة</option>
-            </select>
-            <span class="sel-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </span>
-          </div>
-          <span class="inp-error-msg" id="err-city" role="alert">يرجى اختيار المدينة</span>
+        <div class="nav-actions">
+          <button class="btn-login" onclick="App.toast('تسجيل الدخول قريباً', 'ok')">تسجيل الدخول</button>
         </div>
       </div>
+    </nav>
 
-      <div class="modal-foot">
-        <button class="save-btn" type="button" onclick="App.saveLocation()">حفظ الموقع</button>
+    <!-- ════ PROFILE PAGE CONTENT (unchanged from original) ════ -->
+    <div class="page">
+      <main class="wrap" id="main-content">
+        <section class="hero" aria-label="معلومات الملف الشخصي">
+          <div class="hero-left">
+            <div>
+              <div class="brand-stack">
+                <!-- Renamed class: profile-avatar (was "avatar") to avoid any future collisions -->
+                <div class="profile-avatar" id="avatar" aria-hidden="true">أ</div>
+                <div>
+                  <div class="badge badge-role" id="role-badge" aria-label="الدور: متطوع">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    متطوع
+                  </div>
+                  <div class="badge badge-ghost" style="margin-top:.55rem">عضو منذ يناير ٢٠٢٥</div>
+                </div>
+              </div>
+
+              <div class="hero-copy">
+                <h2 id="profile-name">أحمد محمد العمري</h2>
+                <p id="profile-bio">
+                  صفحة شخصية نظيفة وسريعة تعرض بياناتك الأساسية وسجل الكتب التي بحثت عنها أو شاهدت مسجدها وموقعها.
+                </p>
+              </div>
+              <span class="badge badge-ghost" id="profile-email">ahmed@example.com</span>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <div class="section-top">
+              <div>
+                <h2 class="section-title">أهلاً بعودتك</h2>
+                <p class="section-sub">
+                  هنا يمكنك مراجعة موقعك الحالي، الوصول السريع إلى إعداداتك، والاطلاع على سجل الكتب التي تفاعلت معها
+                  داخل المنصة.
+                </p>
+              </div>
+
+              <div class="profile-actions">
+                <button class="pill-btn" type="button" onclick="App.openModal()">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  تعديل الموقع
+                </button>
+                <button class="pill-btn" type="button" onclick="App.toast('تم حفظ الإعدادات الافتراضية', 'ok')">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2v4" />
+                    <path d="M12 18v4" />
+                    <path d="M4.93 4.93l2.83 2.83" />
+                    <path d="M16.24 16.24l2.83 2.83" />
+                    <path d="M2 12h4" />
+                    <path d="M18 12h4" />
+                    <path d="M4.93 19.07l2.83-2.83" />
+                    <path d="M16.24 7.76l2.83-2.83" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  إعدادات سريعة
+                </button>
+              </div>
+            </div>
+
+            <div class="grid-3" aria-label="إحصاءات سريعة">
+              <article class="stat-card">
+                <p class="stat-label">كتب في السجل</p>
+                <p class="stat-value" id="stat-total">0</p>
+                <p class="stat-note">كل العناصر المتاحة في هذا العرض</p>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">تمت المشاهدة</p>
+                <p class="stat-value" id="stat-viewed">0</p>
+                <p class="stat-note">كتب شاهدت مسجدها أو تفاصيلها</p>
+              </article>
+              <article class="stat-card">
+                <p class="stat-label">عمليات البحث</p>
+                <p class="stat-value" id="stat-searched">0</p>
+                <p class="stat-note">سجلات البحث السابقة داخل المنصة</p>
+              </article>
+            </div>
+
+            <div class="profile-grid">
+              <aside class="profile-side">
+                <section class="info-card" aria-label="بيانات الحساب">
+                  <div class="info-row">
+                    <div>
+                      <div class="info-lbl">اسم العرض</div>
+                      <div class="info-val" id="display-name">أحمد محمد العمري</div>
+                    </div>
+                    <div class="badge badge-ghost"
+                      style="color:var(--green-850); background:rgba(19,65,40,.06); border-color:rgba(19,65,40,.08)">نشط
+                    </div>
+                  </div>
+                </section>
+
+                <section class="location-card" aria-label="الموقع الحالي">
+                  <div class="loc-left">
+                    <div class="loc-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="loc-lbl">الموقع الحالي</div>
+                      <div class="loc-val" id="current-location">القاهرة — مدينة نصر</div>
+                    </div>
+                  </div>
+                  <button class="edit-btn" type="button" onclick="App.openModal()">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    تغيير
+                  </button>
+                </section>
+              </aside>
+
+              <section class="history-shell" aria-label="سجل الكتب">
+                <div class="history-head">
+                  <div>
+                    <h3>سجل الكتب</h3>
+                    <p>يعرض آخر الكتب التي بحثت عنها أو شاهدت المسجد المرتبط بها وموقعها.</p>
+                  </div>
+                  <div class="history-count" id="history-count" aria-live="polite">٠ سجل</div>
+                </div>
+
+                <div class="controls">
+                  <label class="search" for="history-search">
+                    <span class="sr-only">ابحث في سجل الكتب</span>
+                    <input id="history-search" type="search" inputmode="search"
+                      placeholder="ابحث عن كتاب، مسجد، مدينة، أو نوع..." autocomplete="off" />
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M20 20l-3.5-3.5" />
+                    </svg>
+                  </label>
+
+                  <div class="filters" role="tablist" aria-label="تصفية سجل الكتب">
+                    <button class="filter-btn on" type="button" data-filter="all" aria-pressed="true">الكل <span
+                        class="filter-badge" id="count-all">0</span></button>
+                    <button class="filter-btn" type="button" data-filter="viewed" aria-pressed="false">المشاهدة <span
+                        class="filter-badge" id="count-viewed">0</span></button>
+                    <button class="filter-btn" type="button" data-filter="searched" aria-pressed="false">البحث <span
+                        class="filter-badge" id="count-searched">0</span></button>
+                  </div>
+                </div>
+
+                <div class="history-list" id="history-list" role="list" aria-label="قائمة سجل الكتب"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ════ TOAST ════ -->
+    <div id="toast" class="toast gone" role="status" aria-live="polite">
+      <span class="toast-icon ok" id="toast-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      <span id="toast-msg" class="toast-msg">تم الحفظ بنجاح</span>
+    </div>
+
+    <!-- ════ LOCATION MODAL ════ -->
+    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+      aria-hidden="true" onclick="App.handleOverlayClick(event)">
+      <div class="modal" id="modal">
+        <div class="modal-handle" aria-hidden="true"></div>
+        <div class="modal-head">
+          <div class="modal-title" id="modal-title">
+            <div class="modal-title-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </div>
+            تعديل الموقع
+          </div>
+          <button class="modal-close" type="button" onclick="App.closeModal()" aria-label="إغلاق">
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="inp-grp" id="grp-gov">
+            <label class="inp-lbl" for="sel-gov">المحافظة <span class="inp-required" aria-hidden="true">*</span></label>
+            <div class="sel-wrap" id="wrap-gov">
+              <select id="sel-gov" onchange="App.onGovChange()" aria-required="true" aria-describedby="err-gov">
+                <option value="">اختر المحافظة</option>
+              </select>
+              <span class="sel-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </div>
+            <span class="inp-error-msg" id="err-gov" role="alert">يرجى اختيار المحافظة</span>
+          </div>
+
+          <div class="inp-grp" id="grp-city">
+            <label class="inp-lbl" for="sel-city">المدينة <span class="inp-required" aria-hidden="true">*</span></label>
+            <div class="sel-wrap" id="wrap-city">
+              <select id="sel-city" aria-required="true" aria-describedby="err-city">
+                <option value="">اختر المدينة</option>
+              </select>
+              <span class="sel-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </div>
+            <span class="inp-error-msg" id="err-city" role="alert">يرجى اختيار المدينة</span>
+          </div>
+        </div>
+
+        <div class="modal-foot">
+          <button class="save-btn" type="button" onclick="App.saveLocation()">حفظ الموقع</button>
+        </div>
       </div>
     </div>
-  </div>
+
+  </div><!-- /#page-content -->
 
   <script>
-    'use strict';
+    /* ═══════════════════════════════════════════════════════
+       SIDEBAR — JS (extracted verbatim from browse.html)
+    ═══════════════════════════════════════════════════════ */
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
 
+    function toggleSidebar() {
+      // On mobile the sidebar is a permanent bottom nav — nothing to toggle
+      if (window.innerWidth <= 768) return;
+
+      sidebar.classList.toggle('open');
+      const isOpen = sidebar.classList.contains('open');
+      backdrop.style.display = isOpen ? 'block' : 'none';
+      document.getElementById('page-content').classList.toggle('sidebar-open', isOpen);
+      if (!isOpen) closeAllSubMenus();
+    }
+
+    function toggleSubMenu(button) {
+      if (!button.nextElementSibling.classList.contains('show')) {
+        closeAllSubMenus();
+      }
+      button.nextElementSibling.classList.toggle('show');
+      button.classList.toggle('rotate');
+    }
+
+    function closeAllSubMenus() {
+      Array.from(sidebar.getElementsByClassName('show')).forEach(ul => {
+        ul.classList.remove('show');
+        ul.previousElementSibling.classList.remove('rotate');
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PROFILE PAGE DATA & STATE
+    ═══════════════════════════════════════════════════════ */
     const DATA = {
       profile: {
         name: 'أحمد محمد العمري',
         email: 'ahmed@example.com',
-        role: 'متطوع',
-        joined: 'يناير ٢٠٢٥',
+        gov: 'المنيا',
+        city: 'مدينة المنيا',
         bio: 'صفحة شخصية نظيفة وسريعة تعرض بياناتك الأساسية وسجل الكتب التي بحثت عنها أو شاهدت مسجدها وموقعها.',
-        gov: 'القاهرة',
-        city: 'مدينة نصر',
       },
-      govs: [
-        'القاهرة', 'الجيزة', 'الإسكندرية', 'أسيوط', 'المنيا', 'الأقصر', 'أسوان', 'الفيوم', 'قنا', 'سوهاج', 'بني سويف',
-        'الإسماعيلية', 'بورسعيد', 'السويس', 'دمياط', 'الدقهلية', 'الشرقية', 'الغربية', 'المنوفية', 'القليوبية', 'البحيرة'
-      ],
+      govs: ['القاهرة', 'الجيزة', 'الإسكندرية', 'المنيا', 'أسيوط', 'سوهاج', 'قنا', 'الأقصر', 'أسوان', 'الفيوم', 'بني سويف', 'المنوفية', 'الغربية', 'الشرقية', 'الدقهلية', 'كفر الشيخ', 'البحيرة', 'الإسماعيلية', 'بورسعيد', 'السويس', 'دمياط', 'شمال سيناء', 'جنوب سيناء', 'البحر الأحمر', 'الوادي الجديد', 'مطروح'],
       cities: {
-        'القاهرة': ['مدينة نصر', 'المعادي', 'الزمالك', 'مصر الجديدة', 'عين شمس', 'المطرية', 'حلوان', 'شبرا', 'الشروق', 'التجمع الخامس', 'المقطم', 'الهليوبوليس'],
-        'الجيزة': ['الدقي', 'المهندسين', 'الهرم', 'إمبابة', 'أكتوبر', 'الشيخ زايد', 'البدرشين'],
-        'الإسكندرية': ['سيدي بشر', 'العجمي', 'المنتزه', 'سموحة', 'الرمل', 'العصافرة'],
-        'أسيوط': ['مدينة أسيوط', 'ديروط', 'أبوتيج', 'منفلوط', 'القوصية'],
-        'المنيا': ['مدينة المنيا', 'ملوي', 'دير مواس', 'العدوة', 'مغاغة', 'أبو قرقاص', 'سمالوط'],
-        'الأقصر': ['مدينة الأقصر', 'الأقصر الغربية', 'إسنا', 'الأرمنت'],
-        'أسوان': ['مدينة أسوان', 'كوم أمبو', 'إدفو', 'نصر النوبة'],
-        'الفيوم': ['مدينة الفيوم', 'سنورس', 'يوسف الصديق', 'إطسا'],
-        'الغربية': ['طنطا', 'المحلة الكبرى', 'زفتى', 'سمنود'],
-        'المنوفية': ['شبين الكوم', 'منوف', 'الشهداء', 'السادات'],
-        'القليوبية': ['بنها', 'شبرا الخيمة', 'قليوب', 'العاشر من رمضان'],
-        'البحيرة': ['دمنهور', 'كفر الدوار', 'رشيد', 'إيتاي البارود'],
-        'الدقهلية': ['المنصورة', 'طلخا', 'ميت غمر', 'بلقاس'],
-        'الشرقية': ['الزقازيق', 'العاشر من رمضان', 'بلبيس', 'أبو حماد'],
-        'الإسماعيلية': ['مدينة الإسماعيلية', 'فايد', 'القنطرة'],
-        'بورسعيد': ['بورسعيد', 'بور فؤاد'],
-        'السويس': ['السويس', 'عتاقة', 'الجناين'],
-        'دمياط': ['مدينة دمياط', 'رأس البر', 'الزرقا'],
-        'قنا': ['مدينة قنا', 'نجع حمادي', 'دشنا', 'قوص'],
-        'سوهاج': ['مدينة سوهاج', 'أخميم', 'طهطا', 'جرجا'],
-        'بني سويف': ['مدينة بني سويف', 'الفشن', 'ببا', 'نزلة']
+        'القاهرة': ['مدينة نصر', 'مصر الجديدة', 'المعادي', 'الزمالك', 'شبرا', 'التجمع الخامس', '6 أكتوبر', 'الهرم'],
+        'المنيا': ['مدينة المنيا', 'ملوي', 'المنيا الجديدة', 'سمالوط', 'العدوة', 'مغاغة', 'بني مزار', 'أبو قرقاص'],
+        'الجيزة': ['الجيزة', 'أكتوبر', 'الشيخ زايد', 'الدقي', 'العجوزة', 'إمبابة'],
+        'الإسكندرية': ['وسط البلد', 'سيدي بشر', 'العجمي', 'برج العرب', 'الإبراهيمية'],
+        'أسيوط': ['أسيوط', 'ديروط', 'أبنوب', 'منفلوط', 'القوصية'],
+        'سوهاج': ['سوهاج', 'طهطا', 'جرجا', 'اخميم', 'المراغة'],
+        'بني سويف': ['بني سويف', 'الفشن', 'ناصر', 'إهناسيا', 'ببا'],
+        'الفيوم': ['الفيوم', 'سنورس', 'يوسف الصديق', 'إطسا', 'طامية'],
       },
       history: [
-        { id: 1, title: 'رياض الصالحين', author: 'الإمام النووي', category: 'حديث', mosque: 'مسجد النور', city: 'مدينة نصر', gov: 'القاهرة', action: 'viewed', date: '٣ مارس ٢٠٢٥', time: '١١:٢٥ ص' },
-        { id: 2, title: 'صحيح البخاري', author: 'الإمام البخاري', category: 'حديث', mosque: 'مسجد الهدى', city: 'المعادي', gov: 'القاهرة', action: 'searched', date: '١٥ فبراير ٢٠٢٥', time: '٠٩:٤١ م' },
-        { id: 3, title: 'تفسير ابن كثير', author: 'ابن كثير الدمشقي', category: 'تفسير', mosque: 'مسجد السلام', city: 'القاهرة', gov: 'القاهرة', action: 'viewed', date: '٢ يناير ٢٠٢٥', time: '٠٨:١٢ ص' },
-        { id: 4, title: 'فقه السنة', author: 'السيد سابق', category: 'فقه', mosque: 'مسجد العزيز بالله', city: 'مدينة نصر', gov: 'القاهرة', action: 'searched', date: '٢٠ ديسمبر ٢٠٢٤', time: '٠٦:٠٧ م' },
-        { id: 5, title: 'الأذكار النووية', author: 'الإمام النووي', category: 'تزكية', mosque: 'مسجد الرحمن', city: 'مدينة نصر', gov: 'القاهرة', action: 'viewed', date: '٥ نوفمبر ٢٠٢٤', time: '٠٢:٣٣ م' },
-        { id: 6, title: 'الشمائل المحمدية', author: 'الإمام الترمذي', category: 'سيرة', mosque: 'مسجد الفتح', city: 'القاهرة', gov: 'القاهرة', action: 'searched', date: '٢٣ أكتوبر ٢٠٢٤', time: '١٠:١٥ ص' }
-      ]
+        { id: 1, title: 'فتح الباري شرح صحيح البخاري', author: 'ابن حجر العسقلاني', category: 'حديث', mosque: 'مسجد النور', city: 'مدينة المنيا', gov: 'المنيا', date: '٢٠٢٥/٠٤/١٥', time: '١٠:٣٠ ص', action: 'viewed' },
+        { id: 2, title: 'تفسير ابن كثير', author: 'ابن كثير الدمشقي', category: 'تفسير', mosque: 'مسجد الإيمان', city: 'سمالوط', gov: 'المنيا', date: '٢٠٢٥/٠٤/١٢', time: '٠٣:٤٥ م', action: 'searched' },
+        { id: 3, title: 'رياض الصالحين', author: 'النووي', category: 'حديث', mosque: 'مسجد الرحمة', city: 'ملوي', gov: 'المنيا', date: '٢٠٢٥/٠٤/١٠', time: '١١:٠٠ ص', action: 'viewed' },
+        { id: 4, title: 'الموافقات في أصول الشريعة', author: 'الشاطبي', category: 'فقه', mosque: 'مسجد الأمين', city: 'مدينة المنيا', gov: 'المنيا', date: '٢٠٢٥/٠٤/٠٨', time: '٠٢:١٥ م', action: 'searched' },
+        { id: 5, title: 'إحياء علوم الدين', author: 'الغزالي', category: 'تزكية', mosque: 'مسجد السلام', city: 'أبو قرقاص', gov: 'المنيا', date: '٢٠٢٥/٠٤/٠٥', time: '٠٩:٢٠ ص', action: 'viewed' },
+        { id: 6, title: 'السيرة النبوية لابن هشام', author: 'ابن هشام', category: 'سيرة', mosque: 'مسجد الفاروق', city: 'مغاغة', gov: 'المنيا', date: '٢٠٢٥/٠٣/٢٨', time: '٠٤:٠٠ م', action: 'searched' },
+      ],
     };
 
-    const state = {
-      filter: 'all',
-      query: '',
-      gov: DATA.profile.gov,
-      city: DATA.profile.city,
-    };
+    const state = { filter: 'all', query: '', gov: DATA.profile.gov, city: DATA.profile.city };
 
-    const $ = (id) => document.getElementById(id);
+    function $(id) { return document.getElementById(id) }
 
-    function toAr(input) {
-      const map = '٠١٢٣٤٥٦٧٨٩';
-      return String(input).replace(/\d/g, d => map[d]);
+    function toAr(n) {
+      return String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
     }
 
     function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function actionMeta(item) {
-      if (item.action === 'viewed') {
-        return {
-          label: 'تمت المشاهدة',
-          cls: 'chip-view',
-          icon: '<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>'
-        };
-      }
-      return {
-        label: 'تم البحث',
-        cls: 'chip-search',
-        icon: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
-      };
+      if (item.action === 'viewed') return { icon: '<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>', label: 'مشاهدة', cls: 'chip-viewed' };
+      if (item.action === 'searched') return { icon: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>', label: 'بحث', cls: 'chip-searched' };
+      return { icon: '', label: item.action, cls: '' };
     }
 
     function renderCounts() {
       const total = DATA.history.length;
       const viewed = DATA.history.filter(i => i.action === 'viewed').length;
       const searched = DATA.history.filter(i => i.action === 'searched').length;
-
       $('stat-total').textContent = toAr(total);
       $('stat-viewed').textContent = toAr(viewed);
       $('stat-searched').textContent = toAr(searched);
-
       $('count-all').textContent = toAr(total);
       $('count-viewed').textContent = toAr(viewed);
       $('count-searched').textContent = toAr(searched);
@@ -1840,11 +2296,7 @@
         const matchesFilter = state.filter === 'all' || item.action === state.filter;
         if (!matchesFilter) return false;
         if (!query) return true;
-
-        const haystack = [
-          item.title, item.author, item.category, item.mosque, item.city, item.gov, item.date, item.time, item.action
-        ].join(' ').toLowerCase();
-
+        const haystack = [item.title, item.author, item.category, item.mosque, item.city, item.gov, item.date, item.time, item.action].join(' ').toLowerCase();
         return haystack.includes(query);
       });
     }
@@ -1860,8 +2312,7 @@
             <div class="empty-ico" aria-hidden="true">📚</div>
             <p class="empty-title">لا توجد نتائج مطابقة</p>
             <p class="empty-sub">جرّب البحث باسم كتاب مختلف أو غيّر عامل التصفية الحالي.</p>
-          </div>
-        `;
+          </div>`;
         return;
       }
 
@@ -1882,26 +2333,12 @@
               <h4 class="card-title">${title}</h4>
               <span class="action-chip ${meta.cls}">${meta.icon}<span>${meta.label}</span></span>
             </div>
-
             <div class="card-meta">
-              <span class="meta-item">
-                <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M7 3v18"/><path d="M9 7h7"/><path d="M9 11h7"/></svg>
-                ${author}
-              </span>
-              <span class="meta-item">
-                <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-                ${category}
-              </span>
-              <span class="meta-item">
-                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                ${mosque} — ${city}
-              </span>
-              <span class="meta-item">
-                <svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
-                ${gov}
-              </span>
+              <span class="meta-item"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M7 3v18"/><path d="M9 7h7"/><path d="M9 11h7"/></svg>${author}</span>
+              <span class="meta-item"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>${category}</span>
+              <span class="meta-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${mosque} — ${city}</span>
+              <span class="meta-item"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>${gov}</span>
             </div>
-
             <div class="card-foot">
               <div class="small">آخر نشاط: ${date} · ${time}</div>
               <button class="secondary-btn" type="button" onclick="App.toast('عرض تفاصيل: ${title} · ${mosque} — ${city}', 'ok')">
@@ -1909,8 +2346,7 @@
                 عرض التفاصيل
               </button>
             </div>
-          </article>
-        `;
+          </article>`;
       }).join('');
     }
 
@@ -1929,16 +2365,12 @@
       if (!node) return;
       const duration = 520;
       const start = performance.now();
-      const from = 0;
-
       function frame(now) {
         const p = Math.min((now - start) / duration, 1);
         const eased = 1 - Math.pow(1 - p, 3);
-        const value = Math.round(from + (endValue - from) * eased);
-        node.textContent = toAr(value);
+        node.textContent = toAr(Math.round(endValue * eased));
         if (p < 1) requestAnimationFrame(frame);
       }
-
       requestAnimationFrame(frame);
     }
 
@@ -1961,13 +2393,11 @@
         const toast = $('toast');
         const icon = $('toast-icon');
         const msg = $('toast-msg');
-
         msg.textContent = message;
         icon.className = 'toast-icon ' + type;
         icon.innerHTML = type === 'warn'
           ? '<svg viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
           : '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
-
         toast.classList.remove('gone', 'hide');
         clearTimeout(this._timer);
         this._timer = setTimeout(() => {
@@ -1991,9 +2421,7 @@
         ['wrap-gov', 'wrap-city'].forEach(id => $(id).classList.remove('error'));
       },
 
-      handleOverlayClick(event) {
-        if (event.target === $('overlay')) this.closeModal();
-      },
+      handleOverlayClick(event) { if (event.target === $('overlay')) this.closeModal() },
 
       onGovChange() {
         const gov = $('sel-gov').value;
@@ -2006,40 +2434,20 @@
         const gov = $('sel-gov').value;
         const city = $('sel-city').value;
         let valid = true;
-
-        if (!gov) {
-          $('grp-gov').classList.add('has-error');
-          $('wrap-gov').classList.add('error');
-          valid = false;
-        }
-
-        if (!city) {
-          $('grp-city').classList.add('has-error');
-          $('wrap-city').classList.add('error');
-          valid = false;
-        }
-
-        if (!valid) {
-          this.toast('يرجى اختيار المحافظة والمدينة', 'warn');
-          return;
-        }
-
+        if (!gov) { $('grp-gov').classList.add('has-error'); $('wrap-gov').classList.add('error'); valid = false }
+        if (!city) { $('grp-city').classList.add('has-error'); $('wrap-city').classList.add('error'); valid = false }
+        if (!valid) { this.toast('يرجى اختيار المحافظة والمدينة', 'warn'); return }
         state.gov = gov;
         state.city = city;
-
-        const locationText = `${gov} — ${city}`;
-        $('current-location').textContent = locationText;
-
+        $('current-location').textContent = `${gov} — ${city}`;
         this.closeModal();
         this.toast('تم تحديث موقعك بنجاح', 'ok');
-      }
+      },
     };
 
-    function bindBottomNavActive() {
-      const active = Array.from(document.querySelectorAll('.bottom-item')).find(a => a.getAttribute('href') === '/profile');
-      if (active) active.classList.add('active');
-    }
-
+    /* ═══════════════════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', () => {
       $('profile-name').textContent = DATA.profile.name;
       $('display-name').textContent = DATA.profile.name;
@@ -2057,25 +2465,16 @@
         btn.addEventListener('click', () => setFilter(btn.dataset.filter));
       });
 
-      $('history-search').addEventListener('input', (e) => {
+      $('history-search').addEventListener('input', e => {
         state.query = e.target.value || '';
         renderHistory();
       });
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !$('overlay').classList.contains('hidden')) {
-          App.closeModal();
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          if (!$('overlay').classList.contains('hidden')) App.closeModal();
+          if (sidebar.classList.contains('open')) toggleSidebar();
         }
-      });
-
-      bindBottomNavActive();
-
-      document.querySelectorAll('.bottom-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          if (item.getAttribute('href') === '/profile') {
-            e.preventDefault();
-          }
-        });
       });
     });
   </script>
