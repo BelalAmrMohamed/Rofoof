@@ -1667,7 +1667,25 @@
       .modal {
         border-radius: var(--r-2xl) var(--r-2xl) 0 0;
         max-width: 100%;
+        max-height: 90vh;
+        max-height: 90dvh;
+        display: flex;
+        flex-direction: column;
         transform: translateY(100%);
+      }
+
+      .modal .modal-header {
+        flex-shrink: 0;
+      }
+
+      .modal #detail-content,
+      .modal #mosque-modal-content,
+      .modal .modal-body {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
 
       .modal-overlay.open .modal {
@@ -1928,6 +1946,19 @@
       border-radius: var(--r-lg);
       border: 1.5px solid var(--border);
       gap: 12px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .detail-mosque-row:hover {
+      background: var(--g-50);
+      border-color: var(--g-200);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .detail-mosque-row:active {
+      transform: scale(0.98);
+      box-shadow: none;
     }
 
     .detail-mosque-name {
@@ -3517,7 +3548,13 @@
     </div>` : ''}
     <div class="detail-section">
       <p class="detail-section-title">متاح في</p>
-      <div class="detail-mosque-row">
+      <div class="detail-mosque-row"
+        role="button"
+        tabindex="0"
+        aria-label="فتح تفاصيل مسجد: ${mosqueDisplay(b.mosque)}"
+        onclick="openMosqueFromBook(${JSON.stringify(b.mosque).replace(/"/g, '&quot;')})"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMosqueFromBook(${JSON.stringify(b.mosque).replace(/"/g, '&quot;')});}"
+      >
         <div>
           <p class="detail-mosque-name">🕌 ${mosqueDisplay(b.mosque)}</p>
           <p class="detail-mosque-loc">${b.mosque.city}، محافظة ${b.mosque.governorate}</p>
@@ -3535,6 +3572,18 @@
     }
 
     function closeDetail() { closeModal('detail-modal'); }
+
+    function openMosqueFromBook(mosqueData) {
+      // Find the mosque in the mosques array by matching name, city, and governorate
+      const m = mosques.find(x =>
+        x.city === mosqueData.city &&
+        x.governorate === mosqueData.governorate &&
+        (x.name === mosqueData.name || (!x.name && !mosqueData.name))
+      );
+      if (!m) return;
+      closeDetail();
+      setTimeout(() => openMosqueDetail(m.id), 200);
+    }
 
     // ═══════════════════════════════════════════════════════
     //  MOSQUE DETAIL
