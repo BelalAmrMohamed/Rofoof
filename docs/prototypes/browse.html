@@ -1667,25 +1667,19 @@
       .modal {
         border-radius: var(--r-2xl) var(--r-2xl) 0 0;
         max-width: 100%;
-        max-height: 90vh;
-        max-height: 90dvh;
-        display: flex;
-        flex-direction: column;
+        max-height: 80vh;
+        max-height: 80dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         transform: translateY(100%);
       }
 
-      .modal .modal-header {
-        flex-shrink: 0;
-      }
-
-      .modal #detail-content,
-      .modal #mosque-modal-content,
-      .modal .modal-body {
-        overflow-y: auto;
-        flex: 1;
-        min-height: 0;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+      /* Ensure footer buttons have breathing room above the bottom edge */
+      .detail-footer,
+      .modal-footer {
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
       }
 
       .modal-overlay.open .modal {
