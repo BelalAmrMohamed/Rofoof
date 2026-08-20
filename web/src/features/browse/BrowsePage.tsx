@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { MapPicker } from '../onboarding/components/MapPicker'
+import type { GeoPoint } from '../onboarding/types/location'
 
 type View = 'books' | 'mosques'
 type Category = 'فقه' | 'حديث' | 'تفسير' | 'سيرة' | 'عقيدة' | 'تزكية' | 'أدب' | 'تاريخ'
@@ -91,6 +93,7 @@ export default function BrowsePage() {
   const [city, setCity] = useState('all')
   const [location, setLocation] = useState<Location | null>(null)
   const [locationDraft, setLocationDraft] = useState<Location>({ governorate: 'المنيا', city: 'مدينة المنيا' })
+  const [locationDraftPoint, setLocationDraftPoint] = useState<GeoPoint | null>(null)
   const [modal, setModal] = useState<'location' | 'book' | 'mosque' | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [selectedMosque, setSelectedMosque] = useState<Mosque | null>(null)
@@ -162,7 +165,7 @@ export default function BrowsePage() {
           <div className="location-inner">
             <Icon name="location" size={17} />
             {location ? <p>الكتب المعروضة قريبة من: <strong>{location.city}، {location.governorate}</strong></p> : <p>حدّد موقعك لعرض الكتب القريبة منك أولاً</p>}
-            <button className="location-action" onClick={() => { setLocationDraft(location ?? locationDraft); setModal('location') }}>{location ? 'تغيير الموقع' : 'تحديد الموقع'}</button>
+            <button className="location-action" onClick={() => { setLocationDraft(location ?? locationDraft); setLocationDraftPoint(null); setModal('location') }}>{location ? 'تغيير الموقع' : 'تحديد الموقع'}</button>
           </div>
         </div>
 
@@ -195,7 +198,7 @@ export default function BrowsePage() {
         <footer><strong>على رفوف المساجد</strong><br />مبادرة مجتمعية مفتوحة لرقمنة مكتبات المساجد في مصر</footer>
       </div>
 
-      {modal === 'location' && <Dialog title="تغيير موقعك" onClose={() => setModal(null)}><p className="dialog-note">سيتم حفظ موقعك في ملفك الشخصي ولن تحتاج إلى إدخاله مجدداً في زياراتك القادمة.</p><label>المحافظة<select value={locationDraft.governorate} onChange={(event) => setLocationDraft({ governorate: event.target.value, city: CITIES[event.target.value]?.[0] ?? '' })}>{Object.keys(CITIES).map((item) => <option key={item}>{item}</option>)}</select></label><label>المدينة / المركز<select value={locationDraft.city} onChange={(event) => setLocationDraft({ ...locationDraft, city: event.target.value })}>{(CITIES[locationDraft.governorate] ?? []).map((item) => <option key={item}>{item}</option>)}</select></label><div className="dialog-actions"><button className="secondary-button" onClick={() => setModal(null)}>إلغاء</button><button className="primary-button" onClick={() => { setLocation(locationDraft); setModal(null) }}>حفظ الموقع</button></div></Dialog>}
+      {modal === 'location' && <Dialog title="تغيير موقعك" onClose={() => setModal(null)}><p className="dialog-note">اختر موقعك على الخريطة أو حدّد المحافظة والمدينة. سيُطبّق الاختيار مباشرة على النتائج.</p><MapPicker point={locationDraftPoint} onPick={setLocationDraftPoint} className="h-56" /><label>المحافظة<select value={locationDraft.governorate} onChange={(event) => setLocationDraft({ governorate: event.target.value, city: CITIES[event.target.value]?.[0] ?? '' })}>{Object.keys(CITIES).map((item) => <option key={item}>{item}</option>)}</select></label><label>المدينة / المركز<select value={locationDraft.city} onChange={(event) => setLocationDraft({ ...locationDraft, city: event.target.value })}>{(CITIES[locationDraft.governorate] ?? []).map((item) => <option key={item}>{item}</option>)}</select></label><div className="dialog-actions"><button className="secondary-button" onClick={() => setModal(null)}>إلغاء</button><button className="primary-button" onClick={() => { setLocation(locationDraft); setGovernorate(locationDraft.governorate); setCity(locationDraft.city); setModal(null) }}>حفظ الموقع</button></div></Dialog>}
       {modal === 'book' && selectedBook && <Dialog title="تفاصيل الكتاب" onClose={() => setModal(null)}><DetailBook book={selectedBook} onMosque={() => openMosque(selectedBook.mosque)} /></Dialog>}
       {modal === 'mosque' && selectedMosque && <Dialog title={mosqueLabel(selectedMosque)} onClose={() => setModal(null)}><DetailMosque mosque={selectedMosque} books={selectedMosqueBooks} location={location} onBook={openBook} /></Dialog>}
     </div>

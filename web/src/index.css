@@ -1,6 +1,7 @@
 /* web/src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 @import "tailwindcss";
+@import 'leaflet/dist/leaflet.css';
 
 :root { font-family: 'Tajawal', sans-serif; color: #1c1814; background: #f9f6f1; font-synthesis: none; text-rendering: optimizeLegibility; }
 * { box-sizing: border-box; }
