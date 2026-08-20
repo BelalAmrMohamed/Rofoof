@@ -154,7 +154,7 @@ export default function BrowsePage() {
           <div className="topbar-inner">
             <button className="icon-button menu-button" onClick={() => setSidebarOpen(true)} aria-label="فتح القائمة"><Icon name="menu" /></button>
             <Brand />
-            <div className="topbar-actions"><button className="login-button">تسجيل الدخول</button></div>
+            <div className="topbar-actions"><a className="login-button" href="/login">تسجيل الدخول</a></div>
           </div>
         </header>
 
