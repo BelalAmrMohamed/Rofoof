@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './site-navigation.css'
 
-type ActivePage = 'browse' | 'submit' | 'requests' | 'profile'
+type ActivePage = 'browse' | 'submit' | 'requests' | 'profile' | 'about'
 
 const items: { key: ActivePage | 'about'; label: string; icon: 'book' | 'plus' | 'requests' | 'user' | 'info'; href: string }[] = [
   { key: 'browse', label: 'تصفح', icon: 'book', href: '/browse' },

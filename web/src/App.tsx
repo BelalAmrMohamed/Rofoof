@@ -4,6 +4,7 @@ import LoginPage from './features/auth/LoginPage'
 import SubmitPage from './features/submit/SubmitPage'
 import RequestsPage from './features/requests/RequestsPage'
 import ProfilePage from './features/profile/ProfilePage'
+import AboutPage from './features/about/AboutPage'
 import './App.css'
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
   if (window.location.pathname === '/submit') return <SubmitPage />
   if (window.location.pathname === '/requests') return <RequestsPage />
   if (window.location.pathname === '/profile') return <ProfilePage />
+  if (window.location.pathname === '/about') return <AboutPage />
   return <BrowsePage />
 }
 
