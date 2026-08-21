@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MapPicker } from '../onboarding/components/MapPicker'
 import type { GeoPoint } from '../onboarding/types/location'
+import { SiteNavigation } from '../../components/SiteNavigation'
 
 type View = 'books' | 'mosques'
 type Category = 'فقه' | 'حديث' | 'تفسير' | 'سيرة' | 'عقيدة' | 'تزكية' | 'أدب' | 'تاريخ'
@@ -97,7 +98,6 @@ export default function BrowsePage() {
   const [modal, setModal] = useState<'location' | 'book' | 'mosque' | null>(null)
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [selectedMosque, setSelectedMosque] = useState<Mosque | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -138,29 +138,8 @@ export default function BrowsePage() {
 
   return (
     <div className="browse-app" dir="rtl">
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="sidebar-header">
-          <button className="icon-button sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="إغلاق القائمة"><Icon name="close" /></button>
-          <Brand />
-        </div>
-        <nav aria-label="روابط رئيسية">
-          <NavItem icon="book" label="تصفح" active onClick={() => setSidebarOpen(false)} />
-          <NavItem icon="plus" label="تسجيل كتاب" onClick={() => { window.location.assign('/submit') }} />
-          <NavItem icon="info" label="طلبات التسجيل" onClick={() => { window.location.assign('/requests') }} />
-          <NavItem icon="user" label="حسابي" onClick={() => undefined} />
-          <NavItem icon="info" label="عن المنصة" onClick={() => undefined} />
-        </nav>
-      </aside>
-      {sidebarOpen && <button className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} aria-label="إغلاق القائمة" />}
-
-      <div className="page-shell">
-        <header className="topbar">
-          <div className="topbar-inner">
-            <button className="icon-button menu-button" onClick={() => setSidebarOpen(true)} aria-label="فتح القائمة"><Icon name="menu" /></button>
-            <Brand />
-            <div className="topbar-actions"><a className="login-button" href="/login">تسجيل الدخول</a></div>
-          </div>
-        </header>
+      <SiteNavigation active="browse" />
+      <div className="page-shell site-content">
 
         <div className={`location-bar ${location ? '' : 'location-empty'}`} role="status" aria-live="polite">
           <div className="location-inner">
@@ -206,8 +185,6 @@ export default function BrowsePage() {
   )
 }
 
-function Brand() { return <a className="brand" href="/" aria-label="على رفوف المساجد"><span className="brand-mark"><Icon name="book" size={22} /></span><span><strong>على رفوف المساجد</strong><small>مكتبات المساجد في مكان واحد</small></span></a> }
-function NavItem({ icon, label, active, onClick }: { icon: 'book' | 'plus' | 'user' | 'info'; label: string; active?: boolean; onClick: () => void }) { return <button className={`nav-item ${active ? 'active' : ''}`} onClick={onClick}><Icon name={icon} /><span>{label}</span></button> }
 function distance(location: Location | null, governorate: string) { return !location ? governorate : governorate === location.governorate ? '● نفس محافظتك' : governorate }
 function BookCard({ book, location, onClick }: { book: Book; location: Location | null; onClick: () => void }) { return <article className="book-card" onClick={onClick} onKeyDown={(event) => { if (event.key === 'Enter') onClick() }} tabIndex={0}><div className={`book-avatar ${categoryClass(book.category)}`}>{book.title[0]}</div><div className="book-info"><span className={`category-badge ${categoryClass(book.category)}`}>{book.category}</span><h3>{book.title}</h3><p>{book.author}</p>{book.edition && <small>{book.edition}</small>}</div><div className="card-footer"><span><strong>{mosqueLabel(book.mosque)}</strong><small>{book.mosque.city}، {book.mosque.governorate}</small></span><em className={location && location.governorate === book.mosque.governorate ? 'same' : ''}>{distance(location, book.mosque.governorate)}</em></div></article> }
 function MosqueCard({ mosque, location, onClick }: { mosque: Mosque; location: Location | null; onClick: () => void }) { return <article className="mosque-card" onClick={onClick} onKeyDown={(event) => { if (event.key === 'Enter') onClick() }} tabIndex={0}><div className="mosque-card-top"><div className="mosque-icon"><Icon name="mosque" size={25} /></div><div><h3>{mosqueLabel(mosque)}</h3><p>{mosque.city}، محافظة {mosque.governorate}</p></div></div><div className="card-footer"><strong>{mosque.count} <small>كتاب مُسجَّل</small></strong><em className={location && location.governorate === mosque.governorate ? 'same' : ''}>{distance(location, mosque.governorate)}</em></div></article> }
