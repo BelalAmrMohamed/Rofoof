@@ -63,7 +63,7 @@ export default function LoginPage() {
     const password = String(data.get('password') ?? '')
     setSubmitting(true)
     if (!supabase) {
-      setNotice({ type: 'error', text: 'أضف VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY إلى ملف البيئة.' })
+      setNotice({ type: 'error', text: 'أضف VITE_SUPABASE_URL و VITE_SUPABASE_PUBLISHABLE_KEY إلى ملف البيئة.' })
     } else if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setNotice({ type: 'error', text: error.message })
