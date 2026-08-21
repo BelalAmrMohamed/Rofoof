@@ -146,6 +146,7 @@ export default function BrowsePage() {
         <nav aria-label="روابط رئيسية">
           <NavItem icon="book" label="تصفح" active onClick={() => setSidebarOpen(false)} />
           <NavItem icon="plus" label="تسجيل كتاب" onClick={() => { window.location.assign('/submit') }} />
+          <NavItem icon="info" label="طلبات التسجيل" onClick={() => { window.location.assign('/requests') }} />
           <NavItem icon="user" label="حسابي" onClick={() => undefined} />
           <NavItem icon="info" label="عن المنصة" onClick={() => undefined} />
         </nav>
