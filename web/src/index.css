@@ -8,3 +8,5 @@
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
+.form-input { width: 100%; min-height: 46px; border: 1.5px solid #e8e4de; border-radius: 10px; padding: 0 14px; color: #1c1814; background: #fdfcf9; outline: 0; transition: border-color .2s, box-shadow .2s; }
+.form-input:focus { border-color: #229670; box-shadow: 0 0 0 4px rgba(34, 150, 112, .13); }

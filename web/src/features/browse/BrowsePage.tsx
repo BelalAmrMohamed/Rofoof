@@ -145,7 +145,7 @@ export default function BrowsePage() {
         </div>
         <nav aria-label="روابط رئيسية">
           <NavItem icon="book" label="تصفح" active onClick={() => setSidebarOpen(false)} />
-          <NavItem icon="plus" label="تسجيل كتاب" onClick={() => undefined} />
+          <NavItem icon="plus" label="تسجيل كتاب" onClick={() => { window.location.assign('/submit') }} />
           <NavItem icon="user" label="حسابي" onClick={() => undefined} />
           <NavItem icon="info" label="عن المنصة" onClick={() => undefined} />
         </nav>
@@ -175,7 +175,7 @@ export default function BrowsePage() {
           <section className="guest-banner">
             <div className="guest-icon"><Icon name="book" size={21} /></div>
             <div><strong>تعرف على كتاب في مسجد قريب؟</strong><p>ساهم في الفهرسة وأضف الكتب التي تراها على رفوف المساجد</p></div>
-            <button className="primary-button compact"><Icon name="plus" size={16} /> تسجيل كتاب</button>
+            <button className="primary-button compact" onClick={() => window.location.assign('/submit')}><Icon name="plus" size={16} /> تسجيل كتاب</button>
           </section>
 
           <div className="search-row">

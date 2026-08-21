@@ -67,7 +67,7 @@ export default function LoginPage() {
     } else if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setNotice({ type: 'error', text: error.message })
-      else window.location.assign('/')
+      else window.location.assign(new URLSearchParams(window.location.search).get('redirect') || '/')
     } else {
       const { error } = await supabase.auth.signUp({ email, password, options: { data: { fullname: data.get('name') } } })
       if (error) setNotice({ type: 'error', text: error.message })
