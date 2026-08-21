@@ -24,7 +24,7 @@ function BrandPanel() {
     <aside className="relative order-1 flex min-h-[180px] w-full items-center justify-center overflow-hidden bg-[#0b1f14] px-6 py-8 text-center text-[#edd898] md:order-2 md:min-h-screen md:w-[44%] md:px-12">
       <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(45deg,transparent_45%,#c49a3c_46%,#c49a3c_47%,transparent_48%),linear-gradient(-45deg,transparent_45%,#c49a3c_46%,#c49a3c_47%,transparent_48%)] [background-size:70px_70px]" aria-hidden="true" />
       <div className="relative flex items-center gap-4 md:flex-col md:gap-0">
-        <div className="mb-0 grid size-12 place-items-center rounded-2xl border border-[#d4b060]/50 bg-[#d4841a] md:mb-7 md:size-[72px]"><img src="/favicon.svg" alt="" className="size-8 md:size-12" /></div>
+        <div className="mb-0 grid size-12 place-items-center rounded-2xl border border-[#d4b060]/50 md:mb-7 md:size-[72px]"><img src="/favicon.svg" alt="" className="size-8 md:size-12" /></div>
         <div className="font-serif text-2xl font-bold leading-[1.55] md:text-[42px]">على رفوف<br />المساجد</div>
         <div className="my-4 hidden h-px w-14 bg-[#d4b060] md:block" />
         <p className="hidden max-w-[280px] text-sm italic leading-8 text-white/40 md:block">معظم المساجد يكون بها مكتبة ثرية بالكتب —<br />ولا يكاد يقرأها أحد</p>
