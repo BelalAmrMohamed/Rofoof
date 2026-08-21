@@ -21,7 +21,7 @@ export function MapPicker({ point, onPick, centerHint, className = '' }: MapPick
         <MapClickHandler onPick={onPick} />
         {point && <CircleMarker center={[point.lat, point.lng]} radius={9} pathOptions={{ color: '#0b1f14', fillColor: '#c49a3c', fillOpacity: 1, weight: 3 }} />}
       </MapContainer>
-      <div className="pointer-events-none absolute inset-x-3 top-3 z-[500] rounded-lg bg-white/90 px-3 py-2 text-center text-xs font-bold text-[#2a1e0c] shadow-sm">اضغط على الخريطة لتحديد موقعك</div>
+      <div className="pointer-events-none absolute inset-x-3 top-3 z-[500] rounded-lg bg-white/90 px-3 py-2 text-center text-xs font-bold text-[#2a1e0c] shadow-sm">اضغط على الخريطة لتحديد الموقع</div>
     </div>
   );
 }
