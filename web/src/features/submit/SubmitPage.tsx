@@ -43,7 +43,8 @@ export default function SubmitPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setNotice(null)
-    const form = new FormData(event.currentTarget); const title = String(form.get('title') ?? '').trim()
+    const formElement = event.currentTarget
+    const form = new FormData(formElement); const title = String(form.get('title') ?? '').trim()
     if (!title) { setNotice({ type: 'error', text: 'يرجى إدخال عنوان الكتاب.' }); return }
     if (!supabase) { setNotice({ type: 'error', text: 'إعدادات Supabase غير موجودة في ملف البيئة.' }); return }
     const { data: { user } } = await supabase.auth.getUser()
@@ -73,10 +74,10 @@ export default function SubmitPage() {
       if (!book) throw new Error('تعذر إنشاء سجل الكتاب.')
       const entry = await supabase.from('mosque_books').insert({ book_id: book.book_id, mosque_id: mosqueId, edition: String(form.get('edition') ?? '').trim() || null, publisher: String(form.get('publisher') ?? '').trim() || null, submitted_by: user.id, status: submissionStatus }).select('id').single()
       if (entry.error) throw entry.error
-      event.currentTarget.reset(); setSelectedMosque(null); setPoint(null); setGovernorate(''); setCity('')
+      formElement.reset(); setSelectedMosque(null); setPoint(null); setGovernorate(''); setCity('')
       setNotice({ type: 'success', text: 'تم تسجيل الكتاب وإرساله بنجاح. سيظهر بعد الموافقة إذا كان حسابك زائراً.' })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'تعذر حفظ التسجيل.'
+    } catch (error: any) {
+      const message = error?.message || 'تعذر حفظ التسجيل.'
       setNotice({ type: 'error', text: message.includes('duplicate') || message.includes('unique') ? 'هذا الكتاب بهذه الطبعة مسجل بالفعل في المسجد.' : message })
     } finally { setSubmitting(false) }
   }
