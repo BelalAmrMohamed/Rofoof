@@ -28,7 +28,10 @@ export default function SubmitPage() {
 
   useEffect(() => {
     if (!supabase) return
-    supabase.from('mosques').select('mosque_id, mosque_name, mosque_governorate, mosque_city, mosque_lat, mosque_lng').order('created_at', { ascending: false }).limit(100).then(({ data }) => setMosques((data ?? []) as Mosque[]))
+    supabase.from('mosques').select('mosque_id, mosque_name, mosque_governorate, mosque_city, mosque_lat, mosque_lng').order('created_at', { ascending: false }).limit(100).then(({ data, error }) => {
+      if (error) setNotice({ type: 'error', text: 'تعذر تحميل المساجد. طبّق آخر migrations على Supabase ثم أعد المحاولة.' })
+      else setMosques((data ?? []) as Mosque[])
+    })
   }, [])
 
   const matches = useMemo(() => {
@@ -48,7 +51,9 @@ export default function SubmitPage() {
     if (!selectedMosque && (!governorate || !city || !point)) { setNotice({ type: 'error', text: 'اختر مسجداً موجوداً أو أدخل المحافظة والمدينة وحدد موقع المسجد على الخريطة.' }); return }
     setSubmitting(true)
     try {
-      const { data: profile } = await supabase.from('users').select('role').eq('user_id', user.id).maybeSingle()
+      const profileResult = await supabase.from('users').select('role').eq('user_id', user.id).maybeSingle()
+      if (profileResult.error) throw profileResult.error
+      const profile = profileResult.data
       const submissionStatus = profile?.role === 'volunteer' || profile?.role === 'admin' ? 'approved' : 'pending'
       let mosqueId = selectedMosque?.mosque_id
       if (!mosqueId) {

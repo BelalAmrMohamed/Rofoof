@@ -32,13 +32,16 @@ export default function ProfilePage() {
       if (!supabase) { setNotice({ type: 'error', text: 'إعدادات Supabase غير موجودة.' }); setLoading(false); return }
       if (!user) { setNotice({ type: 'error', text: 'سجّل الدخول لعرض ملفك الشخصي.' }); setLoading(false); return }
       const result = await supabase.from('users').select('fullname, email, role, governorate, city, lat, lng, created_at').eq('user_id', user.id).single()
-      const fallback: Profile = { fullname: getUserName(user), email: user.email ?? null, role: 'visitor', governorate: null, city: null, lat: null, lng: null, created_at: user.created_at }
-      const loadedProfile = result.error ? fallback : result.data as Profile
+      if (result.error) {
+        setNotice({ type: 'error', text: 'تعذر تحميل بيانات الحساب. طبّق آخر migrations على Supabase ثم أعد تسجيل الدخول.' })
+        setLoading(false)
+        return
+      }
+      const loadedProfile = result.data as Profile
       setProfile(loadedProfile)
       setDraftGov(loadedProfile.governorate ?? '')
       setDraftCity(loadedProfile.city ?? '')
       setDraftPoint(loadedProfile.lat !== null && loadedProfile.lng !== null ? { lat: loadedProfile.lat, lng: loadedProfile.lng } : null)
-      if (result.error) setNotice({ type: 'error', text: result.error.message })
       try { setActivities(JSON.parse(localStorage.getItem(`mosque-shelves-activity:${user.id}`) ?? '[]') as Activity[]) } catch { setActivities([]) }
       setLoading(false)
     }
