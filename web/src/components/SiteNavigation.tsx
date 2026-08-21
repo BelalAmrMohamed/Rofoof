@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getUserAvatar, getUserName, useAuth } from '../lib/auth.ts'
 import './site-navigation.css'
 
 type ActivePage = 'browse' | 'submit' | 'requests' | 'profile' | 'about'
@@ -24,13 +25,16 @@ function Icon({ name }: { name: 'book' | 'plus' | 'requests' | 'user' | 'info' }
 
 export function SiteNavigation({ active }: { active: ActivePage }) {
   const [open, setOpen] = useState(false)
+  const { user } = useAuth()
+  const avatar = getUserAvatar(user)
+  const name = getUserName(user)
   const navigate = (href: string) => window.location.assign(href)
   return <>
     <aside className={`site-sidebar ${open ? 'open' : ''}`} aria-label="روابط رئيسية">
       <div className="site-sidebar-header"><button className="site-close" onClick={() => setOpen(false)} aria-label="إغلاق القائمة">×</button><a href="/browse" className="site-brand"><span>ر</span><strong>على رفوف المساجد<small>مكتبات المساجد في مكان واحد</small></strong></a></div>
-      <nav className="site-nav-list">{items.map((item) => <button key={item.key} className={`site-nav-item ${active === item.key ? 'active' : ''}`} onClick={() => navigate(item.href)}><span className="site-nav-icon"><Icon name={item.icon} /></span><span>{item.label}</span></button>)}</nav>
+      <nav className="site-nav-list">{items.map((item) => <button key={item.key} className={`site-nav-item ${active === item.key ? 'active' : ''}`} onClick={() => navigate(item.href)}><span className="site-nav-icon">{item.key === 'profile' && user ? <span className="site-nav-avatar">{avatar ? <img src={avatar} alt="" /> : name[0]}</span> : <Icon name={item.icon} />}</span><span>{item.label}</span></button>)}</nav>
     </aside>
     {open && <button className="site-nav-backdrop" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" />}
-    <header className="site-topbar"><div className="site-topbar-inner"><button className="site-menu-button" onClick={() => setOpen(true)} aria-label="فتح القائمة">☰</button><a href="/browse" className="site-brand"><span>ر</span><strong>على رفوف المساجد<small>مكتبات المساجد في مكان واحد</small></strong></a><a className="site-login-link" href={`/login?redirect=${active === 'profile' ? '/profile' : `/${active}`}`}>تسجيل الدخول</a></div></header>
+    <header className="site-topbar"><div className="site-topbar-inner"><button className="site-menu-button" onClick={() => setOpen(true)} aria-label="فتح القائمة">☰</button><a href="/browse" className="site-brand"><span>ر</span><strong>على رفوف المساجد<small>مكتبات المساجد في مكان واحد</small></strong></a>{user ? <a className="site-user-link" href="/profile"><span className="site-user-avatar">{avatar ? <img src={avatar} alt="" /> : name[0]}</span><span>{name}</span></a> : <a className="site-login-link" href={`/login?redirect=${active === 'profile' ? '/profile' : `/${active}`}`}>تسجيل الدخول</a>}</div></header>
   </>
 }
