@@ -217,11 +217,18 @@ export default function ProfilePage() {
                     <div className="activity-list">
                       {visibleActivities.map((item) => (
                         <article key={item.id}>
-                          <div>
-                            <h3>{item.title}</h3>
-                            <p>{item.author || 'مؤلف غير محدد'} · {item.category || 'بدون تصنيف'}</p>
-                            <small>{item.mosque} — {item.city}، {item.governorate}</small>
-                          </div>
+                          {item.action === 'searched' ? (
+                            <div>
+                              <h3>بحث: {item.title}</h3>
+                              <p>نطاق البحث: {item.city && item.city !== 'all' ? item.city : item.governorate && item.governorate !== 'all' ? item.governorate : 'عام'}</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <h3>{item.title}</h3>
+                              <p>{item.author || 'مؤلف غير محدد'} · {item.category || 'بدون تصنيف'}</p>
+                              <small>{item.mosque} — {item.city}، {item.governorate}</small>
+                            </div>
+                          )}
                           <span className={item.action}>{item.action === 'viewed' ? 'مشاهدة' : 'بحث'}</span>
                         </article>
                       ))}

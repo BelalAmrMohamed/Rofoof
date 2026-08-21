@@ -51,6 +51,26 @@ function recordActivity(book: LiveBook) {
   } catch { /* localStorage unavailable */ }
 }
 
+// Write a "searched" activity record to localStorage
+function recordSearchActivity(queryText: string, currentCity: string, currentGov: string) {
+  try {
+    const supabaseSession = Object.keys(localStorage).find((k) => k.includes('supabase.auth.token'))
+    const rawSession = supabaseSession ? localStorage.getItem(supabaseSession) : null
+    const userId: string | null = rawSession ? (JSON.parse(rawSession) as any)?.currentSession?.user?.id ?? null : null
+    const key = userId ? `mosque-shelves-activity:${userId}` : 'mosque-shelves-activity:guest'
+    const existing: unknown[] = JSON.parse(localStorage.getItem(key) ?? '[]')
+    const record = {
+      id: `search-${Date.now()}`,
+      title: queryText, author: null, category: null,
+      mosque: '', city: currentCity, governorate: currentGov,
+      action: 'searched', createdAt: new Date().toISOString(),
+    }
+    // Remove exact duplicate searches to keep it clean
+    const updated = [record, ...existing.filter((a: any) => a.action !== 'searched' || a.title !== queryText)].slice(0, 100)
+    localStorage.setItem(key, JSON.stringify(updated))
+  } catch { /* localStorage unavailable */ }
+}
+
 // ── Icon helper ───────────────────────────────────────────────────────────
 
 function Icon({ name, size = 20 }: { name: 'book' | 'mosque' | 'search' | 'close' | 'location' | 'plus' | 'info' | 'globe'; size?: number }) {
@@ -155,6 +175,9 @@ export default function BrowsePage() {
             .select('governorate, city, country').eq('user_id', user.id).maybeSingle()
           if (profile?.governorate && profile?.city && !cancelled) {
             setLocation({ country: profile.country ?? 'مصر', governorate: profile.governorate, city: profile.city })
+            setFilterCountry(profile.country ?? 'مصر')
+            setGovernorate(profile.governorate)
+            setCity(profile.city)
           }
         }
       } catch (err: any) {
@@ -166,6 +189,15 @@ export default function BrowsePage() {
     void load()
     return () => { cancelled = true }
   }, [user])
+
+  // Record search queries when the user pauses typing
+  useEffect(() => {
+    if (!query.trim()) return
+    const timer = setTimeout(() => {
+      recordSearchActivity(query.trim(), city, governorate)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [query, city, governorate])
 
   // ── Derived geo lists ──────────────────────────────────────────────────
   const countries = useMemo(() => {
@@ -391,7 +423,23 @@ export default function BrowsePage() {
           </select></label>
           <div className="dialog-actions">
             <button className="secondary-button" onClick={closeModal}>إلغاء</button>
-            <button className="primary-button" onClick={() => { setLocation(locationDraft); setGovernorate(locationDraft.governorate || 'all'); setCity(locationDraft.city || 'all'); setFilterCountry(locationDraft.country); closeModal() }}>حفظ الموقع</button>
+            <button className="primary-button" onClick={() => { 
+              setLocation(locationDraft)
+              setGovernorate(locationDraft.governorate || 'all')
+              setCity(locationDraft.city || 'all')
+              setFilterCountry(locationDraft.country)
+              if (user && supabase) {
+                supabase.from('users').update({
+                  country: locationDraft.country,
+                  governorate: locationDraft.governorate || null,
+                  city: locationDraft.city || null,
+                  lat: locationDraftPoint?.lat ?? null,
+                  lng: locationDraftPoint?.lng ?? null,
+                  location_source: locationDraftPoint ? 'manual_pin' : 'skipped',
+                }).eq('user_id', user.id).then()
+              }
+              closeModal() 
+            }}>حفظ الموقع</button>
           </div>
         </Dialog>
       )}
