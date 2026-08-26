@@ -23,6 +23,18 @@ export const COUNTRIES = [
   'موريتانيا', 'مالي', 'النيجر', 'السنغال', 'جيبوتي',
 ]
 
+// Full static list of Egypt's 27 governorates. This must NOT be derived from
+// existing mosque rows — doing so previously meant a governorate only
+// appeared in the dropdown once a mosque had already been submitted there,
+// making it impossible to be the first submission in a new governorate.
+export const EGYPT_GOVERNORATES = [
+  'القاهرة', 'الجيزة', 'القليوبية', 'الإسكندرية', 'البحيرة', 'مطروح',
+  'الدقهلية', 'دمياط', 'الشرقية', 'الغربية', 'كفر الشيخ', 'المنوفية',
+  'بورسعيد', 'الإسماعيلية', 'السويس', 'شمال سيناء', 'جنوب سيناء',
+  'الفيوم', 'بني سويف', 'المنيا', 'أسيوط', 'سوهاج', 'قنا', 'الأقصر',
+  'أسوان', 'البحر الأحمر', 'الوادي الجديد',
+].sort()
+
 function mosqueLabel(m: Mosque) { return m.mosque_name || `مسجد في ${m.mosque_city}` }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -39,10 +51,12 @@ export default function SubmitPage() {
   const [country, setCountry] = useState('مصر')
   const [governorate, setGovernorate] = useState('')
   const [city, setCity] = useState('')
+  const [cityIsOther, setCityIsOther] = useState(false)
   const [point, setPoint] = useState<GeoPoint | null>(null)
 
-  // Derived: governorates and cities from live DB for Egypt
-  const [liveGovs, setLiveGovs] = useState<string[]>([])
+  // Derived: cities from live DB for Egypt, cascaded from the selected governorate.
+  // Governorates themselves use the static EGYPT_GOVERNORATES list below, not
+  // live data — see the note on that constant.
   const [liveCities, setLiveCities] = useState<string[]>([])
 
   // Photo upload
@@ -74,10 +88,6 @@ export default function SubmitPage() {
         if (error) { setNotice({ type: 'error', text: 'تعذر تحميل المساجد.' }); return }
         const list = (data ?? []) as Array<Mosque & { country?: string }>
         setMosques(list.map((m) => ({ ...m, mosque_country: m.country ?? 'مصر' })))
-        // Derive Egypt governorates/cities for cascading dropdowns
-        const govSet = new Set<string>()
-        for (const m of list) if ((m.country ?? 'مصر') === 'مصر') govSet.add(m.mosque_governorate)
-        setLiveGovs(Array.from(govSet).sort())
       })
   }, [])
 
@@ -90,6 +100,7 @@ export default function SubmitPage() {
     }
     setLiveCities(Array.from(citySet).sort())
     setCity('')
+    setCityIsOther(false)
   }, [governorate, country, mosques])
 
   const matches = useMemo(() => {
@@ -294,7 +305,7 @@ export default function SubmitPage() {
                     {/* Country selector */}
                     <label className="submit-label">
                       الدولة
-                      <select value={country} onChange={(e) => { setCountry(e.target.value); setGovernorate(''); setCity('') }} className="submit-input">
+                      <select value={country} onChange={(e) => { setCountry(e.target.value); setGovernorate(''); setCity(''); setCityIsOther(false) }} className="submit-input">
                         {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </label>
@@ -306,15 +317,27 @@ export default function SubmitPage() {
                             المحافظة
                             <select value={governorate} onChange={(e) => setGovernorate(e.target.value)} className="submit-input">
                               <option value="">اختر المحافظة</option>
-                              {liveGovs.map((g) => <option key={g}>{g}</option>)}
+                              {EGYPT_GOVERNORATES.map((g) => <option key={g}>{g}</option>)}
                             </select>
                           </label>
                           <label className="submit-label">
                             المدينة / المركز
-                            <select value={city} onChange={(e) => setCity(e.target.value)} disabled={!liveCities.length} className="submit-input">
-                              <option value="">اختر المدينة</option>
-                              {liveCities.map((c) => <option key={c}>{c}</option>)}
-                            </select>
+                            {liveCities.length && !cityIsOther ? (
+                              <select
+                                value={city}
+                                onChange={(e) => {
+                                  if (e.target.value === '__other__') { setCityIsOther(true); setCity('') }
+                                  else setCity(e.target.value)
+                                }}
+                                className="submit-input"
+                              >
+                                <option value="">اختر المدينة</option>
+                                {liveCities.map((c) => <option key={c}>{c}</option>)}
+                                <option value="__other__">مدينة أخرى...</option>
+                              </select>
+                            ) : (
+                              <input autoFocus={cityIsOther} value={city} onChange={(e) => setCity(e.target.value)} className="submit-input" placeholder="مثال: بني مزار" />
+                            )}
                           </label>
                         </>
                       ) : (

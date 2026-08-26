@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import { getUserAvatar, getUserName, useAuth } from '../lib/auth.ts'
+import { SearchContext } from '../lib/search-context'
 import './site-navigation.css'
 
 type ActivePage = 'browse' | 'submit' | 'requests' | 'profile' | 'about'
@@ -22,6 +24,31 @@ function Icon({ name }: { name: 'book' | 'plus' | 'requests' | 'user' | 'info' }
     info:     <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></>,
   }
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>
+}
+
+function SearchIcon() {
+  return <svg aria-hidden="true" width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+}
+
+function HeaderSearch() {
+  const { query, setQuery, placeholder, onSubmit } = useContext(SearchContext)
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') onSubmit(query)
+  }
+
+  return (
+    <label className="site-search-field" aria-label="بحث">
+      <SearchIcon />
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        type="search"
+      />
+    </label>
+  )
 }
 
 export function SiteNavigation({ active }: { active: ActivePage }) {
@@ -70,6 +97,7 @@ export function SiteNavigation({ active }: { active: ActivePage }) {
             <span><img src="/favicon.svg" alt="" /></span>
             <strong>على رفوف المساجد<small>مكتبات المساجد في مكان واحد</small></strong>
           </a>
+          <HeaderSearch />
           {user
             ? (
               <a className="site-user-link" href="/profile" aria-label={`الملف الشخصي — ${name}`}>

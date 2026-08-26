@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { MapPicker } from '../onboarding/components/MapPicker'
 import type { GeoPoint } from '../onboarding/types/location'
 import type { GeocodedLocation } from '../../lib/geocode'
 import { supabase } from '../../lib/supabase'
 import { SiteNavigation } from '../../components/SiteNavigation'
 import { useAuth } from '../../lib/auth.ts'
+import { SearchContext } from '../../lib/search-context'
 import { buildLibrarySchema, buildBookSchema, buildMosqueSchema, setPageMeta } from '../../lib/seo'
 import { COUNTRIES } from '../submit/SubmitPage'
 
@@ -100,7 +101,10 @@ export default function BrowsePage() {
 
   // Filters
   const [view, setView] = useState<View>('books')
-  const [query, setQuery] = useState('')
+  // Search query is shared with the header search field (see SiteNavigation)
+  // via SearchContext, so typing in the header filters this page live instead
+  // of only being usable once already on "/".
+  const { query, setQuery, setPlaceholder } = useContext(SearchContext)
   const [category, setCategory] = useState<Category | 'all'>('all')
   const [filterCountry, setFilterCountry] = useState('all')
   const [governorate, setGovernorate] = useState('all')
@@ -124,6 +128,19 @@ export default function BrowsePage() {
       jsonLd: buildLibrarySchema(),
       canonical: 'https://rofoof-almasajid.vercel.app/',
     })
+  }, [])
+
+  // Keep the shared header search placeholder in sync with the active view
+  useEffect(() => {
+    setPlaceholder(view === 'books' ? 'ابحث بعنوان الكتاب أو المؤلف...' : 'ابحث باسم المسجد أو المدينة...')
+  }, [view, setPlaceholder])
+
+  // If we arrived here via a header search submitted from another page
+  // (which navigates to "/?q=..."), drop the query param from the URL once
+  // consumed so it doesn't linger or get re-applied on a later manual visit.
+  useEffect(() => {
+    if (!window.location.search) return
+    window.history.replaceState(null, '', window.location.pathname)
   }, [])
 
   // Load live data
@@ -344,10 +361,12 @@ export default function BrowsePage() {
                 <Icon name="mosque" size={15} /> مساجد
               </button>
             </div>
-            <label className="filter-search-field">
-              <Icon name="search" size={17} />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={view === 'books' ? 'ابحث بعنوان الكتاب أو المؤلف...' : 'ابحث باسم المسجد أو المدينة...'} aria-label="بحث" />
-            </label>
+            {view === 'books' && (
+              <select value={category} onChange={(e) => setCategory(e.target.value as Category | 'all')} aria-label="التصنيف" className="filter-select">
+                <option value="all">كل التصنيفات</option>
+                {CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            )}
             {/* Country filter — show only if we have >1 country in DB */}
             {countries.length > 1 && (
               <select value={filterCountry} onChange={(e) => updateCountry(e.target.value)} aria-label="الدولة" className="filter-select">
@@ -364,12 +383,6 @@ export default function BrowsePage() {
                 <option value="all">كل المدن</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-            )}
-            {view === 'books' && (
-              <div className="filter-category-strip" role="group" aria-label="التصنيف">
-                <button className={category === 'all' ? 'active' : ''} onClick={() => setCategory('all')}>الكل</button>
-                {CATEGORIES.map((item) => <button key={item} className={category === item ? 'active' : ''} onClick={() => setCategory(item)}>{item}</button>)}
-              </div>
             )}
           </div>
         </div>

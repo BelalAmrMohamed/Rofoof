@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import './AboutPage.css'
 import { SiteNavigation } from '../../components/SiteNavigation'
+import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth.ts'
 
 type Rating = 0 | 1 | 2 | 3 | 4 | 5
 
@@ -24,12 +26,14 @@ function LineIcon({ name }: { name: 'search' | 'mosque' | 'book' | 'send' | 'che
 }
 
 export default function AboutPage() {
+  const { user } = useAuth()
   const [rating, setRating] = useState<Rating>(0)
   const [hoverRating, setHoverRating] = useState<Rating>(0)
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [feedbackError, setFeedbackError] = useState<string | null>(null)
 
   useEffect(() => {
     const elements = document.querySelectorAll('.about-reveal')
@@ -40,10 +44,26 @@ export default function AboutPage() {
     return () => observer.disconnect()
   }, [])
 
-  function submitFeedback() {
+  async function submitFeedback() {
     if (!message.trim()) return
+    setFeedbackError(null)
+    if (!supabase) {
+      setFeedbackError('تعذر الإرسال: إعدادات الخادم غير متوفرة حالياً. حاول لاحقاً أو راسلنا مباشرة.')
+      return
+    }
     setSubmitting(true)
-    window.setTimeout(() => { setSubmitting(false); setSubmitted(true) }, 800)
+    const { error } = await supabase.from('feedback').insert({
+      user_id: user?.id ?? null,
+      message: message.trim(),
+      email: email.trim() || null,
+      rating: rating || null,
+    })
+    setSubmitting(false)
+    if (error) {
+      setFeedbackError('حدث خطأ أثناء إرسال رأيك. يرجى المحاولة مرة أخرى.')
+      return
+    }
+    setSubmitted(true)
   }
 
   const displayedRating = hoverRating || rating
@@ -78,7 +98,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="feedback-section" aria-labelledby="feedback-heading"><div className="feedback-inner"><header className="about-section-header centered about-reveal"><div className="about-label">أرسل رأيك</div><h2 id="feedback-heading">رأيك يهمنا</h2><p>ساعدنا في تحسين المنصة بمشاركة ملاحظاتك أو اقتراحاتك. يمكنك الإرسال بدون حساب.</p></header><div className="feedback-card about-reveal delay-1">{submitted ? <div className="feedback-success" role="status"><span><LineIcon name="check" /></span><h3>شكرًا على رأيك!</h3><p>وصلنا رأيك بنجاح.<br />كل ملاحظة تساعدنا على تحسين المنصة.</p></div> : <><div className="star-rating" role="group" aria-label="تقييمك للمنصة (اختياري)">{([1, 2, 3, 4, 5] as Rating[]).map((value) => <button type="button" key={value} className={value <= displayedRating ? 'selected' : ''} aria-label={`${ratingLabels[value]}: ${value} نجوم`} onMouseEnter={() => setHoverRating(value)} onMouseLeave={() => setHoverRating(0)} onFocus={() => setHoverRating(value)} onBlur={() => setHoverRating(0)} onClick={() => setRating(value)}>★</button>)}</div><p className="rating-label">{displayedRating ? ratingLabels[displayedRating] : 'اختر تقييمك للمنصة'}</p><label>رسالتك <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="اكتب ملاحظاتك أو اقتراحاتك هنا..." required /></label><label>بريدك الإلكتروني <small>(اختياري — للرد عليك)</small><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="example@email.com" dir="ltr" /></label><button className="about-submit-button" type="button" disabled={submitting || !message.trim()} onClick={submitFeedback}>{submitting ? 'جارٍ الإرسال...' : 'إرسال الرأي'}</button></>}</div></div></section>
+        <section className="feedback-section" aria-labelledby="feedback-heading"><div className="feedback-inner"><header className="about-section-header centered about-reveal"><div className="about-label">أرسل رأيك</div><h2 id="feedback-heading">رأيك يهمنا</h2><p>ساعدنا في تحسين المنصة بمشاركة ملاحظاتك أو اقتراحاتك. يمكنك الإرسال بدون حساب.</p></header><div className="feedback-card about-reveal delay-1">{submitted ? <div className="feedback-success" role="status"><span><LineIcon name="check" /></span><h3>شكرًا على رأيك!</h3><p>وصلنا رأيك بنجاح.<br />كل ملاحظة تساعدنا على تحسين المنصة.</p></div> : <><div className="star-rating" role="group" aria-label="تقييمك للمنصة (اختياري)">{([1, 2, 3, 4, 5] as Rating[]).map((value) => <button type="button" key={value} className={value <= displayedRating ? 'selected' : ''} aria-label={`${ratingLabels[value]}: ${value} نجوم`} onMouseEnter={() => setHoverRating(value)} onMouseLeave={() => setHoverRating(0)} onFocus={() => setHoverRating(value)} onBlur={() => setHoverRating(0)} onClick={() => setRating(value)}>★</button>)}</div><p className="rating-label">{displayedRating ? ratingLabels[displayedRating] : 'اختر تقييمك للمنصة'}</p><label>رسالتك <textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="اكتب ملاحظاتك أو اقتراحاتك هنا..." required /></label><label>بريدك الإلكتروني <small>(اختياري — للرد عليك)</small><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="example@email.com" dir="ltr" /></label>{feedbackError && <p className="feedback-error" role="alert">{feedbackError}</p>}<button className="about-submit-button" type="button" disabled={submitting || !message.trim()} onClick={submitFeedback}>{submitting ? 'جارٍ الإرسال...' : 'إرسال الرأي'}</button></>}</div></div></section>
 
         <section className="contact-strip" id="contact"><div><strong>هل لديك سؤال أو تريد التواصل مع الفريق؟</strong><span>نحن نتواصل عبر تيليغرام وبريد المشروع</span></div><a className="contact-button" href="mailto:belalamrofficial@gmail.com"><LineIcon name="send" />تواصل مع الفريق</a></section>
         <footer className="about-footer"><div><strong>على رفوف المساجد</strong><span>نُعيد الكتب إلى النور</span></div><p>مشروع مجتمعي مفتوح لفهرسة مكتبات المساجد في مصر.<br />تطوير بدعم من <a href="#contact">فريق المتطوعين</a></p></footer>

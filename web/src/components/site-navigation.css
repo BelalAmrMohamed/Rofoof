@@ -9,6 +9,14 @@
 .site-topbar-inner { display: flex; align-items: center; gap: 14px; height: 100%; padding: 0 24px; }
 .site-brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; white-space: nowrap; } .site-brand > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; border: solid 2px gold; box-shadow: 0 2px 10px rgba(0,0,0,.22); }.site-brand > span img { width: 25px; height: 25px; }.site-brand strong { display: block; font-size: 15px; line-height: 1.2; }.site-brand small { display: block; margin-top: 2px; color: rgba(255,255,255,.5); font-size: 10px; font-weight: 400; }
 .site-menu-button, .site-close { display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 10px; color: #fff; background: rgba(255,255,255,.1); font-size: 21px; }.site-menu-button:hover, .site-close:hover { background: rgba(255,255,255,.18); }.site-login-link { margin-right: auto; padding: 8px 15px; border: 1px solid rgba(255,255,255,.24); border-radius: 10px; color: rgba(255,255,255,.84); font-size: 13px; text-decoration: none; }.site-nav-icon svg { width: 22px; height: 22px; }
+
+/* ── Header search field ── */
+.site-search-field { display: flex; flex: 1 1 auto; align-items: center; gap: 8px; max-width: 420px; height: 38px; margin-inline-end: auto; padding: 0 14px; border: 1px solid rgba(255,255,255,.2); border-radius: 10px; color: rgba(255,255,255,.65); background: rgba(255,255,255,.1); }
+.site-search-field:focus-within { border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.16); }
+.site-search-field svg { flex-shrink: 0; }
+.site-search-field input { flex: 1; min-width: 0; border: 0; outline: 0; color: #fff; background: transparent; font-size: 13px; }
+.site-search-field input::placeholder { color: rgba(255,255,255,.55); }
+.site-search-field input::-webkit-search-cancel-button { filter: invert(1); opacity: .6; }
 .site-sidebar { position: fixed; inset: 0 0 0 auto; z-index: 40; width: 300px; padding: 0 10px; color: rgba(255,255,255,.68); background: linear-gradient(180deg,#0a3828,#062922); transform: translateX(100%); transition: transform .28s ease; box-shadow: 0 10px 35px rgba(0,0,0,.2); }.site-sidebar.open { transform: translateX(0); }.site-sidebar-header { display: flex; align-items: center; gap: 12px; height: 66px; padding: 0 10px; border-bottom: 1px solid rgba(255,255,255,.08); }.site-sidebar-header .site-brand { margin-right: auto; }.site-nav-list { display: flex; flex-direction: column; gap: 3px; padding-top: 10px; }.site-nav-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 0; border-radius: 12px; color: inherit; text-align: right; background: transparent; font-size: 14px; font-weight: 600; }.site-nav-item:hover, .site-nav-item.active { color: #fff; background: rgba(255,255,255,.1); }.site-nav-item.active { border-inline-end: 3px solid #e8a040; }.site-nav-icon { display: grid; place-items: center; width: 24px; font-size: 20px; line-height: 1; }.site-nav-backdrop { position: fixed; inset: 0; z-index: 30; border: 0; background: rgba(0,0,0,.45); }
 @media (min-width: 769px) { .site-sidebar.open ~ .site-nav-backdrop ~ .site-topbar ~ .site-content { margin-right: 300px; } }
 /* ── Mobile-only: hide profile tab from bottom nav ── */
@@ -19,12 +27,20 @@
 /* ── User name: visible on desktop, hidden on mobile (avatar stays) ── */
 .site-user-name { font-size: 13px; }
 @media (max-width: 768px) {
-  .site-user-name { display: none; }
   /* Show the avatar chip (login link stays too) */
   .site-login-link { font-size: 12px; padding: 6px 10px; }
-  .site-topbar-inner { padding: 0 16px; }
+  .site-topbar-inner { padding: 0 16px; gap: 8px; }
   .site-menu-button { display: none; }
   .site-brand small { display: none; }
+  .site-brand strong { font-size: 0; }
+  .site-brand > span { flex-shrink: 0; }
+  .site-search-field { max-width: none; height: 36px; padding: 0 10px; }
+  .site-search-field input { font-size: 12px; }
+}
+@media (max-width: 480px) {
+  /* At the narrowest widths the brand text is hidden entirely (icon stays)
+     so the search field has room to stay visible and usable. */
+  .site-search-field { flex-basis: 0; }
   .site-sidebar { inset: auto 0 0; width: 100%; height: 64px; padding: 0; transform: none; border-top: 1px solid rgba(255,255,255,.09); box-shadow: 0 -4px 20px rgba(0,0,0,.25); }
   .site-sidebar.open { transform: none; }
   .site-sidebar-header { display: none; }
