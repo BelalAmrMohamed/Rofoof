@@ -1,5 +1,5 @@
 // web/src/features/mosque/MosquePage.tsx
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SiteNavigation } from '../../components/SiteNavigation'
 import { MosqueMap } from '../../components/MosqueMap'
 import { supabase } from '../../lib/supabase'
@@ -35,15 +35,15 @@ function getMosqueIdFromPath() {
 }
 
 export default function MosquePage() {
-  const mosqueId = useMemo(getMosqueIdFromPath, [])
+  const [mosqueId] = useState(getMosqueIdFromPath)
   const [mosque, setMosque] = useState<MosqueDetail | null>(null)
   const [books, setBooks] = useState<MosqueBook[]>([])
   const [activeImage, setActiveImage] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  const [loading, setLoading] = useState(!!mosqueId)
+  const [notFound, setNotFound] = useState(!mosqueId)
 
   useEffect(() => {
-    if (!mosqueId || !supabase) { setLoading(false); setNotFound(true); return }
+    if (!mosqueId || !supabase) return
     let cancelled = false
     async function load() {
       if (!supabase) return
@@ -64,15 +64,15 @@ export default function MosquePage() {
       if (cancelled) return
       if (!mosqueRes.data) { setNotFound(true); setLoading(false); return }
 
-      const m = mosqueRes.data as any
-      const images = (imagesRes.data ?? []).map((r: any) => r.image_url as string)
+      const m = mosqueRes.data as { mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; country: string | null; mosque_lat: number; mosque_lng: number; mosque_image: string | null }
+      const images = (imagesRes.data ?? []).map((r: { image_url: string }) => r.image_url)
       setMosque({
         mosque_id: m.mosque_id, mosque_name: m.mosque_name,
         mosque_governorate: m.mosque_governorate, mosque_city: m.mosque_city,
         mosque_country: m.country ?? 'مصر', mosque_lat: m.mosque_lat, mosque_lng: m.mosque_lng,
         images: images.length ? images : (m.mosque_image ? [m.mosque_image] : []),
       })
-      setBooks((booksRes.data ?? []).map((row: any) => ({
+      setBooks(((booksRes.data ?? []) as unknown as Array<{ id: string; edition: string | null; books: { title: string; author: string | null; category: Category | null } }>).map((row) => ({
         entry_id: row.id, title: row.books.title, author: row.books.author,
         category: row.books.category, edition: row.edition,
       })))

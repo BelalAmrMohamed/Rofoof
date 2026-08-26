@@ -106,7 +106,7 @@ footer { padding: 28px 24px; color: rgba(255, 255, 255, .5); background: linear-
 .submit-mosque-selected strong { display: block; color: var(--stone-950); }
 .submit-mosque-selected p { margin: 3px 0 0; color: var(--green-700); font-size: 13px; }
 .submit-change-link { color: var(--green-700); font-size: 13px; font-weight: 700; background: none; border: none; cursor: pointer; }
-.submit-map { margin-top: 4px; height: 280px; border-radius: 16px; overflow: hidden; }
+.submit-map { margin-top: 4px; height: 280px; border-radius: 16px; overflow: visible; }
 .submit-map-hint { margin: 6px 0 0; color: var(--stone-500); font-size: 12px; }
 .submit-notice { padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; margin: 0; }
 .submit-notice.success { color: var(--green-800); background: var(--green-50); border: 1px solid var(--green-100); }
@@ -124,6 +124,12 @@ footer { padding: 28px 24px; color: rgba(255, 255, 255, .5); background: linear-
 .submit-photo-placeholder strong { color: var(--stone-700); font-size: 13px; }
 .submit-photo-placeholder small { font-size: 11px; }
 .submit-photo-preview { width: 100%; max-height: 220px; object-fit: cover; }
+.submit-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+.submit-photo-item { position: relative; overflow: hidden; border: 1.5px solid var(--stone-200); border-radius: 12px; background: #fff; }
+.submit-photo-item img { display: block; width: 100%; height: 100px; object-fit: cover; }
+.submit-photo-tag-select { width: 100%; padding: 6px 8px; border: 0; border-top: 1px solid var(--stone-100); outline: 0; color: var(--stone-700); background: var(--stone-50); font-size: 11px; font-family: inherit; }
+.submit-photo-remove { position: absolute; top: 6px; left: 6px; display: grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 50%; color: #fff; background: rgba(20,20,20,.55); font-size: 12px; line-height: 1; cursor: pointer; }
+.submit-photo-remove:hover { background: rgba(180,40,40,.85); }
 /* Mosque card image */
 .mosque-card { flex-direction: column; }
 .mosque-card-image { width: 100%; height: 140px; overflow: hidden; background: var(--stone-100); }

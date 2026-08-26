@@ -14,26 +14,16 @@ type Category = 'فقه' | 'حديث' | 'تفسير' | 'سيرة' | 'عقيدة'
 type Mosque = { mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; mosque_country: string; mosque_lat: number; mosque_lng: number }
 type Notice = { type: 'error' | 'success'; text: string } | null
 
+// A caption tag lets the user visually group "exterior" vs "library interior"
+// shots without forcing a choice — 'أخرى' covers anything else.
+type PhotoTag = 'خارجي' | 'مكتبة/رفوف الكتب' | 'أخرى'
+const PHOTO_TAGS: PhotoTag[] = ['خارجي', 'مكتبة/رفوف الكتب', 'أخرى']
+
+type MosquePhoto = { id: string; file: File; preview: string; tag: PhotoTag }
+
 const CATEGORIES: Category[] = ['فقه', 'حديث', 'تفسير', 'سيرة', 'عقيدة', 'تزكية', 'أدب', 'تاريخ', 'أخرى']
 
-export const COUNTRIES = [
-  'مصر', 'السعودية', 'الإمارات', 'المغرب', 'الجزائر', 'تونس', 'ليبيا', 'السودان',
-  'الأردن', 'فلسطين', 'سوريا', 'لبنان', 'العراق', 'اليمن', 'الكويت', 'قطر',
-  'البحرين', 'عُمان', 'باكستان', 'تركيا', 'إندونيسيا', 'ماليزيا', 'الصومال',
-  'موريتانيا', 'مالي', 'النيجر', 'السنغال', 'جيبوتي',
-]
-
-// Full static list of Egypt's 27 governorates. This must NOT be derived from
-// existing mosque rows — doing so previously meant a governorate only
-// appeared in the dropdown once a mosque had already been submitted there,
-// making it impossible to be the first submission in a new governorate.
-export const EGYPT_GOVERNORATES = [
-  'القاهرة', 'الجيزة', 'القليوبية', 'الإسكندرية', 'البحيرة', 'مطروح',
-  'الدقهلية', 'دمياط', 'الشرقية', 'الغربية', 'كفر الشيخ', 'المنوفية',
-  'بورسعيد', 'الإسماعيلية', 'السويس', 'شمال سيناء', 'جنوب سيناء',
-  'الفيوم', 'بني سويف', 'المنيا', 'أسيوط', 'سوهاج', 'قنا', 'الأقصر',
-  'أسوان', 'البحر الأحمر', 'الوادي الجديد',
-].sort()
+import { COUNTRIES, EGYPT_GOVERNORATES } from '../../lib/locations'
 
 function mosqueLabel(m: Mosque) { return m.mosque_name || `مسجد في ${m.mosque_city}` }
 
@@ -56,13 +46,17 @@ export default function SubmitPage() {
 
   // Derived: cities from live DB for Egypt, cascaded from the selected governorate.
   // Governorates themselves use the static EGYPT_GOVERNORATES list below, not
-  // live data — see the note on that constant.
-  const [liveCities, setLiveCities] = useState<string[]>([])
+  // live data — see the note on that constant. Derived via useMemo below.
 
-  // Photo upload
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
-  const photoInputRef = useRef<HTMLInputElement>(null)
+  // Mosque photos — multiple images (exterior angles + library interior),
+  // each independently tagged, previewed, and removable. See 2.5.
+  const [mosquePhotos, setMosquePhotos] = useState<MosquePhoto[]>([])
+  const mosquePhotoInputRef = useRef<HTMLInputElement>(null)
+
+  // Book cover photo — single image, mirrors the old mosque photo pattern. See 2.4.
+  const [bookCoverFile, setBookCoverFile] = useState<File | null>(null)
+  const [bookCoverPreview, setBookCoverPreview] = useState<string | null>(null)
+  const bookCoverInputRef = useRef<HTMLInputElement>(null)
 
   // Form status
   const [notice, setNotice] = useState<Notice>(null)
@@ -91,17 +85,26 @@ export default function SubmitPage() {
       })
   }, [])
 
-  // When user selects a governorate, derive cities
-  useEffect(() => {
-    if (!governorate) { setLiveCities([]); return }
+  // When user selects a governorate, derive cities. Pure derivation from
+  // governorate/country/mosques — a useMemo, not an effect, since nothing
+  // here needs to synchronize with an external system.
+  const liveCities = useMemo(() => {
+    if (!governorate) return []
     const citySet = new Set<string>()
     for (const m of mosques) {
       if ((m.mosque_country ?? 'مصر') === country && m.mosque_governorate === governorate) citySet.add(m.mosque_city)
     }
-    setLiveCities(Array.from(citySet).sort())
+    return Array.from(citySet).sort()
+  }, [governorate, country, mosques])
+
+  // Governorate changed (via the dropdown or a map reverse-geocode) — reset
+  // the dependent city fields so a stale city from the previous governorate
+  // doesn't linger.
+  const changeGovernorate = (value: string) => {
+    setGovernorate(value)
     setCity('')
     setCityIsOther(false)
-  }, [governorate, country, mosques])
+  }
 
   const matches = useMemo(() => {
     const text = query.trim()
@@ -114,20 +117,41 @@ export default function SubmitPage() {
   // Reverse geocode callback from MapPicker
   const handleGeocode = (result: GeocodedLocation) => {
     if (result.country) setCountry(result.country)
-    if (result.state) setGovernorate(result.state)
+    if (result.state) changeGovernorate(result.state)
     if (result.city) setCity(result.city)
   }
 
-  // Photo file selection
-  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Add one or more mosque photos (multi-select), each gets a preview + default tag.
+  const handleMosquePhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+    const added: MosquePhoto[] = files.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      preview: URL.createObjectURL(file),
+      tag: 'خارجي',
+    }))
+    setMosquePhotos((prev) => [...prev, ...added])
+    e.target.value = ''
+  }
+
+  const removeMosquePhoto = (id: string) => {
+    setMosquePhotos((prev) => {
+      const target = prev.find((p) => p.id === id)
+      if (target) URL.revokeObjectURL(target.preview)
+      return prev.filter((p) => p.id !== id)
+    })
+  }
+
+  const setMosquePhotoTag = (id: string, tag: PhotoTag) => {
+    setMosquePhotos((prev) => prev.map((p) => (p.id === id ? { ...p, tag } : p)))
+  }
+
+  // Book cover selection — single file, mirrors the old single mosque-photo pattern.
+  const handleBookCover = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null
-    setPhotoFile(file)
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setPhotoPreview(url)
-    } else {
-      setPhotoPreview(null)
-    }
+    setBookCoverFile(file)
+    setBookCoverPreview(file ? URL.createObjectURL(file) : null)
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -154,17 +178,34 @@ export default function SubmitPage() {
         }
       }
 
-      // Upload mosque photo if provided
-      let mosqueImageUrl: string | null = null
-      if (photoFile && supabase) {
-        const ext = photoFile.name.split('.').pop() ?? 'jpg'
+      // Upload all mosque photos (0..n) to the mosque-images bucket, keeping
+      // each one's tag as its mosque_images.caption. The first uploaded photo
+      // also becomes the legacy mosques.mosque_image for backward-compat with
+      // any code path that still reads that single column.
+      const uploadedMosqueImages: Array<{ image_url: string; caption: string }> = []
+      for (const photo of mosquePhotos) {
+        const ext = photo.file.name.split('.').pop() ?? 'jpg'
         const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('mosque-images')
-          .upload(path, photoFile, { contentType: photoFile.type, upsert: false })
+          .upload(path, photo.file, { contentType: photo.file.type, upsert: false })
         if (uploadError) throw uploadError
         const { data: urlData } = supabase.storage.from('mosque-images').getPublicUrl(uploadData.path)
-        mosqueImageUrl = urlData.publicUrl
+        uploadedMosqueImages.push({ image_url: urlData.publicUrl, caption: photo.tag })
+      }
+      const mosqueImageUrl = uploadedMosqueImages[0]?.image_url ?? null
+
+      // Upload the book cover, if provided, to the book-images bucket.
+      let bookImageUrl: string | null = null
+      if (bookCoverFile) {
+        const ext = bookCoverFile.name.split('.').pop() ?? 'jpg'
+        const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('book-images')
+          .upload(path, bookCoverFile, { contentType: bookCoverFile.type, upsert: false })
+        if (uploadError) throw uploadError
+        const { data: urlData } = supabase.storage.from('book-images').getPublicUrl(uploadData.path)
+        bookImageUrl = urlData.publicUrl
       }
 
       // Resolve or create mosque
@@ -188,12 +229,27 @@ export default function SubmitPage() {
         await supabase.from('mosques').update({ mosque_image: mosqueImageUrl }).eq('mosque_id', selectedMosque.mosque_id)
       }
 
+      // Insert every uploaded mosque photo into the gallery table, ordered
+      // by upload order.
+      if (uploadedMosqueImages.length && mosqueId) {
+        const rows = uploadedMosqueImages.map((img, i) => ({
+          mosque_id: mosqueId,
+          image_url: img.image_url,
+          caption: img.caption,
+          sort_order: i,
+          ...(submittedBy ? { submitted_by: submittedBy } : {}),
+        }))
+        const { error: imagesError } = await supabase.from('mosque_images').insert(rows)
+        if (imagesError) throw imagesError
+      }
+
       // Upsert book record
       const bookFields = {
         title,
         author: String(form.get('author') ?? '').trim() || null,
         category: String(form.get('category') ?? '') || null,
         extra_info: String(form.get('notes') ?? '').trim() || null,
+        ...(bookImageUrl ? { book_image: bookImageUrl } : {}),
       }
       const existingBook = await supabase.from('books').select('book_id').eq('title', title).maybeSingle()
       if (existingBook.error) throw existingBook.error
@@ -202,6 +258,9 @@ export default function SubmitPage() {
         const insertedBook = await supabase.from('books').insert(bookFields).select('book_id').single()
         if (insertedBook.error) throw insertedBook.error
         book = insertedBook.data
+      } else if (bookImageUrl) {
+        // Existing book title matched — attach the newly uploaded cover if it didn't have one.
+        await supabase.from('books').update({ book_image: bookImageUrl }).eq('book_id', book.book_id)
       }
       if (!book) throw new Error('تعذر إنشاء سجل الكتاب.')
 
@@ -219,7 +278,10 @@ export default function SubmitPage() {
 
       formElement.reset()
       setSelectedMosque(null); setPoint(null); setGovernorate(''); setCity(''); setCountry('مصر')
-      setPhotoFile(null); setPhotoPreview(null)
+      mosquePhotos.forEach((p) => URL.revokeObjectURL(p.preview))
+      setMosquePhotos([])
+      if (bookCoverPreview) URL.revokeObjectURL(bookCoverPreview)
+      setBookCoverFile(null); setBookCoverPreview(null)
       setNotice({
         type: 'success',
         text: !user
@@ -228,8 +290,8 @@ export default function SubmitPage() {
             ? 'تم تسجيل الكتاب وإضافته مباشرة إلى الفهرس.'
             : 'تم إرسال الطلب وسيظهر بعد موافقة المشرف.',
       })
-    } catch (error: any) {
-      const message = error?.message || 'تعذر حفظ التسجيل.'
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'تعذر حفظ التسجيل.'
       setNotice({ type: 'error', text: message.includes('duplicate') || message.includes('unique') ? 'هذا الكتاب بهذه الطبعة مسجل بالفعل في المسجد.' : message })
     } finally { setSubmitting(false) }
   }
@@ -276,6 +338,37 @@ export default function SubmitPage() {
                   ملاحظات إضافية
                   <textarea name="notes" className="submit-input submit-textarea" placeholder="حالة الكتاب أو أي معلومات مفيدة للقراء" />
                 </label>
+
+                {/* ── Book Cover Upload (2.4) ── */}
+                <div className="submit-photo-section">
+                  <label className="submit-label">
+                    صورة غلاف الكتاب (اختياري)
+                    <div className="submit-photo-area" onClick={() => bookCoverInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && bookCoverInputRef.current?.click()}>
+                      {bookCoverPreview
+                        ? <img src={bookCoverPreview} alt="معاينة غلاف الكتاب" className="submit-photo-preview" />
+                        : (
+                          <div className="submit-photo-placeholder">
+                            <span>📕</span>
+                            <strong>انقر لرفع صورة الغلاف</strong>
+                            <small>JPG أو PNG · حتى 5 ميغابايت</small>
+                          </div>
+                        )
+                      }
+                    </div>
+                    <input
+                      ref={bookCoverInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleBookCover}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  {bookCoverFile && (
+                    <button type="button" className="submit-change-link" style={{ marginTop: 6 }} onClick={() => { if (bookCoverPreview) URL.revokeObjectURL(bookCoverPreview); setBookCoverFile(null); setBookCoverPreview(null); if (bookCoverInputRef.current) bookCoverInputRef.current.value = '' }}>
+                      إزالة الصورة
+                    </button>
+                  )}
+                </div>
               </section>
 
               {/* ── Mosque & Location ── */}
@@ -315,7 +408,7 @@ export default function SubmitPage() {
                         <>
                           <label className="submit-label">
                             المحافظة
-                            <select value={governorate} onChange={(e) => setGovernorate(e.target.value)} className="submit-input">
+                            <select value={governorate} onChange={(e) => changeGovernorate(e.target.value)} className="submit-input">
                               <option value="">اختر المحافظة</option>
                               {EGYPT_GOVERNORATES.map((g) => <option key={g}>{g}</option>)}
                             </select>
@@ -370,34 +463,42 @@ export default function SubmitPage() {
                   </div>
                 )}
 
-                {/* ── Mosque Photo Upload ── */}
+                {/* ── Mosque Photos Upload (2.5: multiple images) ── */}
                 <div className="submit-photo-section">
                   <label className="submit-label">
-                    صورة المسجد (اختياري)
-                    <div className="submit-photo-area" onClick={() => photoInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && photoInputRef.current?.click()}>
-                      {photoPreview
-                        ? <img src={photoPreview} alt="معاينة المسجد" className="submit-photo-preview" />
-                        : (
-                          <div className="submit-photo-placeholder">
-                            <span>🖼️</span>
-                            <strong>انقر لرفع صورة المسجد</strong>
-                            <small>JPG أو PNG · حتى 5 ميغابايت</small>
-                          </div>
-                        )
-                      }
+                    صور المسجد (اختياري) — يمكن إضافة أكثر من صورة، مثل صور خارجية وصورة لرفوف الكتب
+                    <div className="submit-photo-area" onClick={() => mosquePhotoInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && mosquePhotoInputRef.current?.click()}>
+                      <div className="submit-photo-placeholder">
+                        <span>🖼️</span>
+                        <strong>انقر لرفع صورة أو أكثر</strong>
+                        <small>JPG أو PNG · حتى 5 ميغابايت لكل صورة</small>
+                      </div>
                     </div>
                     <input
-                      ref={photoInputRef}
+                      ref={mosquePhotoInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
-                      onChange={handlePhoto}
+                      multiple
+                      onChange={handleMosquePhotos}
                       style={{ display: 'none' }}
                     />
                   </label>
-                  {photoFile && (
-                    <button type="button" className="submit-change-link" style={{ marginTop: 6 }} onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (photoInputRef.current) photoInputRef.current.value = '' }}>
-                      إزالة الصورة
-                    </button>
+                  {mosquePhotos.length > 0 && (
+                    <div className="submit-photo-grid">
+                      {mosquePhotos.map((photo) => (
+                        <div key={photo.id} className="submit-photo-item">
+                          <img src={photo.preview} alt="معاينة صورة المسجد" />
+                          <select
+                            className="submit-photo-tag-select"
+                            value={photo.tag}
+                            onChange={(e) => setMosquePhotoTag(photo.id, e.target.value as PhotoTag)}
+                          >
+                            {PHOTO_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+                          </select>
+                          <button type="button" className="submit-photo-remove" onClick={() => removeMosquePhoto(photo.id)} aria-label="إزالة الصورة">✕</button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               </section>

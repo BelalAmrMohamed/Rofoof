@@ -6,7 +6,7 @@ import { SiteNavigation } from '../../components/SiteNavigation'
 import { supabase } from '../../lib/supabase'
 import { getUserAvatar, useAuth } from '../../lib/auth.ts'
 import { setPageMeta } from '../../lib/seo'
-import { COUNTRIES } from '../submit/SubmitPage'
+import { COUNTRIES } from '../../lib/locations'
 import './ProfilePage.css'
 
 type Profile = {

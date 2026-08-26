@@ -1,5 +1,5 @@
 // web/src/features/book/BookPage.tsx
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SiteNavigation } from '../../components/SiteNavigation'
 import { supabase } from '../../lib/supabase'
 import { buildBookSchema, setPageMeta } from '../../lib/seo'
@@ -15,6 +15,12 @@ type BookDetail = {
   mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; mosque_country: string
 }
 
+type BookRow = {
+  id: string; edition: string | null; publisher: string | null
+  books: { title: string; author: string | null; category: Category | null; extra_info: string | null; book_image: string | null }
+  mosques: { mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; country: string | null }
+}
+
 function mosqueLabel(name: string | null, city: string) { return name ?? `مسجد في ${city}` }
 
 // Extracted from the URL path, e.g. /books/<mosque_books.id>
@@ -24,13 +30,13 @@ function getEntryIdFromPath() {
 }
 
 export default function BookPage() {
-  const entryId = useMemo(getEntryIdFromPath, [])
+  const [entryId] = useState(getEntryIdFromPath)
   const [book, setBook] = useState<BookDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  const [loading, setLoading] = useState(!!entryId)
+  const [notFound, setNotFound] = useState(!entryId)
 
   useEffect(() => {
-    if (!entryId || !supabase) { setLoading(false); setNotFound(true); return }
+    if (!entryId || !supabase) return
     let cancelled = false
     async function load() {
       if (!supabase) return
@@ -43,7 +49,7 @@ export default function BookPage() {
       if (cancelled) return
       if (error || !data) { setNotFound(true); setLoading(false); return }
 
-      const row = data as any
+      const row = data as unknown as BookRow
       setBook({
         entry_id: row.id, title: row.books.title, author: row.books.author,
         category: row.books.category, extra_info: row.books.extra_info,

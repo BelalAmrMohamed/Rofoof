@@ -7,7 +7,7 @@ import { SiteNavigation } from '../../components/SiteNavigation'
 import { useAuth } from '../../lib/auth.ts'
 import { SearchContext } from '../../lib/search-context'
 import { buildLibrarySchema, buildBookSchema, buildMosqueSchema, setPageMeta } from '../../lib/seo'
-import { COUNTRIES } from '../submit/SubmitPage'
+import { COUNTRIES } from '../../lib/locations'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -37,22 +37,38 @@ function mosqueLabel(name: string | null, city: string) { return name ?? `مسج
 function catIdx(cat: Category | null) { return cat ? CATEGORIES.indexOf(cat) : -1 }
 function catClass(cat: Category | null) { const i = catIdx(cat); return i >= 0 ? `category-${i}` : '' }
 
+type ActivityRecord = {
+  id: string; title: string; author: string | null; category: Category | null
+  mosque: string; city: string; governorate: string
+  action: 'viewed' | 'searched'; createdAt: string
+}
+
+// Best-effort read of the logged-in user's id from the Supabase auth session
+// stored in localStorage, so activity records can be keyed per-user.
+function currentUserIdFromLocalStorage(): string | null {
+  const supabaseSession = Object.keys(localStorage).find((k) => k.includes('supabase.auth.token'))
+  const rawSession = supabaseSession ? localStorage.getItem(supabaseSession) : null
+  if (!rawSession) return null
+  try {
+    const parsed = JSON.parse(rawSession) as { currentSession?: { user?: { id?: string } } }
+    return parsed.currentSession?.user?.id ?? null
+  } catch { return null }
+}
+
 // Write a "viewed" activity record to localStorage
 function recordActivity(book: LiveBook) {
   try {
-    const supabaseSession = Object.keys(localStorage).find((k) => k.includes('supabase.auth.token'))
-    const rawSession = supabaseSession ? localStorage.getItem(supabaseSession) : null
-    const userId: string | null = rawSession ? (JSON.parse(rawSession) as any)?.currentSession?.user?.id ?? null : null
+    const userId = currentUserIdFromLocalStorage()
     const key = userId ? `mosque-shelves-activity:${userId}` : 'mosque-shelves-activity:guest'
-    const existing: unknown[] = JSON.parse(localStorage.getItem(key) ?? '[]')
-    const record = {
+    const existing = JSON.parse(localStorage.getItem(key) ?? '[]') as ActivityRecord[]
+    const record: ActivityRecord = {
       id: `${book.entry_id}-${Date.now()}`,
       title: book.title, author: book.author, category: book.category,
       mosque: mosqueLabel(book.mosque_name, book.mosque_city),
       city: book.mosque_city, governorate: book.mosque_governorate,
       action: 'viewed', createdAt: new Date().toISOString(),
     }
-    const updated = [record, ...existing.filter((a: any) => a.title !== book.title)].slice(0, 100)
+    const updated = [record, ...existing.filter((a) => a.title !== book.title)].slice(0, 100)
     localStorage.setItem(key, JSON.stringify(updated))
   } catch { /* localStorage unavailable */ }
 }
@@ -60,19 +76,17 @@ function recordActivity(book: LiveBook) {
 // Write a "searched" activity record to localStorage
 function recordSearchActivity(queryText: string, currentCity: string, currentGov: string) {
   try {
-    const supabaseSession = Object.keys(localStorage).find((k) => k.includes('supabase.auth.token'))
-    const rawSession = supabaseSession ? localStorage.getItem(supabaseSession) : null
-    const userId: string | null = rawSession ? (JSON.parse(rawSession) as any)?.currentSession?.user?.id ?? null : null
+    const userId = currentUserIdFromLocalStorage()
     const key = userId ? `mosque-shelves-activity:${userId}` : 'mosque-shelves-activity:guest'
-    const existing: unknown[] = JSON.parse(localStorage.getItem(key) ?? '[]')
-    const record = {
+    const existing = JSON.parse(localStorage.getItem(key) ?? '[]') as ActivityRecord[]
+    const record: ActivityRecord = {
       id: `search-${Date.now()}`,
       title: queryText, author: null, category: null,
       mosque: '', city: currentCity, governorate: currentGov,
       action: 'searched', createdAt: new Date().toISOString(),
     }
     // Remove exact duplicate searches to keep it clean
-    const updated = [record, ...existing.filter((a: any) => a.action !== 'searched' || a.title !== queryText)].slice(0, 100)
+    const updated = [record, ...existing.filter((a) => a.action !== 'searched' || a.title !== queryText)].slice(0, 100)
     localStorage.setItem(key, JSON.stringify(updated))
   } catch { /* localStorage unavailable */ }
 }
@@ -101,8 +115,8 @@ export default function BrowsePage() {
   // Data
   const [books, setBooks] = useState<LiveBook[]>([])
   const [mosquesRaw, setMosquesRaw] = useState<LiveMosque[]>([])
-  const [loading, setLoading] = useState(true)
-  const [dataError, setDataError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(!!supabase)
+  const [dataError, setDataError] = useState<string | null>(supabase ? null : 'إعدادات Supabase غير موجودة.')
 
   // Filters
   const [view, setView] = useState<View>('books')
@@ -150,7 +164,7 @@ export default function BrowsePage() {
 
   // Load live data
   useEffect(() => {
-    if (!supabase) { setLoading(false); setDataError('إعدادات Supabase غير موجودة.'); return }
+    if (!supabase) return
     let cancelled = false
     async function load() {
       if (!supabase) return
@@ -174,7 +188,12 @@ export default function BrowsePage() {
         if (imagesRes.error) throw imagesRes.error
         if (cancelled) return
 
-        const flatBooks: LiveBook[] = (booksRes.data ?? []).map((row: any) => ({
+        type BookRow = {
+          id: string; edition: string | null; publisher: string | null
+          books: { book_id: string; title: string; author: string | null; category: Category | null; extra_info: string | null; book_image: string | null }
+          mosques: { mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; country: string | null }
+        }
+        const flatBooks: LiveBook[] = ((booksRes.data ?? []) as unknown as BookRow[]).map((row) => ({
           entry_id: row.id, book_id: row.books.book_id, title: row.books.title,
           author: row.books.author, category: row.books.category, extra_info: row.books.extra_info,
           edition: row.edition, publisher: row.publisher, book_image: row.books.book_image ?? null,
@@ -192,7 +211,11 @@ export default function BrowsePage() {
           (imagesByMosque[row.mosque_id] ??= []).push(row.image_url)
         }
 
-        const flatMosques: LiveMosque[] = (mosquesRes.data ?? []).map((m: any) => ({
+        type MosqueRow = {
+          mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string
+          country: string | null; mosque_lat: number | null; mosque_lng: number | null; mosque_image: string | null
+        }
+        const flatMosques: LiveMosque[] = ((mosquesRes.data ?? []) as MosqueRow[]).map((m) => ({
           mosque_id: m.mosque_id, mosque_name: m.mosque_name,
           mosque_governorate: m.mosque_governorate, mosque_city: m.mosque_city,
           mosque_country: m.country ?? 'مصر', mosque_lat: m.mosque_lat ?? null, mosque_lng: m.mosque_lng ?? null,
@@ -215,8 +238,8 @@ export default function BrowsePage() {
             setCity(profile.city)
           }
         }
-      } catch (err: any) {
-        if (!cancelled) setDataError(err?.message ?? 'تعذر تحميل البيانات.')
+      } catch (err: unknown) {
+        if (!cancelled) setDataError(err instanceof Error ? err.message : 'تعذر تحميل البيانات.')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -272,24 +295,31 @@ export default function BrowsePage() {
   }), [books, mosquesRaw])
 
   // ── Filtered results ───────────────────────────────────────────────────
-  const proximity = (g: string) => location && g !== location.governorate ? 1 : 0
+  const filteredBooks = useMemo(() => {
+    // Local sort-priority helper: results in the user's own governorate sort
+    // first. Defined inside the memo so `location` (already a dep) is its
+    // only dependency — no separate closure to track.
+    const sortByProximity = (g: string) => location && g !== location.governorate ? 1 : 0
+    return books.filter((b) => {
+      const q = !query || b.title.includes(query) || (b.author ?? '').includes(query)
+      const cat = category === 'all' || b.category === category
+      const ctry = filterCountry === 'all' || b.mosque_country === filterCountry
+      const gov = governorate === 'all' || b.mosque_governorate === governorate
+      const cty = city === 'all' || b.mosque_city === city
+      return q && cat && ctry && gov && cty
+    }).sort((a, b) => sortByProximity(a.mosque_governorate) - sortByProximity(b.mosque_governorate))
+  }, [books, category, city, filterCountry, governorate, location, query])
 
-  const filteredBooks = useMemo(() => books.filter((b) => {
-    const q = !query || b.title.includes(query) || (b.author ?? '').includes(query)
-    const cat = category === 'all' || b.category === category
-    const ctry = filterCountry === 'all' || b.mosque_country === filterCountry
-    const gov = governorate === 'all' || b.mosque_governorate === governorate
-    const cty = city === 'all' || b.mosque_city === city
-    return q && cat && ctry && gov && cty
-  }).sort((a, b) => proximity(a.mosque_governorate) - proximity(b.mosque_governorate)), [books, category, city, filterCountry, governorate, location, query])
-
-  const filteredMosques = useMemo(() => mosquesRaw.filter((m) => {
-    const q = !query || (m.mosque_name ?? '').includes(query) || m.mosque_city.includes(query) || m.mosque_governorate.includes(query)
-    const ctry = filterCountry === 'all' || m.mosque_country === filterCountry
-    const gov = governorate === 'all' || m.mosque_governorate === governorate
-    const cty = city === 'all' || m.mosque_city === city
-    return q && ctry && gov && cty
-  }).sort((a, b) => proximity(a.mosque_governorate) - proximity(b.mosque_governorate)), [mosquesRaw, city, filterCountry, governorate, location, query])
+  const filteredMosques = useMemo(() => {
+    const sortByProximity = (g: string) => location && g !== location.governorate ? 1 : 0
+    return mosquesRaw.filter((m) => {
+      const q = !query || (m.mosque_name ?? '').includes(query) || m.mosque_city.includes(query) || m.mosque_governorate.includes(query)
+      const ctry = filterCountry === 'all' || m.mosque_country === filterCountry
+      const gov = governorate === 'all' || m.mosque_governorate === governorate
+      const cty = city === 'all' || m.mosque_city === city
+      return q && ctry && gov && cty
+    }).sort((a, b) => sortByProximity(a.mosque_governorate) - sortByProximity(b.mosque_governorate))
+  }, [mosquesRaw, city, filterCountry, governorate, location, query])
 
   const results = view === 'books' ? filteredBooks : filteredMosques
   const selectedMosqueBooks = useMemo(() => selectedMosque ? books.filter((b) => b.mosque_id === selectedMosque.mosque_id) : [], [books, selectedMosque])
