@@ -46,6 +46,31 @@ const COUNTRY_CODE_MAP: Record<string, string> = {
   dj: 'جيبوتي',
 }
 
+export interface GeocodeSearchResult {
+  label: string   // display_name from Nominatim, shown in the results list
+  lat: number
+  lng: number
+}
+
+// Forward geocoding: turn a free-text query ("مسجد النور، القاهرة") into a
+// list of candidate places with coordinates, so users can search for an
+// address on the map instead of only click-to-pick. Debounced by callers.
+export async function searchPlaces(query: string): Promise<GeocodeSearchResult[]> {
+  const text = query.trim()
+  if (!text) return []
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(text)}&accept-language=ar&limit=6`
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'RoofAlMasajid/1.0 (https://rofoof-almasajid.vercel.app)' },
+    })
+    if (!res.ok) return []
+    const data = await res.json() as Array<{ display_name: string; lat: string; lon: string }>
+    return data.map((item) => ({ label: item.display_name, lat: parseFloat(item.lat), lng: parseFloat(item.lon) }))
+  } catch {
+    return []
+  }
+}
+
 export async function reverseGeocode(lat: number, lng: number): Promise<GeocodedLocation | null> {
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`

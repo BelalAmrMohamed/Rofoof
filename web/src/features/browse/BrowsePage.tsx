@@ -18,12 +18,17 @@ type Location = { country: string; governorate: string; city: string }
 type LiveBook = {
   entry_id: string; book_id: string; title: string; author: string | null
   category: Category | null; extra_info: string | null; edition: string | null; publisher: string | null
+  book_image: string | null
   mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; mosque_country: string
 }
 
 type LiveMosque = {
   mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string
-  mosque_country: string; mosque_image: string | null; book_count: number
+  mosque_country: string; mosque_lat: number | null; mosque_lng: number | null
+  // First image is treated as the primary/cover photo (card thumbnail).
+  // Falls back to the single legacy mosque_image column when a mosque has
+  // no rows in mosque_images yet (see 20260826120000_mosque_images_table.sql).
+  mosque_images: string[]; book_count: number
 }
 
 const CATEGORIES: Category[] = ['فقه', 'حديث', 'تفسير', 'سيرة', 'عقيدة', 'تزكية', 'أدب', 'تاريخ', 'أخرى']
@@ -150,25 +155,29 @@ export default function BrowsePage() {
     async function load() {
       if (!supabase) return
       try {
-        const [booksRes, mosquesRes] = await Promise.all([
+        const [booksRes, mosquesRes, imagesRes] = await Promise.all([
           supabase.from('mosque_books')
-            .select('id, edition, publisher, books!inner(book_id, title, author, category, extra_info), mosques!inner(mosque_id, mosque_name, mosque_governorate, mosque_city, country, mosque_image)')
+            .select('id, edition, publisher, books!inner(book_id, title, author, category, extra_info, book_image), mosques!inner(mosque_id, mosque_name, mosque_governorate, mosque_city, country, mosque_lat, mosque_lng)')
             .eq('status', 'approved')
             .order('created_at', { ascending: false })
             .limit(500),
           supabase.from('mosques')
-            .select('mosque_id, mosque_name, mosque_governorate, mosque_city, country, mosque_image')
+            .select('mosque_id, mosque_name, mosque_governorate, mosque_city, country, mosque_lat, mosque_lng, mosque_image')
             .order('created_at', { ascending: false })
             .limit(400),
+          supabase.from('mosque_images')
+            .select('mosque_id, image_url, sort_order')
+            .order('sort_order', { ascending: true }),
         ])
         if (booksRes.error) throw booksRes.error
         if (mosquesRes.error) throw mosquesRes.error
+        if (imagesRes.error) throw imagesRes.error
         if (cancelled) return
 
         const flatBooks: LiveBook[] = (booksRes.data ?? []).map((row: any) => ({
           entry_id: row.id, book_id: row.books.book_id, title: row.books.title,
           author: row.books.author, category: row.books.category, extra_info: row.books.extra_info,
-          edition: row.edition, publisher: row.publisher,
+          edition: row.edition, publisher: row.publisher, book_image: row.books.book_image ?? null,
           mosque_id: row.mosques.mosque_id, mosque_name: row.mosques.mosque_name,
           mosque_governorate: row.mosques.mosque_governorate, mosque_city: row.mosques.mosque_city,
           mosque_country: row.mosques.country ?? 'مصر',
@@ -177,10 +186,19 @@ export default function BrowsePage() {
         const bookCountByMosque: Record<string, number> = {}
         for (const b of flatBooks) bookCountByMosque[b.mosque_id] = (bookCountByMosque[b.mosque_id] ?? 0) + 1
 
+        // Group mosque_images rows by mosque_id, already ordered by sort_order.
+        const imagesByMosque: Record<string, string[]> = {}
+        for (const row of (imagesRes.data ?? []) as Array<{ mosque_id: string; image_url: string }>) {
+          (imagesByMosque[row.mosque_id] ??= []).push(row.image_url)
+        }
+
         const flatMosques: LiveMosque[] = (mosquesRes.data ?? []).map((m: any) => ({
           mosque_id: m.mosque_id, mosque_name: m.mosque_name,
           mosque_governorate: m.mosque_governorate, mosque_city: m.mosque_city,
-          mosque_country: m.country ?? 'مصر', mosque_image: m.mosque_image ?? null,
+          mosque_country: m.country ?? 'مصر', mosque_lat: m.mosque_lat ?? null, mosque_lng: m.mosque_lng ?? null,
+          // Prefer the normalized gallery; fall back to the legacy single
+          // mosque_image column for mosques that predate mosque_images.
+          mosque_images: imagesByMosque[m.mosque_id] ?? (m.mosque_image ? [m.mosque_image] : []),
           book_count: bookCountByMosque[m.mosque_id] ?? 0,
         }))
 
@@ -458,12 +476,20 @@ export default function BrowsePage() {
       )}
       {modal === 'book' && selectedBook && (
         <Dialog title="تفاصيل الكتاب" onClose={closeModal}>
-          <DetailBook book={selectedBook} onMosque={() => { const m = filteredMosques.find((x) => x.mosque_id === selectedBook.mosque_id) ?? { mosque_id: selectedBook.mosque_id, mosque_name: selectedBook.mosque_name, mosque_governorate: selectedBook.mosque_governorate, mosque_city: selectedBook.mosque_city, mosque_country: selectedBook.mosque_country, mosque_image: null, book_count: 0 }; openMosque(m) }} />
+          <DetailBook book={selectedBook} onMosque={() => { const m = filteredMosques.find((x) => x.mosque_id === selectedBook.mosque_id) ?? { mosque_id: selectedBook.mosque_id, mosque_name: selectedBook.mosque_name, mosque_governorate: selectedBook.mosque_governorate, mosque_city: selectedBook.mosque_city, mosque_country: selectedBook.mosque_country, mosque_lat: null, mosque_lng: null, mosque_images: [], book_count: 0 }; openMosque(m) }} />
+          <a className="detail-full-page-link" href={`/books/${selectedBook.entry_id}`}>
+            عرض الصفحة الكاملة
+            <svg aria-hidden="true" width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>
+          </a>
         </Dialog>
       )}
       {modal === 'mosque' && selectedMosque && (
         <Dialog title={mosqueLabel(selectedMosque.mosque_name, selectedMosque.mosque_city)} onClose={closeModal}>
           <DetailMosque mosque={selectedMosque} books={selectedMosqueBooks} location={location} onBook={openBook} />
+          <a className="detail-full-page-link" href={`/mosques/${selectedMosque.mosque_id}`}>
+            عرض الصفحة الكاملة (مع الخريطة وكل الصور)
+            <svg aria-hidden="true" width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>
+          </a>
         </Dialog>
       )}
     </div>
@@ -502,8 +528,8 @@ function BookCard({ book, location, onClick }: { book: LiveBook; location: Locat
 function MosqueCard({ mosque, location, onClick }: { mosque: LiveMosque; location: Location | null; onClick: () => void }) {
   return (
     <article className="mosque-card" onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick() }} tabIndex={0}>
-      {mosque.mosque_image
-        ? <div className="mosque-card-image"><img src={mosque.mosque_image} alt={mosqueLabel(mosque.mosque_name, mosque.mosque_city)} /></div>
+      {mosque.mosque_images[0]
+        ? <div className="mosque-card-image"><img src={mosque.mosque_images[0]} alt={mosqueLabel(mosque.mosque_name, mosque.mosque_city)} /></div>
         : <div className="mosque-card-image mosque-card-image--placeholder">
             <svg aria-hidden="true" width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2c-1.5 0-2.5 1.5-2.5 3v2H7a3 3 0 0 0-3 3v10h16V10a3 3 0 0 0-3-3h-2.5V5c0-1.5-1-3-2.5-3Z" />
@@ -578,7 +604,10 @@ function DetailBook({ book, onMosque }: { book: LiveBook; onMosque: () => void }
   return (
     <>
       <div className="detail-hero">
-        <div className={`book-avatar ${catClass(book.category)}`}>{book.title[0]}</div>
+        {book.book_image
+          ? <div className="detail-book-cover"><img src={book.book_image} alt={book.title} /></div>
+          : <div className={`book-avatar ${catClass(book.category)}`}>{book.title[0]}</div>
+        }
         <div>
           {book.category && <span className={`category-badge ${catClass(book.category)}`}>{book.category}</span>}
           <h3>{book.title}</h3>
@@ -602,9 +631,10 @@ function DetailBook({ book, onMosque }: { book: LiveBook; onMosque: () => void }
 function DetailMosque({ mosque, books: mosqueBooks, location, onBook }: { mosque: LiveMosque; books: LiveBook[]; location: Location | null; onBook: (b: LiveBook) => void }) {
   return (
     <>
-      {mosque.mosque_image && (
+      {mosque.mosque_images[0] && (
         <div className="detail-mosque-image">
-          <img src={mosque.mosque_image} alt={mosqueLabel(mosque.mosque_name, mosque.mosque_city)} />
+          <img src={mosque.mosque_images[0]} alt={mosqueLabel(mosque.mosque_name, mosque.mosque_city)} />
+          {mosque.mosque_images.length > 1 && <span className="detail-mosque-image-count">+{mosque.mosque_images.length - 1} صور أخرى</span>}
         </div>
       )}
       <div className="mosque-detail-hero">
