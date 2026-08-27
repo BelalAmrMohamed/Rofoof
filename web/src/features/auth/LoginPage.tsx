@@ -44,6 +44,7 @@ function Field({ label, ...props }: { label: string } & InputHTMLAttributes<HTML
 
 export default function LoginPage() {
   const { user, loading: authLoading } = useAuth()
+  const [avatarFailed, setAvatarFailed] = useState(false)
   const [mode, setMode] = useState<Mode>('login')
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -86,9 +87,9 @@ export default function LoginPage() {
   const availableCities = cities[governorate] ?? []
   if (authLoading) return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#fdf8ee] font-[Tajawal,sans-serif] text-[#2a1e0c]">جارٍ التحقق من الجلسة...</main>
   if (user) {
-    const avatar = getUserAvatar(user)
+    const avatar = avatarFailed ? null : getUserAvatar(user)
     const name = getUserName(user)
-    return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#fdf8ee] px-5 font-[Tajawal,sans-serif] text-[#2a1e0c]"><section className="w-full max-w-[420px] rounded-2xl border border-[#d8cbaa] bg-white p-8 text-center shadow-sm"><div className="mx-auto mb-4 grid size-16 place-items-center overflow-hidden rounded-full bg-[#f5edd8] text-2xl font-bold text-[#2c5a3c]">{avatar ? <img src={avatar} alt="" className="size-full object-cover" /> : name[0]}</div><h1 className="font-serif text-2xl font-bold">أنت مسجّل الدخول بالفعل</h1><p className="mt-2 text-sm text-[#8a7a5c]">{name} · {user.email}</p><div className="mt-6 flex gap-3"><a href="/profile" className="flex-1 rounded-[10px] bg-[#0b1f14] py-3 font-bold text-white">الملف الشخصي</a><button type="button" onClick={() => void handleSignOut()} className="flex-1 rounded-[10px] border border-[#d8cbaa] py-3 font-bold">تسجيل الخروج</button></div></section></main>
+    return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#fdf8ee] px-5 font-[Tajawal,sans-serif] text-[#2a1e0c]"><section className="w-full max-w-[420px] rounded-2xl border border-[#d8cbaa] bg-white p-8 text-center shadow-sm"><div className="mx-auto mb-4 grid size-16 place-items-center overflow-hidden rounded-full bg-[#f5edd8] text-2xl font-bold text-[#2c5a3c]">{avatar ? <img src={avatar} alt="" className="size-full object-cover" onError={() => setAvatarFailed(true)} /> : name[0]}</div><h1 className="font-serif text-2xl font-bold">أنت مسجّل الدخول بالفعل</h1><p className="mt-2 text-sm text-[#8a7a5c]">{name} · {user.email}</p><div className="mt-6 flex gap-3"><a href="/profile" className="flex-1 rounded-[10px] bg-[#0b1f14] py-3 font-bold text-white">الملف الشخصي</a><button type="button" onClick={() => void handleSignOut()} className="flex-1 rounded-[10px] border border-[#d8cbaa] py-3 font-bold">تسجيل الخروج</button></div></section></main>
   }
   return <main dir="rtl" className="flex min-h-screen flex-col bg-[#fdf8ee] font-[Tajawal,sans-serif] text-[#2a1e0c] md:flex-row">
     <section className="order-2 flex flex-1 items-center justify-center overflow-y-auto bg-[#fdf8ee] px-5 py-8 md:order-1 md:px-8">

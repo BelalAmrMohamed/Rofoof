@@ -23,6 +23,7 @@ type Notice = { type: 'error' | 'success'; text: string } | null
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [avatarFailed, setAvatarFailed] = useState(false)
   const [activities, setActivities] = useState<Activity[]>([])
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'viewed' | 'searched'>('all')
@@ -164,7 +165,7 @@ export default function ProfilePage() {
           <div className="profile-wrap">
             <section className="profile-hero">
               <div className="profile-identity">
-                <div className="profile-avatar">{getUserAvatar(user) ? <img src={getUserAvatar(user) ?? ''} alt="" /> : profile.fullname[0] || 'م'}</div>
+                <div className="profile-avatar">{!avatarFailed && getUserAvatar(user) ? <img src={getUserAvatar(user) ?? ''} alt="" onError={() => setAvatarFailed(true)} /> : profile.fullname[0] || 'م'}</div>
                 <span className="profile-role">{profile.role === 'admin' ? 'مدير' : profile.role === 'volunteer' ? 'متطوع' : 'زائر'}</span>
                 <h1>{profile.fullname}</h1>
                 <p>{profile.email}</p>

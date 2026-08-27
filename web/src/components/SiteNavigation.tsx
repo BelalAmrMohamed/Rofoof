@@ -54,7 +54,9 @@ function HeaderSearch() {
 export function SiteNavigation({ active }: { active: ActivePage }) {
   const [open, setOpen] = useState(false)
   const { user } = useAuth()
-  const avatar = getUserAvatar(user)
+  const rawAvatar = getUserAvatar(user)
+  const [avatarFailed, setAvatarFailed] = useState(false)
+  const avatar = avatarFailed ? null : rawAvatar
   const name = getUserName(user)
   const navigate = (href: string) => window.location.assign(href)
 
@@ -78,7 +80,7 @@ export function SiteNavigation({ active }: { active: ActivePage }) {
             >
               <span className="site-nav-icon">
                 {item.key === 'profile' && user
-                  ? <span className="site-nav-avatar">{avatar ? <img src={avatar} alt="" /> : name[0]}</span>
+                  ? <span className="site-nav-avatar">{avatar ? <img src={avatar} alt="" onError={() => setAvatarFailed(true)} /> : name[0]}</span>
                   : <Icon name={item.icon} />
                 }
               </span>
@@ -102,7 +104,7 @@ export function SiteNavigation({ active }: { active: ActivePage }) {
             ? (
               <a className="site-user-link" href="/profile" aria-label={`الملف الشخصي — ${name}`}>
                 <span className="site-user-avatar">
-                  {avatar ? <img src={avatar} alt="" /> : name[0]}
+                  {avatar ? <img src={avatar} alt="" onError={() => setAvatarFailed(true)} /> : name[0]}
                 </span>
                 {/* Name shown on desktop only — hidden on mobile via CSS */}
                 <span className="site-user-name">{name}</span>
