@@ -178,7 +178,8 @@ export default function MosquePage() {
     ;[reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]]
     const withSortOrder = reordered.map((r, i) => ({ ...r, sort_order: i }))
     setReorderingImage(true)
-    const results = await Promise.all(withSortOrder.map((r) => supabase.from('mosque_images').update({ sort_order: r.sort_order }).eq('id', r.id)))
+    const db = supabase
+    const results = await Promise.all(withSortOrder.map((r) => db.from('mosque_images').update({ sort_order: r.sort_order }).eq('id', r.id)))
     setReorderingImage(false)
     if (results.some((r) => r.error)) { setAdminNotice({ type: 'error', text: 'تعذر إعادة ترتيب الصور.' }); return }
     setImageRows(withSortOrder)
@@ -396,6 +397,7 @@ export default function MosquePage() {
                 lat={mosque.mosque_lat}
                 lng={mosque.mosque_lng}
                 label={mosqueLabel(mosque.mosque_name, mosque.mosque_city)}
+                image={mosque.images[0] ?? null}
               />
             </section>
 

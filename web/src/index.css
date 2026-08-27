@@ -3,6 +3,23 @@
 @import "tailwindcss";
 @import 'leaflet/dist/leaflet.css';
 
+/* Onboarding flow design tokens — the onboarding components (Onboarding.tsx
+   and children) were originally built as a standalone dark-card UI with
+   these Tailwind color tokens (text-gold, bg-gold/10, text-text-3, etc.),
+   but the tokens themselves were never carried over into this app's theme,
+   so every one of those classes was silently generating no styles at all —
+   this is the root cause of the "unstyled onboarding" issue. Values are
+   reverse-derived from the raw hex colors already used alongside these
+   tokens in the same components (#C9A84C/#c49a3c gold, #0A2E1E dark-green
+   card background). */
+@theme {
+  --color-gold: #c9a84c;
+  --color-gold-light: #e0c47a;
+  --color-text: #f5f1e6;
+  --color-text-2: rgba(245, 241, 230, .72);
+  --color-text-3: rgba(245, 241, 230, .48);
+}
+
 :root { font-family: 'Tajawal', sans-serif; color: #1c1814; background: #f9f6f1; font-synthesis: none; text-rendering: optimizeLegibility; }
 * { box-sizing: border-box; }
 /* html/body/#root all given the app's base background and full height so

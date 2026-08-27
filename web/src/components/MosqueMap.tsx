@@ -9,21 +9,21 @@
 // incorrectly and render as broken images.
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet'
 
-export function MosqueMap({ lat, lng, label, className = '' }: { lat: number; lng: number; label: string; className?: string }) {
+export function MosqueMap({ lat, lng, label, image, className = '' }: { lat: number; lng: number; label: string; image?: string | null; className?: string }) {
+  const externalUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`
   return (
     <div className={`mosque-map ${className}`}>
       <MapContainer center={[lat, lng]} zoom={15} scrollWheelZoom={true} className="mosque-map-container">
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <CircleMarker center={[lat, lng]} radius={9} pathOptions={{ color: '#0b1f14', fillColor: '#c49a3c', fillOpacity: 1, weight: 3 }}>
-          <Popup>{label}</Popup>
+          <Popup minWidth={180} className="mosque-map-popup">
+            {image && <img src={image} alt={label} className="mosque-map-popup-image" />}
+            <strong className="mosque-map-popup-title">{label}</strong>
+            <a href={externalUrl} target="_blank" rel="noreferrer" className="mosque-map-popup-link">فتح في خرائط أكبر ←</a>
+          </Popup>
         </CircleMarker>
       </MapContainer>
-      <a
-        className="mosque-map-external-link"
-        href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a className="mosque-map-external-link" href={externalUrl} target="_blank" rel="noreferrer">
         فتح في خرائط أكبر
       </a>
     </div>

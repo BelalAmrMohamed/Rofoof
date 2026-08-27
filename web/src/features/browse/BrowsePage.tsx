@@ -503,7 +503,7 @@ export default function BrowsePage() {
               {governorates.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
             {governorate !== 'all' && (
-              <select value={city} onChange={(e) => { filtersTouchedRef.current = true; setCity(e.target.value) }} aria-label="المدينة" className="filter-select">
+              <select value={city} onChange={(e) => { markFiltersTouched(); setCity(e.target.value) }} aria-label="المدينة" className="filter-select">
                 <option value="all">كل المدن</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -561,7 +561,7 @@ export default function BrowsePage() {
           <div className="dialog-actions">
             <button className="secondary-button" onClick={closeModal}>إلغاء</button>
             <button className="primary-button" onClick={() => { 
-              filtersTouchedRef.current = true
+              markFiltersTouched()
               setLocation(locationDraft)
               setGovernorate(locationDraft.governorate || 'all')
               setCity(locationDraft.city || 'all')
