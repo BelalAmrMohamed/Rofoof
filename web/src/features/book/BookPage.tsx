@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { SiteNavigation } from '../../components/SiteNavigation'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth.ts'
 import { buildBookSchema, setPageMeta } from '../../lib/seo'
 
 type Category = 'فقه' | 'حديث' | 'تفسير' | 'سيرة' | 'عقيدة' | 'تزكية' | 'أدب' | 'تاريخ' | 'أخرى'
@@ -10,14 +11,14 @@ function catIdx(cat: Category | null) { return cat ? CATEGORIES.indexOf(cat) : -
 function catClass(cat: Category | null) { const i = catIdx(cat); return i >= 0 ? `category-${i}` : '' }
 
 type BookDetail = {
-  entry_id: string; title: string; author: string | null; category: Category | null
+  entry_id: string; book_id: string; title: string; author: string | null; category: Category | null
   extra_info: string | null; edition: string | null; publisher: string | null; book_image: string | null
   mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; mosque_country: string
 }
 
 type BookRow = {
   id: string; edition: string | null; publisher: string | null
-  books: { title: string; author: string | null; category: Category | null; extra_info: string | null; book_image: string | null }
+  books: { book_id: string; title: string; author: string | null; category: Category | null; extra_info: string | null; book_image: string | null }
   mosques: { mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; country: string | null }
 }
 
@@ -30,10 +31,83 @@ function getEntryIdFromPath() {
 }
 
 export default function BookPage() {
+  const { user } = useAuth()
   const [entryId] = useState(getEntryIdFromPath)
   const [book, setBook] = useState<BookDetail | null>(null)
   const [loading, setLoading] = useState(!!entryId)
   const [notFound, setNotFound] = useState(!entryId)
+
+  // Admin edit/delete (issue 2).
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editAuthor, setEditAuthor] = useState('')
+  const [editCategory, setEditCategory] = useState<Category | ''>('')
+  const [editEdition, setEditEdition] = useState('')
+  const [editPublisher, setEditPublisher] = useState('')
+  const [editExtraInfo, setEditExtraInfo] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [adminNotice, setAdminNotice] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    if (!supabase || !user) { const t = window.setTimeout(() => setIsAdmin(false), 0); return () => window.clearTimeout(t) }
+    supabase.from('users').select('role').eq('user_id', user.id).maybeSingle().then(({ data }) => {
+      if (!cancelled) setIsAdmin(data?.role === 'admin')
+    })
+    return () => { cancelled = true }
+  }, [user])
+
+  function startEdit() {
+    if (!book) return
+    setEditTitle(book.title)
+    setEditAuthor(book.author ?? '')
+    setEditCategory(book.category ?? '')
+    setEditEdition(book.edition ?? '')
+    setEditPublisher(book.publisher ?? '')
+    setEditExtraInfo(book.extra_info ?? '')
+    setAdminNotice(null)
+    setEditing(true)
+  }
+
+  async function saveEdit() {
+    if (!supabase || !book) return
+    setSavingEdit(true)
+    const [booksResult, entryResult] = await Promise.all([
+      supabase.from('books').update({
+        title: editTitle.trim(),
+        author: editAuthor.trim() || null,
+        category: editCategory || null,
+        extra_info: editExtraInfo.trim() || null,
+      }).eq('book_id', book.book_id),
+      supabase.from('mosque_books').update({
+        edition: editEdition.trim() || null,
+        publisher: editPublisher.trim() || null,
+      }).eq('id', book.entry_id),
+    ])
+    setSavingEdit(false)
+    if (booksResult.error || entryResult.error) { setAdminNotice({ type: 'error', text: 'تعذر حفظ التعديلات.' }); return }
+    setBook({
+      ...book,
+      title: editTitle.trim(), author: editAuthor.trim() || null,
+      category: (editCategory || null) as Category | null,
+      extra_info: editExtraInfo.trim() || null,
+      edition: editEdition.trim() || null, publisher: editPublisher.trim() || null,
+    })
+    setEditing(false)
+    setAdminNotice({ type: 'success', text: 'تم تحديث بيانات الكتاب.' })
+  }
+
+  async function deleteEntry() {
+    if (!supabase || !book) return
+    setDeleting(true)
+    const { error } = await supabase.from('mosque_books').delete().eq('id', book.entry_id)
+    setDeleting(false)
+    if (error) { setAdminNotice({ type: 'error', text: 'تعذر حذف هذا التسجيل.' }); return }
+    window.location.assign(`/mosques/${book.mosque_id}`)
+  }
 
   useEffect(() => {
     if (!entryId || !supabase) return
@@ -42,7 +116,7 @@ export default function BookPage() {
       if (!supabase) return
       const { data, error } = await supabase
         .from('mosque_books')
-        .select('id, edition, publisher, books!inner(title, author, category, extra_info, book_image), mosques!inner(mosque_id, mosque_name, mosque_governorate, mosque_city, country)')
+        .select('id, edition, publisher, books!inner(book_id, title, author, category, extra_info, book_image), mosques!inner(mosque_id, mosque_name, mosque_governorate, mosque_city, country)')
         .eq('id', entryId)
         .eq('status', 'approved')
         .maybeSingle()
@@ -51,7 +125,7 @@ export default function BookPage() {
 
       const row = data as unknown as BookRow
       setBook({
-        entry_id: row.id, title: row.books.title, author: row.books.author,
+        entry_id: row.id, book_id: row.books.book_id, title: row.books.title, author: row.books.author,
         category: row.books.category, extra_info: row.books.extra_info,
         edition: row.edition, publisher: row.publisher, book_image: row.books.book_image ?? null,
         mosque_id: row.mosques.mosque_id, mosque_name: row.mosques.mosque_name,
@@ -120,6 +194,53 @@ export default function BookPage() {
               </section>
             )}
 
+            {/* ── Admin controls (issue 2) ── */}
+            {isAdmin && (
+              <section className="mosque-page-section">
+                {adminNotice && <p className={`submit-notice ${adminNotice.type}`} role="alert">{adminNotice.text}</p>}
+                {!editing ? (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="button" className="secondary-button" onClick={startEdit}>تعديل بيانات الكتاب</button>
+                    <button type="button" className="secondary-button" style={{ color: '#b52525' }} onClick={() => setConfirmingDelete(true)}>حذف هذا التسجيل</button>
+                  </div>
+                ) : (
+                  <div className="submit-grid">
+                    <label className="submit-label">
+                      عنوان الكتاب
+                      <input className="submit-input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                    </label>
+                    <label className="submit-label">
+                      اسم المؤلف
+                      <input className="submit-input" value={editAuthor} onChange={(e) => setEditAuthor(e.target.value)} />
+                    </label>
+                    <label className="submit-label">
+                      رقم الطبعة
+                      <input className="submit-input" value={editEdition} onChange={(e) => setEditEdition(e.target.value)} />
+                    </label>
+                    <label className="submit-label">
+                      دار النشر
+                      <input className="submit-input" value={editPublisher} onChange={(e) => setEditPublisher(e.target.value)} />
+                    </label>
+                    <label className="submit-label">
+                      التصنيف
+                      <select className="submit-input" value={editCategory} onChange={(e) => setEditCategory(e.target.value as Category | '')}>
+                        <option value="">بدون تصنيف</option>
+                        {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </label>
+                    <label className="submit-label" style={{ gridColumn: '1 / -1' }}>
+                      ملاحظات إضافية
+                      <textarea className="submit-input submit-textarea" value={editExtraInfo} onChange={(e) => setEditExtraInfo(e.target.value)} />
+                    </label>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'end' }}>
+                      <button type="button" className="primary-button" disabled={savingEdit} onClick={() => void saveEdit()}>{savingEdit ? 'جارٍ الحفظ...' : 'حفظ'}</button>
+                      <button type="button" className="secondary-button" onClick={() => setEditing(false)}>إلغاء</button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
             <section className="mosque-page-section">
               <h2>متاح في</h2>
               <a className="detail-mosque" href={`/mosques/${book.mosque_id}`}>
@@ -130,6 +251,19 @@ export default function BookPage() {
           </>
         )}
       </div>
+
+      {confirmingDelete && book && (
+        <div className="request-modal-backdrop" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) setConfirmingDelete(false) }}>
+          <div className="request-modal">
+            <h2>حذف تسجيل الكتاب</h2>
+            <p>سيتم حذف <strong>{book.title}</strong> من هذا المسجد. لا يمكن التراجع عن هذا الإجراء.</p>
+            <div className="modal-actions">
+              <button className="secondary-action" onClick={() => setConfirmingDelete(false)}>إلغاء</button>
+              <button className="reject-action" disabled={deleting} onClick={() => void deleteEntry()}>{deleting ? 'جارٍ الحذف...' : 'تأكيد الحذف'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

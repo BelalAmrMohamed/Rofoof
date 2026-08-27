@@ -157,6 +157,11 @@ export default function BrowsePage() {
   // If we arrived here via a header search submitted from another page
   // (which navigates to "/?q=..."), drop the query param from the URL once
   // consumed so it doesn't linger or get re-applied on a later manual visit.
+  // Remember that this load came from a header search so we can, once data
+  // loads, search across both books and mosques rather than only the
+  // currently-active view (see issue 4: header search only searches one
+  // type at a time but doesn't say so).
+  const [cameFromHeaderSearch] = useState(() => Boolean(window.location.search))
   useEffect(() => {
     if (!window.location.search) return
     window.history.replaceState(null, '', window.location.pathname)
@@ -324,6 +329,28 @@ export default function BrowsePage() {
   const results = view === 'books' ? filteredBooks : filteredMosques
   const selectedMosqueBooks = useMemo(() => selectedMosque ? books.filter((b) => b.mosque_id === selectedMosque.mosque_id) : [], [books, selectedMosque])
 
+  // Issue 4: a header search should look across both books and mosques, not
+  // just whichever view happens to be active (which defaults to 'books').
+  // Once data has loaded, if we arrived via a header search (?q=...) and the
+  // active view has no matches while the other view does, switch to the
+  // view that actually has results — so a mosque-name search doesn't land
+  // on an empty "books" list.
+  useEffect(() => {
+    if (!cameFromHeaderSearch || loading || !query.trim()) return
+    const t = window.setTimeout(() => {
+      if (view === 'books' && filteredBooks.length === 0 && filteredMosques.length > 0) {
+        setView('mosques')
+      } else if (view === 'mosques' && filteredMosques.length === 0 && filteredBooks.length > 0) {
+        setView('books')
+      }
+    }, 0)
+    return () => window.clearTimeout(t)
+    // Only run this reconciliation once data is loaded and query is settled —
+    // deliberately not re-running on every filteredBooks/filteredMosques
+    // change to avoid fighting the user's manual view toggle afterwards.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameFromHeaderSearch, loading, query])
+
   const updateCountry = (val: string) => { setFilterCountry(val); setGovernorate('all'); setCity('all') }
   const updateGovernorate = (val: string) => { setGovernorate(val); setCity('all') }
   const resetFilters = () => { setQuery(''); setCategory('all'); setFilterCountry('all'); setGovernorate('all'); setCity('all') }
@@ -353,6 +380,19 @@ export default function BrowsePage() {
     setModal(null)
     setPageMeta({ title: 'على رفوف المساجد — تصفح الكتب والمساجد', description: 'اكتشف الكتب المتاحة على رفوف المساجد القريبة منك.', jsonLd: buildLibrarySchema() })
   }
+
+  // Track admin status (issue 2) so the Browse dialogs can surface a hint
+  // pointing admins to the full-page edit/delete controls, without
+  // duplicating the edit form inside the compact dialog.
+  const [isAdmin, setIsAdmin] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    if (!supabase || !user) { const t = window.setTimeout(() => setIsAdmin(false), 0); return () => window.clearTimeout(t) }
+    supabase.from('users').select('role').eq('user_id', user.id).maybeSingle().then(({ data }) => {
+      if (!cancelled) setIsAdmin(data?.role === 'admin')
+    })
+    return () => { cancelled = true }
+  }, [user])
 
   const filterBarRef = useRef<HTMLDivElement>(null)
 
@@ -507,6 +547,7 @@ export default function BrowsePage() {
       {modal === 'book' && selectedBook && (
         <Dialog title="تفاصيل الكتاب" onClose={closeModal}>
           <DetailBook book={selectedBook} onMosque={() => { const m = filteredMosques.find((x) => x.mosque_id === selectedBook.mosque_id) ?? { mosque_id: selectedBook.mosque_id, mosque_name: selectedBook.mosque_name, mosque_governorate: selectedBook.mosque_governorate, mosque_city: selectedBook.mosque_city, mosque_country: selectedBook.mosque_country, mosque_lat: null, mosque_lng: null, mosque_images: [], book_count: 0 }; openMosque(m) }} />
+          {isAdmin && <p className="dialog-note">أنت مدير — يمكنك تعديل أو حذف هذا الكتاب من الصفحة الكاملة.</p>}
           <a className="detail-full-page-link" href={`/books/${selectedBook.entry_id}`}>
             عرض الصفحة الكاملة
             <svg aria-hidden="true" width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>
@@ -516,6 +557,7 @@ export default function BrowsePage() {
       {modal === 'mosque' && selectedMosque && (
         <Dialog title={mosqueLabel(selectedMosque.mosque_name, selectedMosque.mosque_city)} onClose={closeModal}>
           <DetailMosque mosque={selectedMosque} books={selectedMosqueBooks} location={location} onBook={openBook} />
+          {isAdmin && <p className="dialog-note">أنت مدير — يمكنك تعديل أو حذف هذا المسجد من الصفحة الكاملة.</p>}
           <a className="detail-full-page-link" href={`/mosques/${selectedMosque.mosque_id}`}>
             عرض الصفحة الكاملة (مع الخريطة وكل الصور)
             <svg aria-hidden="true" width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>

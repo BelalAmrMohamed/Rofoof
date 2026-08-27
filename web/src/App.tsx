@@ -7,6 +7,7 @@ import ProfilePage from './features/profile/ProfilePage'
 import AboutPage from './features/about/AboutPage'
 import MosquePage from './features/mosque/MosquePage'
 import BookPage from './features/book/BookPage'
+import AdminFeedbackPage from './features/admin/AdminFeedbackPage'
 import './App.css'
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   if (pathname === '/login') return <LoginPage />
   if (pathname === '/submit') return <SubmitPage />
   if (pathname === '/requests') return <RequestsPage />
+  if (pathname === '/admin/feedback') return <AdminFeedbackPage />
   if (pathname === '/profile') return <ProfilePage />
   if (pathname === '/about') return <AboutPage />
   if (pathname.startsWith('/mosques/')) return <MosquePage />

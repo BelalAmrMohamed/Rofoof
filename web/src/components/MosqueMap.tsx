@@ -12,7 +12,7 @@ import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet'
 export function MosqueMap({ lat, lng, label, className = '' }: { lat: number; lng: number; label: string; className?: string }) {
   return (
     <div className={`mosque-map ${className}`}>
-      <MapContainer center={[lat, lng]} zoom={15} scrollWheelZoom={false} className="mosque-map-container">
+      <MapContainer center={[lat, lng]} zoom={15} scrollWheelZoom={true} className="mosque-map-container">
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <CircleMarker center={[lat, lng]} radius={9} pathOptions={{ color: '#0b1f14', fillColor: '#c49a3c', fillOpacity: 1, weight: 3 }}>
           <Popup>{label}</Popup>

@@ -62,6 +62,15 @@ export default function SubmitPage() {
   const [notice, setNotice] = useState<Notice>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  // Volunteer request state — for logged-in visitors who want to become
+  // volunteers. Role and any existing request status are loaded once the
+  // user is known; volunteers/admins never see this section.
+  const [userRole, setUserRole] = useState<'visitor' | 'volunteer' | 'admin' | null>(null)
+  const [volunteerRequestStatus, setVolunteerRequestStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null)
+  const [volunteerMessage, setVolunteerMessage] = useState('')
+  const [volunteerSubmitting, setVolunteerSubmitting] = useState(false)
+  const [volunteerNotice, setVolunteerNotice] = useState<Notice>(null)
+
   // SEO
   useEffect(() => {
     setPageMeta({
@@ -84,6 +93,51 @@ export default function SubmitPage() {
         setMosques(list.map((m) => ({ ...m, mosque_country: m.country ?? 'مصر' })))
       })
   }, [])
+
+  // Load the current user's role and any existing volunteer request, so a
+  // visitor sees the "ask to volunteer" prompt while a volunteer/admin (or
+  // someone with a pending/decided request) sees the right state instead.
+  useEffect(() => {
+    let cancelled = false
+    if (!supabase || !user) {
+      const t = window.setTimeout(() => { setUserRole(null); setVolunteerRequestStatus(null) }, 0)
+      return () => window.clearTimeout(t)
+    }
+    async function load() {
+      if (!supabase || !user) return
+      const profileResult = await supabase.from('users').select('role').eq('user_id', user.id).maybeSingle()
+      if (cancelled) return
+      setUserRole((profileResult.data?.role as 'visitor' | 'volunteer' | 'admin' | undefined) ?? 'visitor')
+
+      const requestResult = await supabase.from('volunteer_requests')
+        .select('status')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (cancelled) return
+      setVolunteerRequestStatus((requestResult.data?.status as 'pending' | 'approved' | 'rejected' | undefined) ?? null)
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [user])
+
+  async function requestToVolunteer() {
+    if (!supabase || !user) return
+    setVolunteerSubmitting(true)
+    setVolunteerNotice(null)
+    const { error } = await supabase.from('volunteer_requests').insert({
+      user_id: user.id,
+      message: volunteerMessage.trim() || null,
+    })
+    setVolunteerSubmitting(false)
+    if (error) {
+      setVolunteerNotice({ type: 'error', text: 'تعذر إرسال الطلب. حاول مرة أخرى.' })
+      return
+    }
+    setVolunteerRequestStatus('pending')
+    setVolunteerNotice({ type: 'success', text: 'تم إرسال طلبك وسيراجعه المدير قريباً.' })
+  }
 
   // When user selects a governorate, derive cities. Pure derivation from
   // governorate/country/mosques — a useMemo, not an effect, since nothing
@@ -313,6 +367,35 @@ export default function SubmitPage() {
                   <span>🌐</span>
                   <span>تسجيل الدخول غير مطلوب — يمكنك إضافة كتاب مباشرة وسيراجعه المشرف.</span>
                   <a href="/login?redirect=/submit">تسجيل الدخول</a>
+                </div>
+              )}
+
+              {/* ── Ask to become a volunteer (visitors only) ── */}
+              {!authLoading && user && userRole === 'visitor' && (
+                <div className="submit-guest-notice" role="note">
+                  {volunteerRequestStatus === 'pending' && <><span>⏳</span><span>طلبك للتطوع قيد المراجعة — سنُعلمك عند الرد عليه.</span></>}
+                  {volunteerRequestStatus === 'rejected' && <><span>ℹ️</span><span>تم رفض طلبك السابق للتطوع. يمكنك المحاولة مرة أخرى.</span></>}
+                  {(volunteerRequestStatus === null || volunteerRequestStatus === 'rejected') && (
+                    <>
+                      {volunteerRequestStatus === null && <><span>🙋</span><span>تريد إضافاتك أن تُعتمد فوراً دون مراجعة؟ اطلب الانضمام كمتطوع.</span></>}
+                      <details className="submit-volunteer-details">
+                        <summary>{volunteerRequestStatus === 'rejected' ? 'إعادة المحاولة' : 'طلب التطوع'}</summary>
+                        <label className="submit-label" style={{ marginTop: 8 }}>
+                          رسالة (اختياري)
+                          <textarea
+                            className="submit-input submit-textarea"
+                            value={volunteerMessage}
+                            onChange={(e) => setVolunteerMessage(e.target.value)}
+                            placeholder="مثلاً: أزور عدة مساجد أسبوعياً وأريد المساعدة في الفهرسة"
+                          />
+                        </label>
+                        {volunteerNotice && <p role="alert" className={`submit-notice ${volunteerNotice.type}`}>{volunteerNotice.text}</p>}
+                        <button type="button" className="submit-cta" disabled={volunteerSubmitting} onClick={() => void requestToVolunteer()}>
+                          {volunteerSubmitting ? 'جارٍ الإرسال...' : 'إرسال طلب التطوع'}
+                        </button>
+                      </details>
+                    </>
+                  )}
                 </div>
               )}
             </header>

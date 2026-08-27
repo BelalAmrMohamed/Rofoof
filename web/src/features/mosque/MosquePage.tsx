@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { SiteNavigation } from '../../components/SiteNavigation'
 import { MosqueMap } from '../../components/MosqueMap'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth.ts'
 import { buildMosqueSchema, setPageMeta } from '../../lib/seo'
 
 type Category = 'فقه' | 'حديث' | 'تفسير' | 'سيرة' | 'عقيدة' | 'تزكية' | 'أدب' | 'تاريخ' | 'أخرى'
@@ -35,12 +36,67 @@ function getMosqueIdFromPath() {
 }
 
 export default function MosquePage() {
+  const { user } = useAuth()
   const [mosqueId] = useState(getMosqueIdFromPath)
   const [mosque, setMosque] = useState<MosqueDetail | null>(null)
   const [books, setBooks] = useState<MosqueBook[]>([])
   const [activeImage, setActiveImage] = useState(0)
   const [loading, setLoading] = useState(!!mosqueId)
   const [notFound, setNotFound] = useState(!mosqueId)
+
+  // Admin edit/delete (issue 2). isAdmin is checked once the user is known;
+  // edit/delete controls only render for role = 'admin'.
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editGov, setEditGov] = useState('')
+  const [editCity, setEditCity] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [adminNotice, setAdminNotice] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    if (!supabase || !user) { const t = window.setTimeout(() => setIsAdmin(false), 0); return () => window.clearTimeout(t) }
+    supabase.from('users').select('role').eq('user_id', user.id).maybeSingle().then(({ data }) => {
+      if (!cancelled) setIsAdmin(data?.role === 'admin')
+    })
+    return () => { cancelled = true }
+  }, [user])
+
+  function startEdit() {
+    if (!mosque) return
+    setEditName(mosque.mosque_name ?? '')
+    setEditGov(mosque.mosque_governorate)
+    setEditCity(mosque.mosque_city)
+    setAdminNotice(null)
+    setEditing(true)
+  }
+
+  async function saveEdit() {
+    if (!supabase || !mosque) return
+    setSavingEdit(true)
+    const { error } = await supabase.from('mosques').update({
+      mosque_name: editName.trim() || null,
+      mosque_governorate: editGov.trim(),
+      mosque_city: editCity.trim(),
+    }).eq('mosque_id', mosque.mosque_id)
+    setSavingEdit(false)
+    if (error) { setAdminNotice({ type: 'error', text: 'تعذر حفظ التعديلات.' }); return }
+    setMosque({ ...mosque, mosque_name: editName.trim() || null, mosque_governorate: editGov.trim(), mosque_city: editCity.trim() })
+    setEditing(false)
+    setAdminNotice({ type: 'success', text: 'تم تحديث بيانات المسجد.' })
+  }
+
+  async function deleteMosque() {
+    if (!supabase || !mosque) return
+    setDeleting(true)
+    const { error } = await supabase.from('mosques').delete().eq('mosque_id', mosque.mosque_id)
+    setDeleting(false)
+    if (error) { setAdminNotice({ type: 'error', text: 'تعذر حذف المسجد.' }); return }
+    window.location.assign('/')
+  }
 
   useEffect(() => {
     if (!mosqueId || !supabase) return
@@ -154,6 +210,38 @@ export default function MosquePage() {
               <strong>{books.length} كتاب مُسجَّل</strong>
             </div>
 
+            {/* ── Admin controls (issue 2) ── */}
+            {isAdmin && (
+              <section className="mosque-page-section">
+                {adminNotice && <p className={`submit-notice ${adminNotice.type}`} role="alert">{adminNotice.text}</p>}
+                {!editing ? (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="button" className="secondary-button" onClick={startEdit}>تعديل بيانات المسجد</button>
+                    <button type="button" className="secondary-button" style={{ color: '#b52525' }} onClick={() => setConfirmingDelete(true)}>حذف المسجد</button>
+                  </div>
+                ) : (
+                  <div className="submit-grid">
+                    <label className="submit-label">
+                      اسم المسجد
+                      <input className="submit-input" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="اسم المسجد (اختياري)" />
+                    </label>
+                    <label className="submit-label">
+                      المحافظة
+                      <input className="submit-input" value={editGov} onChange={(e) => setEditGov(e.target.value)} />
+                    </label>
+                    <label className="submit-label">
+                      المدينة
+                      <input className="submit-input" value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                    </label>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'end' }}>
+                      <button type="button" className="primary-button" disabled={savingEdit} onClick={() => void saveEdit()}>{savingEdit ? 'جارٍ الحفظ...' : 'حفظ'}</button>
+                      <button type="button" className="secondary-button" onClick={() => setEditing(false)}>إلغاء</button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
             {/* ── Map ── */}
             <section className="mosque-page-section">
               <h2>الموقع على الخريطة</h2>
@@ -186,6 +274,19 @@ export default function MosquePage() {
           </>
         )}
       </div>
+
+      {confirmingDelete && mosque && (
+        <div className="request-modal-backdrop" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) setConfirmingDelete(false) }}>
+          <div className="request-modal">
+            <h2>حذف المسجد</h2>
+            <p>سيتم حذف <strong>{mosqueLabel(mosque.mosque_name, mosque.mosque_city)}</strong> وكل الكتب والصور المرتبطة به. لا يمكن التراجع عن هذا الإجراء.</p>
+            <div className="modal-actions">
+              <button className="secondary-action" onClick={() => setConfirmingDelete(false)}>إلغاء</button>
+              <button className="reject-action" disabled={deleting} onClick={() => void deleteMosque()}>{deleting ? 'جارٍ الحذف...' : 'تأكيد الحذف'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
