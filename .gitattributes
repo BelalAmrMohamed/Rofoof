@@ -1,0 +1,8 @@
+# Run `git archive --format=zip --output=rofoof.zip HEAD` to export.
+.github/ export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
+public/ export-ignore
+
+# Temporarily ignore
+mobile/
