@@ -1,7 +1,8 @@
 // web/src/features/mosque/MosquePage.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { SiteNavigation } from '../../components/SiteNavigation'
-import { MosqueMap } from '../../components/MosqueMap'
+import { MosqueMap, type MosqueMapPoint } from '../../components/MosqueMap'
+import { fetchAllMosquesForMap } from '../../lib/mosques'
 import { MapPicker } from '../onboarding/components/MapPicker'
 import type { GeoPoint } from '../onboarding/types/location'
 import { supabase } from '../../lib/supabase'
@@ -50,6 +51,11 @@ export default function MosquePage() {
   const [activeImage, setActiveImage] = useState(0)
   const [loading, setLoading] = useState(!!mosqueId)
   const [notFound, setNotFound] = useState(!mosqueId)
+
+  // All mosques with coordinates, for the "view every mosque on one map"
+  // upgrade — fetched independently of the single-mosque detail load above
+  // so a slow/failed map fetch never blocks the page's main content.
+  const [mapPoints, setMapPoints] = useState<MosqueMapPoint[]>([])
 
   // Admin edit/delete (issue 2). isAdmin is checked once the user is known;
   // edit/delete controls only render for role = 'admin'.
@@ -238,6 +244,23 @@ export default function MosquePage() {
   }, [mosqueId])
 
   useEffect(() => {
+    let cancelled = false
+    fetchAllMosquesForMap()
+      .then((mosques) => {
+        if (cancelled) return
+        setMapPoints(mosques.map((m) => ({
+          id: m.mosque_id,
+          lat: m.mosque_lat,
+          lng: m.mosque_lng,
+          label: mosqueLabel(m.mosque_name, m.mosque_city),
+          image: m.image,
+        })))
+      })
+      .catch(() => { /* map is a bonus feature — a failed fetch just means fewer markers, not a broken page */ })
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
     if (!mosque) return
     setPageMeta({
       title: `${mosqueLabel(mosque.mosque_name, mosque.mosque_city)} — على رفوف المساجد`,
@@ -249,6 +272,19 @@ export default function MosquePage() {
       canonical: `https://rofoof-almasajid.vercel.app/mosques/${mosque.mosque_id}`,
     })
   }, [mosque, books.length])
+
+  // The currently-viewed mosque's own freshly-fetched name/image always
+  // takes priority over its entry (if any) in the separately-fetched
+  // mapPoints list, so the focused marker's popup never lags behind an
+  // in-progress admin edit or shows a stale cover photo.
+  const mergedMapPoints = useMemo<MosqueMapPoint[]>(() => {
+    if (!mosque) return mapPoints
+    const focusPoint: MosqueMapPoint = {
+      id: mosque.mosque_id, lat: mosque.mosque_lat, lng: mosque.mosque_lng,
+      label: mosqueLabel(mosque.mosque_name, mosque.mosque_city), image: mosque.images[0] ?? null,
+    }
+    return [focusPoint, ...mapPoints.filter((p) => p.id !== mosque.mosque_id)]
+  }, [mosque, mapPoints])
 
   return (
     <div className="mosque-page" dir="rtl">
@@ -392,13 +428,8 @@ export default function MosquePage() {
 
             {/* ── Map ── */}
             <section className="mosque-page-section">
-              <h2>الموقع على الخريطة</h2>
-              <MosqueMap
-                lat={mosque.mosque_lat}
-                lng={mosque.mosque_lng}
-                label={mosqueLabel(mosque.mosque_name, mosque.mosque_city)}
-                image={mosque.images[0] ?? null}
-              />
+              <h2>هذا المسجد وباقي المساجد على الخريطة</h2>
+              <MosqueMap points={mergedMapPoints} focusMosqueId={mosque.mosque_id} />
             </section>
 
             {/* ── Books ── */}
