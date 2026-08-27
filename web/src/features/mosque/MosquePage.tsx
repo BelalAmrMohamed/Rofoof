@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { SiteNavigation } from '../../components/SiteNavigation'
 import { MosqueMap } from '../../components/MosqueMap'
+import { MapPicker } from '../onboarding/components/MapPicker'
+import type { GeoPoint } from '../onboarding/types/location'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth.ts'
 import { buildMosqueSchema, setPageMeta } from '../../lib/seo'
@@ -21,6 +23,11 @@ type MosqueDetail = {
   mosque_lng: number
   images: string[]
 }
+
+// Image rows carry their own `id` (mosque_images.id) so we can
+// add/remove/reorder them individually, separate from the flat `images`
+// URL list used for the public gallery display above.
+type MosqueImageRow = { id: string; image_url: string; sort_order: number }
 
 type MosqueBook = {
   entry_id: string; title: string; author: string | null; category: Category | null
@@ -51,10 +58,18 @@ export default function MosquePage() {
   const [editName, setEditName] = useState('')
   const [editGov, setEditGov] = useState('')
   const [editCity, setEditCity] = useState('')
+  const [editPoint, setEditPoint] = useState<GeoPoint | null>(null)
   const [savingEdit, setSavingEdit] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [adminNotice, setAdminNotice] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
+
+  // Admin image management (issue 2): rows loaded straight from
+  // mosque_images so each has an id to target for delete/reorder.
+  const [imageRows, setImageRows] = useState<MosqueImageRow[]>([])
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [removingImageId, setRemovingImageId] = useState<string | null>(null)
+  const [reorderingImage, setReorderingImage] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -70,6 +85,7 @@ export default function MosquePage() {
     setEditName(mosque.mosque_name ?? '')
     setEditGov(mosque.mosque_governorate)
     setEditCity(mosque.mosque_city)
+    setEditPoint({ lat: mosque.mosque_lat, lng: mosque.mosque_lng })
     setAdminNotice(null)
     setEditing(true)
   }
@@ -81,12 +97,69 @@ export default function MosquePage() {
       mosque_name: editName.trim() || null,
       mosque_governorate: editGov.trim(),
       mosque_city: editCity.trim(),
+      ...(editPoint ? { mosque_lat: editPoint.lat, mosque_lng: editPoint.lng } : {}),
     }).eq('mosque_id', mosque.mosque_id)
     setSavingEdit(false)
     if (error) { setAdminNotice({ type: 'error', text: 'تعذر حفظ التعديلات.' }); return }
-    setMosque({ ...mosque, mosque_name: editName.trim() || null, mosque_governorate: editGov.trim(), mosque_city: editCity.trim() })
+    setMosque({
+      ...mosque, mosque_name: editName.trim() || null, mosque_governorate: editGov.trim(), mosque_city: editCity.trim(),
+      ...(editPoint ? { mosque_lat: editPoint.lat, mosque_lng: editPoint.lng } : {}),
+    })
     setEditing(false)
     setAdminNotice({ type: 'success', text: 'تم تحديث بيانات المسجد.' })
+  }
+
+  function syncGalleryFromRows(rows: MosqueImageRow[]) {
+    setMosque((m) => m ? { ...m, images: rows.map((r) => r.image_url) } : m)
+  }
+
+  async function handleAddImage(file: File | null) {
+    if (!file || !supabase || !mosque) return
+    setUploadingImage(true)
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('mosque-images')
+      .upload(path, file, { contentType: file.type, upsert: false })
+    if (uploadError) { setUploadingImage(false); setAdminNotice({ type: 'error', text: 'تعذر رفع الصورة.' }); return }
+    const { data: urlData } = supabase.storage.from('mosque-images').getPublicUrl(uploadData.path)
+    const nextSortOrder = imageRows.length ? Math.max(...imageRows.map((r) => r.sort_order)) + 1 : 0
+    const { data: inserted, error: insertError } = await supabase.from('mosque_images')
+      .insert({ mosque_id: mosque.mosque_id, image_url: urlData.publicUrl, sort_order: nextSortOrder })
+      .select('id, image_url, sort_order').single()
+    setUploadingImage(false)
+    if (insertError || !inserted) { setAdminNotice({ type: 'error', text: 'تعذر إضافة الصورة.' }); return }
+    const nextRows = [...imageRows, inserted as MosqueImageRow]
+    setImageRows(nextRows)
+    syncGalleryFromRows(nextRows)
+  }
+
+  async function handleRemoveImage(id: string) {
+    if (!supabase) return
+    setRemovingImageId(id)
+    const { error } = await supabase.from('mosque_images').delete().eq('id', id)
+    setRemovingImageId(null)
+    if (error) { setAdminNotice({ type: 'error', text: 'تعذر حذف الصورة.' }); return }
+    const nextRows = imageRows.filter((r) => r.id !== id)
+    setImageRows(nextRows)
+    syncGalleryFromRows(nextRows)
+    setActiveImage(0)
+  }
+
+  async function handleMoveImage(id: string, direction: -1 | 1) {
+    if (!supabase) return
+    const idx = imageRows.findIndex((r) => r.id === id)
+    const swapIdx = idx + direction
+    if (idx < 0 || swapIdx < 0 || swapIdx >= imageRows.length) return
+    const reordered = [...imageRows]
+    ;[reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]]
+    const withSortOrder = reordered.map((r, i) => ({ ...r, sort_order: i }))
+    setReorderingImage(true)
+    const results = await Promise.all(withSortOrder.map((r) => supabase.from('mosque_images').update({ sort_order: r.sort_order }).eq('id', r.id)))
+    setReorderingImage(false)
+    if (results.some((r) => r.error)) { setAdminNotice({ type: 'error', text: 'تعذر إعادة ترتيب الصور.' }); return }
+    setImageRows(withSortOrder)
+    syncGalleryFromRows(withSortOrder)
   }
 
   async function deleteMosque() {
@@ -109,7 +182,7 @@ export default function MosquePage() {
           .eq('mosque_id', mosqueId)
           .maybeSingle(),
         supabase.from('mosque_images')
-          .select('image_url')
+          .select('id, image_url, sort_order')
           .eq('mosque_id', mosqueId)
           .order('sort_order', { ascending: true }),
         supabase.from('mosque_books')
@@ -121,7 +194,9 @@ export default function MosquePage() {
       if (!mosqueRes.data) { setNotFound(true); setLoading(false); return }
 
       const m = mosqueRes.data as { mosque_id: string; mosque_name: string | null; mosque_governorate: string; mosque_city: string; country: string | null; mosque_lat: number; mosque_lng: number; mosque_image: string | null }
-      const images = (imagesRes.data ?? []).map((r: { image_url: string }) => r.image_url)
+      const rows = (imagesRes.data ?? []) as MosqueImageRow[]
+      const images = rows.map((r) => r.image_url)
+      setImageRows(rows)
       setMosque({
         mosque_id: m.mosque_id, mosque_name: m.mosque_name,
         mosque_governorate: m.mosque_governorate, mosque_city: m.mosque_city,
@@ -214,6 +289,31 @@ export default function MosquePage() {
             {isAdmin && (
               <section className="mosque-page-section">
                 {adminNotice && <p className={`submit-notice ${adminNotice.type}`} role="alert">{adminNotice.text}</p>}
+
+                {/* Image manager — add / remove / reorder, independent of the
+                    name/location edit form below. */}
+                <div style={{ marginBottom: 16 }}>
+                  <h2 style={{ marginBottom: 8 }}>صور المسجد</h2>
+                  {imageRows.length > 0 && (
+                    <div className="mosque-gallery-thumbs" style={{ marginBottom: 8 }}>
+                      {imageRows.map((row, i) => (
+                        <div key={row.id} style={{ position: 'relative', flexShrink: 0 }}>
+                          <img src={row.image_url} alt="" style={{ width: 68, height: 52, borderRadius: 10, objectFit: 'cover', border: '1.5px solid var(--stone-200)' }} />
+                          <div style={{ display: 'flex', gap: 3, marginTop: 3, justifyContent: 'center' }}>
+                            <button type="button" disabled={i === 0 || reorderingImage} onClick={() => void handleMoveImage(row.id, -1)} aria-label="نقل لليمين" title="نقل لليمين" style={{ padding: '2px 6px', fontSize: 11 }}>›</button>
+                            <button type="button" disabled={removingImageId === row.id} onClick={() => void handleRemoveImage(row.id)} aria-label="حذف الصورة" title="حذف الصورة" style={{ padding: '2px 6px', fontSize: 11, color: '#b52525' }}>✕</button>
+                            <button type="button" disabled={i === imageRows.length - 1 || reorderingImage} onClick={() => void handleMoveImage(row.id, 1)} aria-label="نقل لليسار" title="نقل لليسار" style={{ padding: '2px 6px', fontSize: 11 }}>‹</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <label className="secondary-button" style={{ display: 'inline-block', cursor: 'pointer' }}>
+                    {uploadingImage ? 'جارٍ الرفع...' : '+ إضافة صورة'}
+                    <input type="file" accept="image/*" disabled={uploadingImage} style={{ display: 'none' }} onChange={(e) => { void handleAddImage(e.target.files?.[0] ?? null); e.target.value = '' }} />
+                  </label>
+                </div>
+
                 {!editing ? (
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button type="button" className="secondary-button" onClick={startEdit}>تعديل بيانات المسجد</button>
@@ -232,6 +332,10 @@ export default function MosquePage() {
                     <label className="submit-label">
                       المدينة
                       <input className="submit-input" value={editCity} onChange={(e) => setEditCity(e.target.value)} />
+                    </label>
+                    <label className="submit-label" style={{ gridColumn: '1 / -1' }}>
+                      الموقع على الخريطة
+                      <MapPicker point={editPoint} onPick={setEditPoint} centerHint={{ lat: mosque.mosque_lat, lng: mosque.mosque_lng }} />
                     </label>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'end' }}>
                       <button type="button" className="primary-button" disabled={savingEdit} onClick={() => void saveEdit()}>{savingEdit ? 'جارٍ الحفظ...' : 'حفظ'}</button>

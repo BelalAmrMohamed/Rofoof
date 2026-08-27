@@ -133,6 +133,15 @@ export default function BrowsePage() {
   const [location, setLocation] = useState<Location | null>(null)
   const [locationDraft, setLocationDraft] = useState<Location>({ country: 'مصر', governorate: '', city: '' })
   const [locationDraftPoint, setLocationDraftPoint] = useState<GeoPoint | null>(null)
+  // Only pre-fill governorate/city from the saved profile once per page
+  // visit, and never again after the user has touched the filters
+  // (including an explicit "reset"). Without this, the profile prefill
+  // reruns on every mount — e.g. navigating away and back — and silently
+  // reintroduces a governorate/city with no matching data right after the
+  // user reset filters to clear it, making "Reset filters" look like it
+  // does nothing.
+  const profileLocationAppliedRef = useRef(false)
+  const filtersTouchedRef = useRef(false)
 
   // Modals
   const [modal, setModal] = useState<'location' | 'book' | 'mosque' | null>(null)
@@ -232,11 +241,14 @@ export default function BrowsePage() {
 
         setBooks(flatBooks); setMosquesRaw(flatMosques)
 
-        // Pre-fill location from user profile
-        if (user && supabase) {
+        // Pre-fill location from user profile — only once per page visit,
+        // and never if the user has already touched the filters (see
+        // profileLocationAppliedRef / filtersTouchedRef above).
+        if (user && supabase && !profileLocationAppliedRef.current && !filtersTouchedRef.current) {
           const { data: profile } = await supabase.from('users')
             .select('governorate, city, country').eq('user_id', user.id).maybeSingle()
-          if (profile?.governorate && profile?.city && !cancelled) {
+          if (profile?.governorate && profile?.city && !cancelled && !filtersTouchedRef.current) {
+            profileLocationAppliedRef.current = true
             setLocation({ country: profile.country ?? 'مصر', governorate: profile.governorate, city: profile.city })
             setFilterCountry(profile.country ?? 'مصر')
             setGovernorate(profile.governorate)
@@ -351,9 +363,9 @@ export default function BrowsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameFromHeaderSearch, loading, query])
 
-  const updateCountry = (val: string) => { setFilterCountry(val); setGovernorate('all'); setCity('all') }
-  const updateGovernorate = (val: string) => { setGovernorate(val); setCity('all') }
-  const resetFilters = () => { setQuery(''); setCategory('all'); setFilterCountry('all'); setGovernorate('all'); setCity('all') }
+  const updateCountry = (val: string) => { filtersTouchedRef.current = true; setFilterCountry(val); setGovernorate('all'); setCity('all') }
+  const updateGovernorate = (val: string) => { filtersTouchedRef.current = true; setGovernorate(val); setCity('all') }
+  const resetFilters = () => { filtersTouchedRef.current = true; setQuery(''); setCategory('all'); setFilterCountry('all'); setGovernorate('all'); setCity('all') }
 
   const openBook = (book: LiveBook) => {
     recordActivity(book)
@@ -467,7 +479,7 @@ export default function BrowsePage() {
               {governorates.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
             {governorate !== 'all' && (
-              <select value={city} onChange={(e) => setCity(e.target.value)} aria-label="المدينة" className="filter-select">
+              <select value={city} onChange={(e) => { filtersTouchedRef.current = true; setCity(e.target.value) }} aria-label="المدينة" className="filter-select">
                 <option value="all">كل المدن</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -525,6 +537,7 @@ export default function BrowsePage() {
           <div className="dialog-actions">
             <button className="secondary-button" onClick={closeModal}>إلغاء</button>
             <button className="primary-button" onClick={() => { 
+              filtersTouchedRef.current = true
               setLocation(locationDraft)
               setGovernorate(locationDraft.governorate || 'all')
               setCity(locationDraft.city || 'all')
@@ -577,7 +590,9 @@ function proximity(location: Location | null, governorate: string) {
 function BookCard({ book, location, onClick }: { book: LiveBook; location: Location | null; onClick: () => void }) {
   return (
     <article className="book-card" onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick() }} tabIndex={0}>
-      <div className={`book-avatar ${catClass(book.category)}`}>{book.title[0]}</div>
+      <div className={`book-avatar ${catClass(book.category)}`}>
+        {book.book_image ? <img src={book.book_image} alt="" /> : book.title[0]}
+      </div>
       <div className="book-info">
         {book.category && <span className={`category-badge ${catClass(book.category)}`}>{book.category}</span>}
         <h3>{book.title}</h3>

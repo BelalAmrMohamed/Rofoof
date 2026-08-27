@@ -46,6 +46,9 @@ export default function BookPage() {
   const [editEdition, setEditEdition] = useState('')
   const [editPublisher, setEditPublisher] = useState('')
   const [editExtraInfo, setEditExtraInfo] = useState('')
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null)
+  const [removeImage, setRemoveImage] = useState(false)
   const [savingEdit, setSavingEdit] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -68,19 +71,46 @@ export default function BookPage() {
     setEditEdition(book.edition ?? '')
     setEditPublisher(book.publisher ?? '')
     setEditExtraInfo(book.extra_info ?? '')
+    setEditImageFile(null)
+    setEditImagePreview(null)
+    setRemoveImage(false)
     setAdminNotice(null)
     setEditing(true)
+  }
+
+  function handleImagePick(file: File | null) {
+    setEditImageFile(file)
+    setRemoveImage(false)
+    setEditImagePreview(file ? URL.createObjectURL(file) : null)
   }
 
   async function saveEdit() {
     if (!supabase || !book) return
     setSavingEdit(true)
+
+    // Upload a new cover, if one was picked, to the book-images bucket —
+    // same bucket/path pattern used on the Submit page.
+    let newImageUrl: string | null | undefined
+    if (editImageFile) {
+      const ext = editImageFile.name.split('.').pop() ?? 'jpg'
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('book-images')
+        .upload(path, editImageFile, { contentType: editImageFile.type, upsert: false })
+      if (uploadError) { setSavingEdit(false); setAdminNotice({ type: 'error', text: 'تعذر رفع الصورة.' }); return }
+      const { data: urlData } = supabase.storage.from('book-images').getPublicUrl(uploadData.path)
+      newImageUrl = urlData.publicUrl
+    } else if (removeImage) {
+      newImageUrl = null
+    }
+
     const [booksResult, entryResult] = await Promise.all([
       supabase.from('books').update({
         title: editTitle.trim(),
         author: editAuthor.trim() || null,
         category: editCategory || null,
         extra_info: editExtraInfo.trim() || null,
+        ...(newImageUrl !== undefined ? { book_image: newImageUrl } : {}),
       }).eq('book_id', book.book_id),
       supabase.from('mosque_books').update({
         edition: editEdition.trim() || null,
@@ -95,8 +125,12 @@ export default function BookPage() {
       category: (editCategory || null) as Category | null,
       extra_info: editExtraInfo.trim() || null,
       edition: editEdition.trim() || null, publisher: editPublisher.trim() || null,
+      ...(newImageUrl !== undefined ? { book_image: newImageUrl } : {}),
     })
     setEditing(false)
+    setEditImageFile(null)
+    setEditImagePreview(null)
+    setRemoveImage(false)
     setAdminNotice({ type: 'success', text: 'تم تحديث بيانات الكتاب.' })
   }
 
@@ -205,6 +239,26 @@ export default function BookPage() {
                   </div>
                 ) : (
                   <div className="submit-grid">
+                    <label className="submit-label" style={{ gridColumn: '1 / -1' }}>
+                      صورة الغلاف
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {(editImagePreview ?? (!removeImage ? book.book_image : null)) ? (
+                          <img
+                            src={editImagePreview ?? book.book_image ?? ''}
+                            alt=""
+                            style={{ width: 64, height: 64, borderRadius: 10, objectFit: 'cover', border: '1.5px solid var(--stone-200)' }}
+                          />
+                        ) : (
+                          <div className={`book-avatar ${catClass(book.category)}`} style={{ width: 64, height: 64, fontSize: 26 }}>{book.title[0]}</div>
+                        )}
+                        <input type="file" accept="image/*" onChange={(e) => handleImagePick(e.target.files?.[0] ?? null)} />
+                        {(book.book_image || editImageFile) && !removeImage && (
+                          <button type="button" className="secondary-button" onClick={() => { setRemoveImage(true); setEditImageFile(null); setEditImagePreview(null) }}>
+                            إزالة الصورة
+                          </button>
+                        )}
+                      </div>
+                    </label>
                     <label className="submit-label">
                       عنوان الكتاب
                       <input className="submit-input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
