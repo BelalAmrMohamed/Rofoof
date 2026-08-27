@@ -70,6 +70,9 @@ export default function MosquePage() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [removingImageId, setRemovingImageId] = useState<string | null>(null)
   const [reorderingImage, setReorderingImage] = useState(false)
+  // Requires an explicit confirm click before an image is actually deleted,
+  // so a stray click on the ✕ icon can't remove a photo by accident.
+  const [confirmingImageDeleteId, setConfirmingImageDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -113,6 +116,16 @@ export default function MosquePage() {
     setMosque((m) => m ? { ...m, images: rows.map((r) => r.image_url) } : m)
   }
 
+  // Extract the storage object path from a public URL returned by
+  // getPublicUrl(), e.g. ".../object/public/mosque-images/171234-abc.jpg"
+  // -> "171234-abc.jpg". Needed because .remove() takes a path, not a URL.
+  function storagePathFromPublicUrl(bucket: string, url: string): string | null {
+    const marker = `/object/public/${bucket}/`
+    const idx = url.indexOf(marker)
+    if (idx === -1) return null
+    return decodeURIComponent(url.slice(idx + marker.length))
+  }
+
   async function handleAddImage(file: File | null) {
     if (!file || !supabase || !mosque) return
     setUploadingImage(true)
@@ -134,16 +147,26 @@ export default function MosquePage() {
     syncGalleryFromRows(nextRows)
   }
 
+  // Deletes both the mosque_images row AND the underlying storage file
+  // (see 20260827140000_storage_delete_policies.sql — the storage delete
+  // previously had no RLS grant at all and silently failed/was never
+  // attempted, leaving orphaned files behind).
   async function handleRemoveImage(id: string) {
     if (!supabase) return
+    const row = imageRows.find((r) => r.id === id)
     setRemovingImageId(id)
     const { error } = await supabase.from('mosque_images').delete().eq('id', id)
+    if (error) { setRemovingImageId(null); setAdminNotice({ type: 'error', text: 'تعذر حذف الصورة.' }); return }
+    if (row) {
+      const path = storagePathFromPublicUrl('mosque-images', row.image_url)
+      if (path) await supabase.storage.from('mosque-images').remove([path])
+    }
     setRemovingImageId(null)
-    if (error) { setAdminNotice({ type: 'error', text: 'تعذر حذف الصورة.' }); return }
     const nextRows = imageRows.filter((r) => r.id !== id)
     setImageRows(nextRows)
     syncGalleryFromRows(nextRows)
     setActiveImage(0)
+    setConfirmingImageDeleteId(null)
   }
 
   async function handleMoveImage(id: string, direction: -1 | 1) {
@@ -290,30 +313,6 @@ export default function MosquePage() {
               <section className="mosque-page-section">
                 {adminNotice && <p className={`submit-notice ${adminNotice.type}`} role="alert">{adminNotice.text}</p>}
 
-                {/* Image manager — add / remove / reorder, independent of the
-                    name/location edit form below. */}
-                <div style={{ marginBottom: 16 }}>
-                  <h2 style={{ marginBottom: 8 }}>صور المسجد</h2>
-                  {imageRows.length > 0 && (
-                    <div className="mosque-gallery-thumbs" style={{ marginBottom: 8 }}>
-                      {imageRows.map((row, i) => (
-                        <div key={row.id} style={{ position: 'relative', flexShrink: 0 }}>
-                          <img src={row.image_url} alt="" style={{ width: 68, height: 52, borderRadius: 10, objectFit: 'cover', border: '1.5px solid var(--stone-200)' }} />
-                          <div style={{ display: 'flex', gap: 3, marginTop: 3, justifyContent: 'center' }}>
-                            <button type="button" disabled={i === 0 || reorderingImage} onClick={() => void handleMoveImage(row.id, -1)} aria-label="نقل لليمين" title="نقل لليمين" style={{ padding: '2px 6px', fontSize: 11 }}>›</button>
-                            <button type="button" disabled={removingImageId === row.id} onClick={() => void handleRemoveImage(row.id)} aria-label="حذف الصورة" title="حذف الصورة" style={{ padding: '2px 6px', fontSize: 11, color: '#b52525' }}>✕</button>
-                            <button type="button" disabled={i === imageRows.length - 1 || reorderingImage} onClick={() => void handleMoveImage(row.id, 1)} aria-label="نقل لليسار" title="نقل لليسار" style={{ padding: '2px 6px', fontSize: 11 }}>‹</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <label className="secondary-button" style={{ display: 'inline-block', cursor: 'pointer' }}>
-                    {uploadingImage ? 'جارٍ الرفع...' : '+ إضافة صورة'}
-                    <input type="file" accept="image/*" disabled={uploadingImage} style={{ display: 'none' }} onChange={(e) => { void handleAddImage(e.target.files?.[0] ?? null); e.target.value = '' }} />
-                  </label>
-                </div>
-
                 {!editing ? (
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button type="button" className="secondary-button" onClick={startEdit}>تعديل بيانات المسجد</button>
@@ -321,6 +320,50 @@ export default function MosquePage() {
                   </div>
                 ) : (
                   <div className="submit-grid">
+                    {/* Image manager — only reachable once "تعديل بيانات المسجد"
+                        is pressed, so nothing is add/removable by a stray
+                        click while just viewing the page. */}
+                    <div className="submit-label" style={{ gridColumn: '1 / -1' }}>
+                      <span>صور المسجد</span>
+                      <div className="mosque-image-manager">
+                        {imageRows.map((row, i) => (
+                          <div key={row.id} className="mosque-image-manager-item">
+                            <img src={row.image_url} alt="" />
+                            {confirmingImageDeleteId === row.id ? (
+                              <div className="mosque-image-manager-confirm">
+                                <span>حذف الصورة؟</span>
+                                <div>
+                                  <button type="button" disabled={removingImageId === row.id} onClick={() => void handleRemoveImage(row.id)}>
+                                    {removingImageId === row.id ? '...' : 'تأكيد'}
+                                  </button>
+                                  <button type="button" onClick={() => setConfirmingImageDeleteId(null)}>إلغاء</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mosque-image-manager-controls">
+                                <button type="button" disabled={i === 0 || reorderingImage} onClick={() => void handleMoveImage(row.id, -1)} aria-label="نقل لليمين" title="نقل لليمين">
+                                  <svg aria-hidden="true" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                                </button>
+                                <button type="button" onClick={() => setConfirmingImageDeleteId(row.id)} aria-label="حذف الصورة" title="حذف الصورة" className="danger">
+                                  <svg aria-hidden="true" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
+                                </button>
+                                <button type="button" disabled={i === imageRows.length - 1 || reorderingImage} onClick={() => void handleMoveImage(row.id, 1)} aria-label="نقل لليسار" title="نقل لليسار">
+                                  <svg aria-hidden="true" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        <label className="mosque-image-manager-add">
+                          {uploadingImage
+                            ? <span>جارٍ الرفع...</span>
+                            : <><svg aria-hidden="true" width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg><span>إضافة صورة</span></>
+                          }
+                          <input type="file" accept="image/*" disabled={uploadingImage} style={{ display: 'none' }} onChange={(e) => { void handleAddImage(e.target.files?.[0] ?? null); e.target.value = '' }} />
+                        </label>
+                      </div>
+                    </div>
+
                     <label className="submit-label">
                       اسم المسجد
                       <input className="submit-input" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="اسم المسجد (اختياري)" />
@@ -339,7 +382,7 @@ export default function MosquePage() {
                     </label>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'end' }}>
                       <button type="button" className="primary-button" disabled={savingEdit} onClick={() => void saveEdit()}>{savingEdit ? 'جارٍ الحفظ...' : 'حفظ'}</button>
-                      <button type="button" className="secondary-button" onClick={() => setEditing(false)}>إلغاء</button>
+                      <button type="button" className="secondary-button" onClick={() => { setEditing(false); setConfirmingImageDeleteId(null) }}>إلغاء</button>
                     </div>
                   </div>
                 )}

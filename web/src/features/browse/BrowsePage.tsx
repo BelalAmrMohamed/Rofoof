@@ -133,15 +133,22 @@ export default function BrowsePage() {
   const [location, setLocation] = useState<Location | null>(null)
   const [locationDraft, setLocationDraft] = useState<Location>({ country: 'مصر', governorate: '', city: '' })
   const [locationDraftPoint, setLocationDraftPoint] = useState<GeoPoint | null>(null)
-  // Only pre-fill governorate/city from the saved profile once per page
-  // visit, and never again after the user has touched the filters
-  // (including an explicit "reset"). Without this, the profile prefill
-  // reruns on every mount — e.g. navigating away and back — and silently
-  // reintroduces a governorate/city with no matching data right after the
-  // user reset filters to clear it, making "Reset filters" look like it
-  // does nothing.
-  const profileLocationAppliedRef = useRef(false)
-  const filtersTouchedRef = useRef(false)
+  // Only pre-fill governorate/city from the saved profile once per browser
+  // *session* (not just once per mount) — and never again after the user
+  // has touched the filters (including an explicit "reset"). A useRef alone
+  // isn't enough here: this app navigates between pages with a full
+  // window.location.assign (see SiteNavigation.tsx), which remounts
+  // BrowsePage from scratch and resets any ref — so a ref-only guard still
+  // let the profile prefill silently reapply itself every time the user
+  // left and came back to "/", undoing "إعادة ضبط الفلاتر". sessionStorage
+  // survives across those full navigations within the same tab, while still
+  // resetting for a genuinely new visit (new tab / browser restart).
+  const FILTERS_TOUCHED_KEY = 'rofoof:browseFiltersTouched'
+  const filtersTouchedRef = useRef(sessionStorage.getItem(FILTERS_TOUCHED_KEY) === '1')
+  function markFiltersTouched() {
+    filtersTouchedRef.current = true
+    try { sessionStorage.setItem(FILTERS_TOUCHED_KEY, '1') } catch { /* storage unavailable */ }
+  }
 
   // Modals
   const [modal, setModal] = useState<'location' | 'book' | 'mosque' | null>(null)
@@ -241,14 +248,14 @@ export default function BrowsePage() {
 
         setBooks(flatBooks); setMosquesRaw(flatMosques)
 
-        // Pre-fill location from user profile — only once per page visit,
-        // and never if the user has already touched the filters (see
-        // profileLocationAppliedRef / filtersTouchedRef above).
-        if (user && supabase && !profileLocationAppliedRef.current && !filtersTouchedRef.current) {
+        // Pre-fill location from user profile — only if the user hasn't
+        // already touched the filters this browser session (see
+        // filtersTouchedRef above, backed by sessionStorage so it survives
+        // full-page navigations between routes).
+        if (user && supabase && !filtersTouchedRef.current) {
           const { data: profile } = await supabase.from('users')
             .select('governorate, city, country').eq('user_id', user.id).maybeSingle()
           if (profile?.governorate && profile?.city && !cancelled && !filtersTouchedRef.current) {
-            profileLocationAppliedRef.current = true
             setLocation({ country: profile.country ?? 'مصر', governorate: profile.governorate, city: profile.city })
             setFilterCountry(profile.country ?? 'مصر')
             setGovernorate(profile.governorate)
@@ -363,9 +370,9 @@ export default function BrowsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameFromHeaderSearch, loading, query])
 
-  const updateCountry = (val: string) => { filtersTouchedRef.current = true; setFilterCountry(val); setGovernorate('all'); setCity('all') }
-  const updateGovernorate = (val: string) => { filtersTouchedRef.current = true; setGovernorate(val); setCity('all') }
-  const resetFilters = () => { filtersTouchedRef.current = true; setQuery(''); setCategory('all'); setFilterCountry('all'); setGovernorate('all'); setCity('all') }
+  const updateCountry = (val: string) => { markFiltersTouched(); setFilterCountry(val); setGovernorate('all'); setCity('all') }
+  const updateGovernorate = (val: string) => { markFiltersTouched(); setGovernorate(val); setCity('all') }
+  const resetFilters = () => { markFiltersTouched(); setQuery(''); setCategory('all'); setFilterCountry('all'); setGovernorate('all'); setCity('all') }
 
   const openBook = (book: LiveBook) => {
     recordActivity(book)
@@ -391,6 +398,23 @@ export default function BrowsePage() {
   const closeModal = () => {
     setModal(null)
     setPageMeta({ title: 'على رفوف المساجد — تصفح الكتب والمساجد', description: 'اكتشف الكتب المتاحة على رفوف المساجد القريبة منك.', jsonLd: buildLibrarySchema() })
+  }
+
+  async function openLocationModal() {
+    setLocationDraft(location ?? { country: 'مصر', governorate: '', city: '' })
+    // Pre-fill the map pin from the user's actually saved lat/lng — previously
+    // this was hardcoded to null every time the modal opened, so Browse's map
+    // always showed a blank/default pin while the Profile page's map showed
+    // the real saved point, making the two look out of sync. It also meant
+    // saving here without re-clicking the map would silently wipe out a
+    // previously saved precise location.
+    let savedPoint: GeoPoint | null = null
+    if (user && supabase) {
+      const { data } = await supabase.from('users').select('lat, lng').eq('user_id', user.id).maybeSingle()
+      if (data?.lat != null && data?.lng != null) savedPoint = { lat: data.lat, lng: data.lng }
+    }
+    setLocationDraftPoint(savedPoint)
+    setModal('location')
   }
 
   // Track admin status (issue 2) so the Browse dialogs can surface a hint
@@ -443,7 +467,7 @@ export default function BrowsePage() {
                   : <><strong>حدّد موقعك</strong><p>لعرض الكتب القريبة منك أولاً</p></>
                 }
               </div>
-              <button className="location-hero-btn" onClick={() => { setLocationDraft(location ?? { country: 'مصر', governorate: '', city: '' }); setLocationDraftPoint(null); setModal('location') }}>
+              <button className="location-hero-btn" onClick={() => void openLocationModal()}>
                 {location ? 'تغيير' : 'تحديد الموقع'}
               </button>
             </div>

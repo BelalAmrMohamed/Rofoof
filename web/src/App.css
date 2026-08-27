@@ -17,7 +17,8 @@
 }
 
 .browse-app { min-height: 100vh; color: var(--stone-950); background: var(--stone-50); background-image: radial-gradient(var(--stone-300) 1px, transparent 1px); background-size: 28px 28px; }
-.page-shell { min-height: 100vh; transition: margin-right .28s ease; }
+.page-shell { display: flex; flex-direction: column; min-height: 100vh; flex: 1; transition: margin-right .28s ease; }
+.page-shell > .browse-main { flex: 1; }
 .topbar { position: sticky; top: 0; z-index: 20; height: 66px; color: #fff; background: linear-gradient(155deg, var(--green-700), var(--green-800) 55%, var(--green-900)); box-shadow: 0 4px 18px rgba(6, 41, 34, .2); }
 .topbar-inner, .location-inner { height: 100%; display: flex; align-items: center; gap: 14px; padding: 0 24px; }
 .brand { display: flex; align-items: center; gap: 11px; color: inherit; text-decoration: none; white-space: nowrap; }
@@ -93,6 +94,26 @@ footer { padding: 28px 24px; color: rgba(255, 255, 255, .5); background: linear-
 .submit-required { margin-right: 3px; color: var(--amber-400); }
 .submit-input { height: 44px; padding: 0 14px; border: 1.5px solid var(--stone-200); border-radius: 12px; outline: 0; color: var(--stone-950); background: #fff; font-size: 14px; font-family: inherit; transition: border-color .15s, box-shadow .15s; }
 .submit-input:focus { border-color: var(--green-500); box-shadow: 0 0 0 4px rgba(34,150,112,.12); }
+
+/* Mosque page admin image manager (issue: reordering/removal is easy to
+   trigger by accident and gave no visual feedback). Only rendered once the
+   admin has pressed "تعديل بيانات المسجد" — see MosquePage.tsx. */
+.mosque-image-manager { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.mosque-image-manager-item { position: relative; width: 92px; height: 92px; overflow: hidden; border-radius: 12px; border: 1.5px solid var(--stone-200); background: var(--stone-100); }
+.mosque-image-manager-item img { width: 100%; height: 100%; object-fit: cover; }
+.mosque-image-manager-controls { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 4px; opacity: 0; background: linear-gradient(180deg, rgba(6,41,34,.15), rgba(6,41,34,.55)); transition: opacity .15s; }
+.mosque-image-manager-item:hover .mosque-image-manager-controls, .mosque-image-manager-item:focus-within .mosque-image-manager-controls { opacity: 1; }
+.mosque-image-manager-controls button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 8px; color: var(--stone-950); background: rgba(255,255,255,.92); }
+.mosque-image-manager-controls button:disabled { opacity: .35; }
+.mosque-image-manager-controls button.danger { color: #fff; background: #c23a3a; }
+.mosque-image-manager-confirm { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 6px; text-align: center; color: #fff; background: rgba(6,41,34,.88); }
+.mosque-image-manager-confirm span { font-size: 11px; font-weight: 700; }
+.mosque-image-manager-confirm div { display: flex; gap: 6px; }
+.mosque-image-manager-confirm button { padding: 3px 8px; border: 0; border-radius: 7px; font-size: 11px; font-weight: 700; }
+.mosque-image-manager-confirm button:first-child { color: #fff; background: #c23a3a; }
+.mosque-image-manager-confirm button:last-child { color: var(--stone-950); background: #fff; }
+.mosque-image-manager-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 92px; height: 92px; border: 1.5px dashed var(--stone-300); border-radius: 12px; color: var(--stone-500); cursor: pointer; text-align: center; font-size: 11px; font-weight: 700; transition: border-color .15s, color .15s; }
+.mosque-image-manager-add:hover { color: var(--green-700); border-color: var(--green-500); }
 .submit-textarea { height: auto; min-height: 96px; padding: 12px 14px; resize: vertical; }
 .submit-divider { display: flex; align-items: center; gap: 12px; color: var(--stone-500); font-size: 12px; }
 .submit-divider::before, .submit-divider::after { content: ''; flex: 1; height: 1px; background: var(--stone-200); }

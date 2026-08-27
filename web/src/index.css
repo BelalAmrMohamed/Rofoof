@@ -5,7 +5,21 @@
 
 :root { font-family: 'Tajawal', sans-serif; color: #1c1814; background: #f9f6f1; font-synthesis: none; text-rendering: optimizeLegibility; }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; }
+/* html/body/#root all given the app's base background and full height so
+   there's no gap for the browser's default white to show through when a
+   page's own content is shorter than the viewport (e.g. Browse with few
+   results) — previously only some inner wrappers had min-height:100vh,
+   which doesn't guarantee they're the last thing painted at the very
+   bottom of the actual document.
+   Deliberately NOT forcing display:flex/flex-direction on #root's child
+   (the page root) — that clobbers each page's own layout (e.g. LoginPage's
+   `md:flex-row` two-column layout, Onboarding's `grid place-items-center`),
+   which is exactly what broke on the previous pass. #root only needs to be
+   tall enough to paint the shared background; individual pages keep full
+   control of their own display/flex-direction. */
+html, body { min-height: 100%; background: #f9f6f1; }
+body { margin: 0; min-width: 320px; }
+#root { min-height: 100vh; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 .form-input { width: 100%; min-height: 46px; border: 1.5px solid #e8e4de; border-radius: 10px; padding: 0 14px; color: #1c1814; background: #fdfcf9; outline: 0; transition: border-color .2s, box-shadow .2s; }

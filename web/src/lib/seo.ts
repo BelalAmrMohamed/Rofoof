@@ -36,7 +36,7 @@ function setJsonLd(data: object | object[]) {
 }
 
 export function setPageMeta({ title, description, image, jsonLd, canonical }: PageMeta) {
-  const fullTitle = title === SITE_NAME ? title : `${title} — ${SITE_NAME}`
+  const fullTitle = title
   const img = image ?? DEFAULT_IMAGE
 
   document.title = fullTitle
